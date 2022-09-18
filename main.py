@@ -61,21 +61,21 @@ def compare_two_imgs(img_cap: np.ndarray, img_photo: np.ndarray):
 
 def detect_squares(points: set, max_distance: int):
     result = []
-    alredy_in_square = set()
+    already_in_square = set()
     for origin_point in points:
         # p_X is on the horizontal axis and p_Y is on the vertical axis
         pMaxX, pMinX, pMaxY, pMinY = origin_point, origin_point, origin_point, origin_point
-        number_of_points_in_cap = 0
-        alredy_in_square.add(origin_point)
+        already_in_square.add(origin_point)
+
         centroid_list = []
         for p in points:
+            # Checks if the cap is in the range of the max caps
             if (distance(pMaxX, p) < max_distance
                 or distance(pMinX, p) < max_distance
-                or distance(origin_point, p) < max_distance
                 or distance(pMaxY, p) < max_distance
                 or distance(pMinY, p) < max_distance) \
-                    and p not in alredy_in_square:
-                alredy_in_square.add(p)
+                    and p not in already_in_square:
+                already_in_square.add(p)
                 centroid_list.append(p)
                 # Check horizontally
                 if p[0] > pMaxX[0]:
@@ -87,8 +87,7 @@ def detect_squares(points: set, max_distance: int):
                     pMaxY = p
                 elif p[1] < pMinY[1]:
                     pMinY = p
-                number_of_points_in_cap += 1
-        if number_of_points_in_cap > 5:
+        if len(centroid_list) > 5:
             pTopLeft = (pMinX[0], pMaxY[1])
             pBotRight = (pMaxX[0], pMinY[1])
             centroid = np.array(centroid_list).mean(axis=0)
@@ -120,7 +119,6 @@ def main():
     for s in squares:
         top = (int(abs(s[0][0] - s[1])), int(s[0][1] + s[1]))
         bot = (int(s[0][0] + s[1]), int(abs(s[0][1] - s[1])))
-        print(top, bot)
         r = cv2.circle(r, top, 2, (0, 0, 0), 10)
         r = cv2.rectangle(r, bot, top, (255, 0, 0), 3)
 
