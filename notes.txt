@@ -1,0 +1,4 @@
+https://stackoverflow.com/questions/41160721/detect-more-than-1-object-on-picture
+https://stackoverflow.com/questions/30716610/how-to-get-pixel-coordinates-from-feature-matching-in-opencv-python
+https://circuitdigest.com/tutorial/real-life-object-detection-using-opencv-python-detecting-objects-in-live-video
+https://pyimagesearch.com/2015/03/23/sliding-windows-for-object-detection-with-python-and-opencv/
