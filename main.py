@@ -1,11 +1,12 @@
-import math
-
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
+
+from aux_scripts import find_dominant_color, compare_if_same_color
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
+DISTANCE = 50
+RATIO_COLOR = 0.25
 
 
 # Detect sift keypoints and descriptors for an img of a bottle cap
@@ -98,30 +99,41 @@ def detect_squares(points: set, max_distance: int):
 
 
 def distance(p1: tuple, p2: tuple):
-    dist = ((abs(p1[0] - p2[0]) ** 2) + (abs(p1[1] - p2[1]) ** 2))**0.5
+    dist = ((abs(p1[0] - p2[0]) ** 2) + (abs(p1[1] - p2[1]) ** 2)) ** 0.5
     return dist
 
 
 def main():
-    img_cap = './caps_imgs/coca_cola.jpg'
+    img_cap = './caps_imgs/t_cap_blue_2.jpg'
     img_test = './test_images/3.jpg'
     img_cap = read_img(img_cap)
     img_test = read_img(img_test)
 
     points = compare_two_imgs(img_cap=img_cap, img_photo=img_test)
-    squares = detect_squares(points, 100)
+    squares = detect_squares(points, DISTANCE)
 
     r = img_test.copy()
-
-    for k in points:
-        r = cv2.circle(r, k, 2, (0, 255, 0), 3)
+    croppeds = []
 
     for s in squares:
-        top = (int(abs(s[0][0] - s[1])), int(s[0][1] + s[1]))
-        bot = (int(s[0][0] + s[1]), int(abs(s[0][1] - s[1])))
-        r = cv2.circle(r, top, 2, (0, 0, 0), 10)
-        r = cv2.rectangle(r, bot, top, (255, 0, 0), 3)
+        top = (int(abs(s[0][0] - s[1])), int(s[0][1] - s[1]))
+        bot = (int(s[0][0] + s[1]), int(abs(s[0][1] + s[1])))
 
+        h, w = bot[1] - top[1], bot[0] - top[0]
+        croppeds.append([r[top[1]:top[1] + h, top[0]:top[0] + w].copy(), top, bot])
+
+    for crop in croppeds:
+        crop_img = crop[0]
+        color_crop = find_dominant_color(crop_img)
+        color_cap = find_dominant_color(img_cap)
+
+        # Only apply color comparison when multiple matches of the same img
+        if len(croppeds) > 1 and compare_if_same_color(color_crop, color_cap, RATIO_COLOR):
+            r = cv2.rectangle(r, crop[1], crop[2], (255, 100, 0), 3)
+        elif len(croppeds) == 1:
+            r = cv2.rectangle(r, crop[1], crop[2], (255, 100, 0), 3)
+
+    cv2.imshow("Original", img_cap)
     cv2.imshow("Result", r)
     cv2.waitKey(0)
 
