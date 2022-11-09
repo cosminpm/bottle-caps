@@ -61,7 +61,7 @@ def compare_two_imgs(img_cap: np.ndarray, img_photo: np.ndarray):
 
 
 def detect_squares(points: set, max_distance: int):
-    result = []
+    centroid_distance = []
     already_in_square = set()
     for origin_point in points:
         # p_X is on the horizontal axis and p_Y is on the vertical axis
@@ -94,13 +94,25 @@ def detect_squares(points: set, max_distance: int):
             centroid = np.array(centroid_list).mean(axis=0)
             centroid = tuple([int(i) for i in centroid])
             dis = max(distance(centroid, pTopLeft), distance(centroid, pBotRight))
-            result.append([centroid, dis])
-    return result
+            centroid_distance.append([centroid, dis])
+    return centroid_distance
 
 
 def distance(p1: tuple, p2: tuple):
     dist = ((abs(p1[0] - p2[0]) ** 2) + (abs(p1[1] - p2[1]) ** 2)) ** 0.5
     return dist
+
+
+def get_cropped_squares(squares: list, img: np.ndarray):
+    print(type(img))
+    croppeds = []
+    for s in squares:
+        top = (int(abs(s[0][0] - s[1])), int(s[0][1] - s[1]))
+        bot = (int(s[0][0] + s[1]), int(abs(s[0][1] + s[1])))
+
+        h, w = bot[1] - top[1], bot[0] - top[0]
+        croppeds.append([img[top[1]:top[1] + h, top[0]:top[0] + w].copy(), top, bot])
+    return croppeds
 
 
 def main():
@@ -111,27 +123,20 @@ def main():
 
     points = compare_two_imgs(img_cap=img_cap, img_photo=img_test)
     squares = detect_squares(points, DISTANCE)
-
     r = img_test.copy()
-    croppeds = []
+    croppeds = get_cropped_squares(squares, r)
 
-    for s in squares:
-        top = (int(abs(s[0][0] - s[1])), int(s[0][1] - s[1]))
-        bot = (int(s[0][0] + s[1]), int(abs(s[0][1] + s[1])))
-
-        h, w = bot[1] - top[1], bot[0] - top[0]
-        croppeds.append([r[top[1]:top[1] + h, top[0]:top[0] + w].copy(), top, bot])
-
-    for crop in croppeds:
-        crop_img = crop[0]
-        color_crop = find_dominant_color(crop_img)
+    if len(croppeds) == 1:
+        r = cv2.rectangle(r, croppeds[1], croppeds[2], (255, 100, 0), 3)
+    else:
         color_cap = find_dominant_color(img_cap)
+        for crop in croppeds:
+            crop_img = crop[0]
+            color_crop = find_dominant_color(crop_img)
+            # Only apply color comparison when multiple matches of the same img
+            if compare_if_same_color(color_crop, color_cap, RATIO_COLOR):
+                r = cv2.rectangle(r, crop[1], crop[2], (255, 100, 0), 3)
 
-        # Only apply color comparison when multiple matches of the same img
-        if len(croppeds) > 1 and compare_if_same_color(color_crop, color_cap, RATIO_COLOR):
-            r = cv2.rectangle(r, crop[1], crop[2], (255, 100, 0), 3)
-        elif len(croppeds) == 1:
-            r = cv2.rectangle(r, crop[1], crop[2], (255, 100, 0), 3)
 
     cv2.imshow("Original", img_cap)
     cv2.imshow("Result", r)
