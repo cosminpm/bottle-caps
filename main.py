@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+import os
+
 
 from aux_scripts import find_dominant_color, compare_if_same_color
 
@@ -7,7 +9,8 @@ MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
 DISTANCE = 50
 RATIO_COLOR = 0.25
-
+MY_CAPS_IMGS_FOLDER = "./caps_imgs/"
+MAX_MATCHES = 35
 
 # Detect sift keypoints and descriptors for an img of a bottle cap
 def get_kp_and_dcp(img: np.ndarray):
@@ -54,7 +57,7 @@ def compare_two_imgs(img_cap: np.ndarray, img_photo: np.ndarray):
     kp_photo, dcp_photo = get_kp_and_dcp(img_photo)
 
     matches = MATCHER.match(dcp_cap, dcp_photo)
-    matches = sorted(matches, key=lambda x: x.distance)[:30]
+    matches = sorted(matches, key=lambda x: x.distance)[:MAX_MATCHES]
 
     _, lst_pix = get_pix_kp_img(matches, kp_cap, kp_photo)
     return lst_pix
@@ -104,44 +107,48 @@ def distance(p1: tuple, p2: tuple):
 
 
 def get_cropped_squares(squares: list, img: np.ndarray):
-    print(type(img))
     croppeds = []
     for s in squares:
         top = (int(abs(s[0][0] - s[1])), int(s[0][1] - s[1]))
         bot = (int(s[0][0] + s[1]), int(abs(s[0][1] + s[1])))
-
         h, w = bot[1] - top[1], bot[0] - top[0]
         croppeds.append([img[top[1]:top[1] + h, top[0]:top[0] + w].copy(), top, bot])
     return croppeds
 
 
-def main():
-    img_cap = './caps_imgs/t_cap_blue_2.jpg'
-    img_test = './test_images/3.jpg'
-    img_cap = read_img(img_cap)
-    img_test = read_img(img_test)
+def look_in_all_images(photo_str):
+    entries = os.listdir(MY_CAPS_IMGS_FOLDER)
+    photo_img = read_img(photo_str)
+    for img in entries:
+        cap_str = MY_CAPS_IMGS_FOLDER + img
+        cap_img = read_img(cap_str)
+        photo_img = draw_squares_detection(cap_img, photo_img, img)
 
-    points = compare_two_imgs(img_cap=img_cap, img_photo=img_test)
-    squares = detect_squares(points, DISTANCE)
-    r = img_test.copy()
-    croppeds = get_cropped_squares(squares, r)
-
-    if len(croppeds) == 1:
-        r = cv2.rectangle(r, croppeds[1], croppeds[2], (255, 100, 0), 3)
-    else:
-        color_cap = find_dominant_color(img_cap)
-        for crop in croppeds:
-            crop_img = crop[0]
-            color_crop = find_dominant_color(crop_img)
-            # Only apply color comparison when multiple matches of the same img
-            if compare_if_same_color(color_crop, color_cap, RATIO_COLOR):
-                r = cv2.rectangle(r, crop[1], crop[2], (255, 100, 0), 3)
-
-
-    cv2.imshow("Original", img_cap)
-    cv2.imshow("Result", r)
+    cv2.imshow("Result", photo_img)
     cv2.waitKey(0)
 
 
+def draw_squares_detection(cap_img, photo_img, name_cap):
+    points = compare_two_imgs(img_cap=cap_img, img_photo=photo_img)
+    squares = detect_squares(points, DISTANCE)
+    r = photo_img.copy()
+    cropped = get_cropped_squares(squares, r)
+
+    if len(cropped) == 1:
+        r = cv2.rectangle(r, cropped[0][1], cropped[0][2], (255, 100, 0), 3)
+        r = cv2.putText(r, name_cap, cropped[0][1], cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0))
+    else:
+        color_cap = find_dominant_color(cap_img)
+        for crop in cropped:
+            crop_img = crop[0]
+            color_crop = find_dominant_color(crop_img)
+            # Only apply color comparison when multiple matches of the same img
+            # if compare_if_same_color(color_crop, color_cap, RATIO_COLOR):
+            # TODO: Decide what I will do with multiple images, detect them or not?
+            r = cv2.rectangle(r, crop[1], crop[2], (255, 100, 0), 3)
+            r = cv2.putText(r, name_cap, crop[1], cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0))
+    return r
+
+
 if __name__ == '__main__':
-    main()
+    look_in_all_images("./test_images/4.jpg")
