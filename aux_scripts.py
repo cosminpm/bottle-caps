@@ -16,3 +16,8 @@ def compare_if_same_color(c1, c2, ratio):
     sum_numb_2 = c2[0] / (255 * 3) + c2[1] / (255 * 3) + c2[2] / (255 * 3)
     print(abs(sum_numb_1 - sum_numb_2))
     return abs(sum_numb_1 - sum_numb_2) > ratio
+
+
+def distance_between_two_points(p1: tuple, p2: tuple):
+    dist = ((abs(p1[0] - p2[0]) ** 2) + (abs(p1[1] - p2[1]) ** 2)) ** 0.5
+    return dist

@@ -1,6 +1,5 @@
 import numpy as np
 
-
 def window(img: np.ndarray, step_size: int, window_size: tuple):
     # slide a window across the image
     for y in range(0, img.shape[0], step_size):
