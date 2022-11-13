@@ -86,6 +86,9 @@ def draw_squares_detection(cap_img, photo_img, name_cap):
 
     return photo_img
 
+def get_value_const():
+    pass
+    # TODO: Get value of const depending on images
 
 if __name__ == '__main__':
     look_in_all_images("./test_images/3.jpg")
