@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from aux_scripts import distance_between_two_points
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
@@ -13,15 +12,6 @@ def get_kp_and_dcp(img: np.ndarray):
     return kp_1, d_1
 
 
-# Draw kp from an image path
-def draw_kp(img_path: str, kp_1: tuple):
-    img = cv2.imread(img_path)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img_kp = cv2.drawKeypoints(gray, kp_1, img, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-    cv2.imshow('image', img_kp)
-    cv2.waitKey(0)
-
-
 def compare_two_imgs(img_cap: np.ndarray, img_photo: np.ndarray):
     # Get the keypoints and descriptors
     kp_cap, dcp_cap = get_kp_and_dcp(img_cap)
@@ -29,7 +19,6 @@ def compare_two_imgs(img_cap: np.ndarray, img_photo: np.ndarray):
 
     matches = MATCHER.match(dcp_cap, dcp_photo)
     matches = sorted(matches, key=lambda x: x.distance)[:MAX_MATCHES]
-
     _, lst_pix = get_pix_kp_img(matches, kp_cap, kp_photo)
     return lst_pix
 

@@ -7,6 +7,7 @@ from kp_and_descriptors import compare_two_imgs
 
 DISTANCE = 50
 MY_CAPS_IMGS_FOLDER = "./caps_imgs/"
+MIN_NUM_OF_CENTROIDS = 7
 
 
 def read_img(img_path: str):
@@ -41,7 +42,7 @@ def detect_squares(points: set, max_distance: int):
                     pMaxY = p
                 elif p[1] < pMinY[1]:
                     pMinY = p
-        if len(centroid_list) > 5:
+        if len(centroid_list) > MIN_NUM_OF_CENTROIDS:
             pTopLeft = (pMinX[0], pMaxY[1])
             pBotRight = (pMaxX[0], pMinY[1])
             centroid = np.array(centroid_list).mean(axis=0)
@@ -76,13 +77,13 @@ def look_in_all_images(photo_str: str):
 def draw_squares_detection(cap_img, photo_img, name_cap):
     points = compare_two_imgs(img_cap=cap_img, img_photo=photo_img)
     squares = detect_squares(points, DISTANCE)
-
     # Check if we have at least one match
     if len(squares) > 0:
         cropped = get_cropped_squares(squares, photo_img)
         for crop in cropped:
             photo_img = cv2.rectangle(photo_img, crop[1], crop[2], (255, 100, 0), 3)
             photo_img = cv2.putText(photo_img, name_cap, crop[1], cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0))
+
     return photo_img
 
 
