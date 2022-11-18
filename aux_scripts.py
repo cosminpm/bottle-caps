@@ -1,3 +1,6 @@
+import cv2
+
+
 def find_dominant_color(img):
     colors = {}
     for pix in img[0]:
@@ -21,3 +24,7 @@ def compare_if_same_color(c1, c2, ratio):
 def distance_between_two_points(p1: tuple, p2: tuple):
     dist = ((abs(p1[0] - p2[0]) ** 2) + (abs(p1[1] - p2[1]) ** 2)) ** 0.5
     return dist
+
+
+def read_img(img_path: str):
+    return cv2.cvtColor(cv2.imread(img_path), 1)
