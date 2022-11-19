@@ -4,16 +4,18 @@ from Classes.SquareDetection import SquareDetection
 from aux_scripts import distance_between_two_points
 
 MIN_NUM_POINTS_IN_SQUARE = 7
-MAX_DISTANCE = 40
+MAX_DISTANCE = 50
 
 
 class Detection:
-    def __init__(self, pix_kps: set[tuple[int]]):
+    def __init__(self, pix_kps: set[tuple[int]], img=None):
         self.pix_kps = pix_kps
         self.squares = []
+        self.img = img
         self.detect_centroids()
 
     def detect_centroids(self):
+
         already_in_square = set()
         for origin_point in self.pix_kps:
             # p_X is on the horizontal axis and p_Y is on the vertical axis
@@ -47,7 +49,9 @@ class Detection:
                 centroid = tuple([int(i) for i in centroid])
                 dis = max(distance_between_two_points(centroid, pTopLeft),
                           distance_between_two_points(centroid, pBotRight))
-                self.squares.append(SquareDetection(centroid, points_list, dis))
+                square = SquareDetection(centroid, points_list, dis, self.img)
+                if square.get_if_match():
+                    self.squares.append(square)
 
     def get_cropped_squares(self, img: np.array):
         croppeds = []
