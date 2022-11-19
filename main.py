@@ -12,8 +12,8 @@ MY_CAPS_IMGS_FOLDER = "./caps_imgs/"
 def look_in_all_images(photo_str: str):
     entries = os.listdir(MY_CAPS_IMGS_FOLDER)
     photo_img = read_img(photo_str)
-    # for name_img in entries:
-    for name_img in [entries[0]]:
+    for name_img in entries:
+    #for name_img in [entries[0]]:
         cap_str = MY_CAPS_IMGS_FOLDER + name_img
         cap_img = read_img(cap_str)
         photo_img = draw_squares_detection(cap_img, photo_img, name_img)
@@ -40,4 +40,4 @@ def get_value_const():
 
 
 if __name__ == '__main__':
-    look_in_all_images("./test_images/3.jpg")
+    look_in_all_images("./test_images/1.jpg")

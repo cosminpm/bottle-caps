@@ -3,7 +3,7 @@ import numpy as np
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
-MAX_MATCHES = 50
+MAX_MATCHES = 100
 
 
 # Detect sift keypoints and descriptors for an img of a bottle cap
@@ -18,7 +18,7 @@ def compare_two_imgs(img_cap: np.ndarray, img_photo: np.ndarray):
     kp_photo, dcp_photo = get_kp_and_dcp(img_photo)
 
     matches = MATCHER.match(dcp_cap, dcp_photo)
-    matches = sorted(matches, key=lambda x: x.distance)#[:MAX_MATCHES]
+    matches = sorted(matches, key=lambda x: x.distance)[:MAX_MATCHES]
     _, lst_pix = get_pix_kp_img(matches, kp_cap, kp_photo)
     return lst_pix
 

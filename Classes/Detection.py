@@ -3,7 +3,7 @@ import numpy as np
 from Classes.SquareDetection import SquareDetection
 from aux_scripts import distance_between_two_points
 
-MIN_NUM_POINTS_IN_SQUARE = 7
+MIN_NUM_POINTS_IN_SQUARE = 10
 MAX_DISTANCE = 50
 
 
@@ -42,16 +42,10 @@ class Detection:
                         pMaxY = p
                     elif p[1] < pMinY[1]:
                         pMinY = p
+
             if len(points_list) > MIN_NUM_POINTS_IN_SQUARE:
-                pTopLeft = (pMinX[0], pMaxY[1])
-                pBotRight = (pMaxX[0], pMinY[1])
-                centroid = np.array(points_list).mean(axis=0)
-                centroid = tuple([int(i) for i in centroid])
-                dis = max(distance_between_two_points(centroid, pTopLeft),
-                          distance_between_two_points(centroid, pBotRight))
-                square = SquareDetection(centroid, points_list, dis, self.img)
-                if square.get_if_match():
-                    self.squares.append(square)
+                square = SquareDetection(points_list, pMaxX=pMaxX, pMinX=pMinX, pMaxY=pMaxY, pMinY=pMinY, img=self.img)
+                self.squares.append(square)
 
     def get_cropped_squares(self, img: np.array):
         croppeds = []
