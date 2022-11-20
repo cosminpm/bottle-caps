@@ -12,7 +12,10 @@ MY_CAPS_IMGS_FOLDER = "./caps_imgs/"
 def look_in_all_images(photo_str: str):
     photo_img = read_img(photo_str)
     detections = get_all_detections(photo_img)
-    draw_squares_detections(detections, photo_img)
+    set_prng_match(detections)
+
+    photo_img = draw_squares_detections(detections, photo_img)
+    photo_img = draw_percentage(detections, photo_img)
 
     cv2.imshow("Result", photo_img)
     cv2.waitKey(0)
@@ -27,7 +30,6 @@ def get_all_detections(photo_img: np.ndarray) -> list[Detection]:
         detection = get_detection(cap_img, photo_img, name_img)
         if detection:
             detections.append(detection)
-
     return detections
 
 
@@ -39,9 +41,29 @@ def get_detection(cap_img: np.ndarray, photo_img: np.ndarray, name_cap) -> Detec
     return None
 
 
+def set_prng_match(detections: list[Detection]):
+    max_matches = get_max_matches(detections)
+    for detection in detections:
+        detection.set_prng_match(max_matches + 1)
+
+
+def get_max_matches(detections: list[Detection]) -> int:
+    max_matches = 0
+    for detection in detections:
+        max_matches = max(max_matches, detection.get_max_matches())
+    return max_matches
+
+
+# Draw
 def draw_squares_detections(detections: list[Detection], img: np.ndarray):
     for detection in detections:
         img = detection.draw_all_squares(img)
+    return img
+
+
+def draw_percentage(detections: list[Detection], img: np.ndarray):
+    for detection in detections:
+        img = detection.draw_percentage(img)
     return img
 
 

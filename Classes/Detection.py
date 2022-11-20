@@ -16,7 +16,6 @@ class Detection:
         self.name = name_cap
 
     def detect_centroids(self):
-
         already_in_square = set()
         for origin_point in self.pix_kps:
             # p_X is on the horizontal axis and p_Y is on the vertical axis
@@ -65,8 +64,25 @@ class Detection:
                 croppeds.append(square.get_cropped_img(img))
         return croppeds
 
+    def set_prng_match(self, max_matches: int):
+        for square in self.get_all_squares():
+            square.set_prng_match(max_matches)
+
+    def get_max_matches(self):
+        num_matches = 0
+        for square in self.get_all_squares():
+            num_matches = max(num_matches, len(square.points))
+        return num_matches
+
+    # Draw
     def draw_all_squares(self, img: np.array):
         squares = self.get_all_squares()
         for sq in squares:
             img = sq.draw_square(img)
+        return img
+
+    def draw_percentage(self, img: np.ndarray) -> np.ndarray:
+        squares = self.get_all_squares()
+        for square in squares:
+            img = square.draw_percentage(img)
         return img

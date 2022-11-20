@@ -2,7 +2,7 @@ import math
 import numpy as np
 import cv2
 
-from aux_scripts import distance_between_two_points
+from aux_scripts import distance_between_two_points, get_mid_point
 from kp_and_descriptors import MAX_MATCHES
 
 DEBUG = False
@@ -14,6 +14,7 @@ class SquareDetection:
         self.centroid = self.calc_centroid()
         self.distance = self.calc_distance(pMaxX=pMaxX, pMinX=pMinX, pMaxY=pMaxY, pMinY=pMinY)
         self.img = img
+        self.percentage_match = len(self.points) / MAX_MATCHES
         # Showing img or not
         self.debug()
 
@@ -34,8 +35,9 @@ class SquareDetection:
         h, w = bot[1] - top[1], bot[0] - top[0]
         return [img[top[1]:top[1] + h, top[0]:top[0] + w], top, bot]
 
-    def get_perc_match(self):
-        return len(self.points) / MAX_MATCHES
+    def set_prng_match(self, max_detections: int):
+        actual_detection = len(self.points) / max_detections
+        self.percentage_match = max(actual_detection, self.percentage_match)
 
     # Drawing Methods
     def draw_pixels(self):
@@ -49,6 +51,14 @@ class SquareDetection:
     def draw_square(self, photo_img: np.array):
         crop = self.get_cropped_img(photo_img)
         photo_img = cv2.rectangle(photo_img, crop[1], crop[2], (255, 100, 0), 3)
+        return photo_img
+
+    def draw_percentage(self, photo_img: np.array):
+        crop = self.get_cropped_img(photo_img)
+        mid_point = get_mid_point(crop[1], crop[2])
+        percentage = "{:.2f}".format(self.percentage_match)
+        photo_img = cv2.putText(photo_img, percentage, mid_point,
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 100, 0), 1, cv2.LINE_AA)
         return photo_img
 
     # Show
