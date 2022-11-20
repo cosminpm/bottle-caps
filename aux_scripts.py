@@ -20,7 +20,7 @@ def compare_if_same_color(c1, c2, ratio):
     return abs(sum_numb_1 - sum_numb_2) > ratio
 
 
-def distance_between_two_points(p1: tuple[int], p2: tuple[int]):
+def distance_between_two_points(p1: tuple, p2: tuple):
     dist = ((abs(p1[0] - p2[0]) ** 2) + (abs(p1[1] - p2[1]) ** 2)) ** 0.5
     return dist
 
@@ -31,3 +31,7 @@ def read_img(img_path: str):
 
 def get_mid_point(p1: tuple[int], p2: tuple[int]) -> tuple:
     return tuple((int((p1[0] + p2[0]) / 2), int((p1[1] + p2[1]) / 2)))
+
+
+def rgb_to_bgr(rgb):
+    return tuple((rgb[2], rgb[1], rgb[0]))

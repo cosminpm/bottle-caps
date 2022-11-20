@@ -16,6 +16,7 @@ def look_in_all_images(photo_str: str):
 
     photo_img = draw_squares_detections(detections, photo_img)
     photo_img = draw_percentage(detections, photo_img)
+    photo_img = draw_name(detections, photo_img)
 
     cv2.imshow("Result", photo_img)
     cv2.waitKey(0)
@@ -64,6 +65,12 @@ def draw_squares_detections(detections: list[Detection], img: np.ndarray):
 def draw_percentage(detections: list[Detection], img: np.ndarray):
     for detection in detections:
         img = detection.draw_percentage(img)
+    return img
+
+
+def draw_name(detections: list[Detection], img: np.ndarray):
+    for detection in detections:
+        img = detection.draw_name(img)
     return img
 
 

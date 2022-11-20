@@ -1,11 +1,13 @@
-import math
 import numpy as np
 import cv2
 
-from aux_scripts import distance_between_two_points, get_mid_point
+from aux_scripts import distance_between_two_points, get_mid_point, rgb_to_bgr
 from kp_and_descriptors import MAX_MATCHES
 
 DEBUG = False
+COLOR_PERCENTAGE = rgb_to_bgr((255, 255, 0))
+THICKNESS_SQUARE = 2
+COLOR_SQUARE = rgb_to_bgr((255, 43, 0))
 
 
 class SquareDetection:
@@ -15,6 +17,7 @@ class SquareDetection:
         self.distance = self.calc_distance(pMaxX=pMaxX, pMinX=pMinX, pMaxY=pMaxY, pMinY=pMinY)
         self.img = img
         self.percentage_match = len(self.points) / MAX_MATCHES
+
         # Showing img or not
         self.debug()
 
@@ -50,7 +53,7 @@ class SquareDetection:
 
     def draw_square(self, photo_img: np.array):
         crop = self.get_cropped_img(photo_img)
-        photo_img = cv2.rectangle(photo_img, crop[1], crop[2], (255, 100, 0), 3)
+        photo_img = cv2.rectangle(photo_img, crop[1], crop[2], COLOR_SQUARE, THICKNESS_SQUARE, -1)
         return photo_img
 
     def draw_percentage(self, photo_img: np.array):
@@ -58,7 +61,13 @@ class SquareDetection:
         mid_point = get_mid_point(crop[1], crop[2])
         percentage = "{:.2f}".format(self.percentage_match)
         photo_img = cv2.putText(photo_img, percentage, mid_point,
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 100, 0), 1, cv2.LINE_AA)
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLOR_PERCENTAGE, 1, cv2.LINE_AA)
+        return photo_img
+
+    def draw_name(self, photo_img: np.ndarray, name: str):
+        crop = self.get_cropped_img(photo_img)
+        photo_img = cv2.putText(photo_img, name, crop[1],
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLOR_PERCENTAGE, 1, cv2.LINE_AA)
         return photo_img
 
     # Show

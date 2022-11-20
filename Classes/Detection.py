@@ -86,3 +86,9 @@ class Detection:
         for square in squares:
             img = square.draw_percentage(img)
         return img
+
+    def draw_name(self, img: np.ndarray) -> np.ndarray:
+        squares = self.get_all_squares()
+        for square in squares:
+            img = square.draw_name(img, self.name)
+        return img
