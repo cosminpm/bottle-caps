@@ -35,8 +35,7 @@ class SquareDetection:
         return [img[top[1]:top[1] + h, top[0]:top[0] + w], top, bot]
 
     def get_perc_match(self):
-        return len(self.points)/MAX_MATCHES
-
+        return len(self.points) / MAX_MATCHES
 
     # Drawing Methods
     def draw_pixels(self):
@@ -46,6 +45,11 @@ class SquareDetection:
     def draw_centroid(self):
         self.img = cv2.circle(self.img, (self.centroid[0], self.centroid[1]), radius=0, color=(125, 0, 255),
                               thickness=5)
+
+    def draw_square(self, photo_img: np.array):
+        crop = self.get_cropped_img(photo_img)
+        photo_img = cv2.rectangle(photo_img, crop[1], crop[2], (255, 100, 0), 3)
+        return photo_img
 
     # Show
     def show_img(self):

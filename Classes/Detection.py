@@ -51,6 +51,13 @@ class Detection:
                 else:
                     self.squares[square.centroid] = self.squares[square.centroid].append(square)
 
+    def get_all_squares(self) -> list[SquareDetection]:
+        squares = []
+        for key in self.squares.keys():
+            for square in self.squares[key]:
+                squares.append(square)
+        return squares
+
     def get_cropped_squares(self, img: np.array):
         croppeds = []
         for key in self.squares.keys():
