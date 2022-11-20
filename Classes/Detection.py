@@ -64,3 +64,9 @@ class Detection:
             for square in self.squares[key]:
                 croppeds.append(square.get_cropped_img(img))
         return croppeds
+
+    def draw_all_squares(self, img: np.array):
+        squares = self.get_all_squares()
+        for sq in squares:
+            img = sq.draw_square(img)
+        return img
