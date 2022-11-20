@@ -8,11 +8,12 @@ MAX_DISTANCE = 50
 
 
 class Detection:
-    def __init__(self, pix_kps: set[tuple[int]], img=None):
+    def __init__(self, pix_kps: set[tuple[int]], name_cap: str, img=None):
         self.pix_kps = pix_kps
-        self.squares = []
+        self.squares = {}
         self.img = img
         self.detect_centroids()
+        self.name = name_cap
 
     def detect_centroids(self):
 
@@ -45,10 +46,14 @@ class Detection:
 
             if len(points_list) > MIN_NUM_POINTS_IN_SQUARE:
                 square = SquareDetection(points_list, pMaxX=pMaxX, pMinX=pMinX, pMaxY=pMaxY, pMinY=pMinY, img=self.img)
-                self.squares.append(square)
+                if square.centroid not in self.squares:
+                    self.squares[square.centroid] = [square]
+                else:
+                    self.squares[square.centroid] = self.squares[square.centroid].append(square)
 
     def get_cropped_squares(self, img: np.array):
         croppeds = []
-        for s in self.squares:
-            croppeds.append(s.get_cropped_img(img))
+        for key in self.squares.keys():
+            for square in self.squares[key]:
+                croppeds.append(square.get_cropped_img(img))
         return croppeds

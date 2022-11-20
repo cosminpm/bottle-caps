@@ -3,8 +3,10 @@ import numpy as np
 import cv2
 
 from aux_scripts import distance_between_two_points
+from kp_and_descriptors import MAX_MATCHES
 
 DEBUG = False
+
 
 class SquareDetection:
     def __init__(self, points: list[tuple[int]], pMaxX, pMinX, pMaxY, pMinY, img=None):
@@ -12,7 +14,6 @@ class SquareDetection:
         self.centroid = self.calc_centroid()
         self.distance = self.calc_distance(pMaxX=pMaxX, pMinX=pMinX, pMaxY=pMaxY, pMinY=pMinY)
         self.img = img
-
         # Showing img or not
         self.debug()
 
@@ -33,6 +34,10 @@ class SquareDetection:
         h, w = bot[1] - top[1], bot[0] - top[0]
         return [img[top[1]:top[1] + h, top[0]:top[0] + w], top, bot]
 
+    def get_perc_match(self):
+        return len(self.points)/MAX_MATCHES
+
+
     # Drawing Methods
     def draw_pixels(self):
         for p in self.points:
@@ -41,6 +46,7 @@ class SquareDetection:
     def draw_centroid(self):
         self.img = cv2.circle(self.img, (self.centroid[0], self.centroid[1]), radius=0, color=(125, 0, 255),
                               thickness=5)
+
     # Show
     def show_img(self):
         cv2.imshow("Result", self.img)
