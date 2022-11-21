@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 from aux_scripts import distance_between_two_points, get_mid_point, rgb_to_bgr
-from Classes.kp_and_descriptors import MAX_MATCHES
+from Classes.KPsDcps import MAX_MATCHES
 
 DEBUG = False
 COLOR_PERCENTAGE = rgb_to_bgr((255, 255, 0))
@@ -40,6 +40,7 @@ class SquareDetection:
 
     def set_prng_match(self, max_detections: int):
         actual_detection = len(self.points) / max_detections
+        print(max_detections)
         self.percentage_match = max(actual_detection, self.percentage_match)
 
     # Drawing Methods

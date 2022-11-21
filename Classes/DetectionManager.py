@@ -4,7 +4,7 @@ import numpy as np
 
 from Classes.Detection import Detection
 from aux_scripts import read_img
-from Classes.kp_and_descriptors import SIFTApplied, SIFTMatch
+from Classes.KPsDcps import SIFTApplied, SIFTMatch
 
 MY_CAPS_IMGS_FOLDER = "./caps_imgs/"
 
@@ -24,9 +24,8 @@ class DetectionManager:
             self.add_detection(cap_img, photo_img, name_img)
 
     def set_prng_match(self):
-        max_matches = self.get_max_matches()
         for key in self.detections:
-            self.detections[key].set_prng_match(max_matches + 1)
+            self.detections[key].set_prng_match()
 
     def get_max_matches(self) -> int:
         max_matches = 0

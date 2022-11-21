@@ -2,7 +2,7 @@ import numpy as np
 
 from Classes.SquareDetection import SquareDetection
 from aux_scripts import distance_between_two_points
-from Classes.kp_and_descriptors import SIFTMatch
+from Classes.KPsDcps import SIFTMatch
 
 MIN_NUM_POINTS_IN_SQUARE = 10
 MAX_DISTANCE = 50
@@ -65,9 +65,9 @@ class Detection:
                 croppeds.append(square.get_cropped_img(img))
         return croppeds
 
-    def set_prng_match(self, max_matches: int):
+    def set_prng_match(self):
         for square in self.get_all_squares():
-            square.set_prng_match(max_matches)
+            square.set_prng_match(len(self.sift_match.sift_cap.kps))
 
     def get_max_matches(self):
         num_matches = 0
