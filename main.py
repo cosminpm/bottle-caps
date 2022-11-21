@@ -8,7 +8,6 @@ from kp_and_descriptors import compare_two_imgs
 
 MY_CAPS_IMGS_FOLDER = "./caps_imgs/"
 
-
 def look_in_all_images(photo_str: str):
     photo_img = read_img(photo_str)
     detections = get_all_detections(photo_img)
@@ -32,6 +31,10 @@ def get_all_detections(photo_img: np.ndarray) -> list[Detection]:
         if detection:
             detections.append(detection)
     return detections
+
+
+def remove_overlapping_detections():
+    pass
 
 
 def get_detection(cap_img: np.ndarray, photo_img: np.ndarray, name_cap) -> Detection or None:
