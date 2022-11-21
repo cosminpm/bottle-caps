@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 from aux_scripts import distance_between_two_points, get_mid_point, rgb_to_bgr
-from kp_and_descriptors import MAX_MATCHES
+from Classes.kp_and_descriptors import MAX_MATCHES
 
 DEBUG = False
 COLOR_PERCENTAGE = rgb_to_bgr((255, 255, 0))

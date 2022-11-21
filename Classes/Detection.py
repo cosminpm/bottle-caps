@@ -2,28 +2,29 @@ import numpy as np
 
 from Classes.SquareDetection import SquareDetection
 from aux_scripts import distance_between_two_points
+from Classes.kp_and_descriptors import SIFTMatch
 
 MIN_NUM_POINTS_IN_SQUARE = 10
 MAX_DISTANCE = 50
 
 
 class Detection:
-    def __init__(self, pix_kps: set[tuple[int]], name_cap: str, img=None):
-        self.pix_kps = pix_kps
+    def __init__(self, name_cap: str, sift_match: SIFTMatch, img=None):
         self.squares = {}
         self.img = img
+        self.sift_match = sift_match
         self.detect_centroids()
         self.name = name_cap
 
     def detect_centroids(self):
         already_in_square = set()
-        for origin_point in self.pix_kps:
+        for origin_point in self.sift_match.lst_pix:
             # p_X is on the horizontal axis and p_Y is on the vertical axis
             pMaxX, pMinX, pMaxY, pMinY = origin_point, origin_point, origin_point, origin_point
             already_in_square.add(origin_point)
 
             points_list = []
-            for p in self.pix_kps:
+            for p in self.sift_match.lst_pix:
                 # Checks if the cap is in the range of the max caps
                 if (distance_between_two_points(pMaxX, p) < MAX_DISTANCE
                     or distance_between_two_points(pMinX, p) < MAX_DISTANCE
