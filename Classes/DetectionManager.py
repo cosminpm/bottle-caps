@@ -53,29 +53,28 @@ class DetectionManager:
     def detect_non_overlapping_squares(self):
         squares = self.get_all_squares()
         not_overlapping = set()
-
         overlapping_sets = []
         while len(squares) > 0:
             s1 = squares.pop(0)
-            overlap_set = set()
+            overlap_set = {s1}
             squares_aux = squares.copy()
             for s2 in squares_aux:
                 area_overlap = s1.is_overlap(s2)
                 # If there is overlap
                 if area_overlap > s1.area() or area_overlap > s2.area():
-                    overlap_set.add(s1)
                     overlap_set.add(s2)
                     squares.remove(s2)
-            if len(overlap_set):
+            if len(overlap_set) > 1:
                 overlapping_sets.append(overlap_set)
             else:
                 not_overlapping.add(s1)
 
         for overlap_set in overlapping_sets:
-            big = None
-            for elem in overlap_set:
-                if big is None or elem.percentage_match > big.percentage_match:
-                    big = elem
+            big = overlap_set.pop()
+            # Get max of each set
+            for square in overlap_set:
+                if square.percentage_match > big.percentage_match:
+                    big = square
             not_overlapping.add(big)
         return not_overlapping
 
