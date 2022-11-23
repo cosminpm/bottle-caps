@@ -7,7 +7,7 @@ from aux_scripts import distance_between_two_points, get_mid_point, rgb_to_bgr
 from Classes.KPsDcps import MAX_MATCHES
 
 DEBUG = False
-COLOR_PERCENTAGE = rgb_to_bgr((255, 255, 0))
+COLOR_PERCENTAGE = rgb_to_bgr((0, 0, 0))
 THICKNESS_SQUARE = 2
 COLOR_SQUARE = rgb_to_bgr((255, 43, 0))
 

@@ -50,7 +50,7 @@ class DetectionManager:
                 squares.append(square)
         return squares
 
-    # TODO: Improve lop for
+    # TODO: Matches can't be one to one, the method must look all overlaping sets and then take one of them that's why case 3 it's failing
     def detect_non_overlapping_squares(self):
         squares = self.get_all_squares()
         not_overlapping = set()
