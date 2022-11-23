@@ -79,17 +79,17 @@ class Detection:
     def draw_all_squares(self, img: np.array):
         squares = self.get_all_squares()
         for sq in squares:
-            img = sq.draw_square(img)
+            img = sq.draw_square()
         return img
 
     def draw_percentage(self, img: np.ndarray) -> np.ndarray:
         squares = self.get_all_squares()
         for square in squares:
-            img = square.draw_percentage(img)
+            img = square.draw_percentage()
         return img
 
     def draw_name(self, img: np.ndarray) -> np.ndarray:
         squares = self.get_all_squares()
         for square in squares:
-            img = square.draw_name(img, self.name)
+            img = square.draw_name( self.name)
         return img
