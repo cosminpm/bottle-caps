@@ -56,7 +56,6 @@ class DetectionManager:
 
         overlapping_sets = []
         while len(squares) > 0:
-            n_overlaps = 0
             s1 = squares.pop(0)
             overlap_set = set()
             squares_aux = squares.copy()
@@ -64,13 +63,12 @@ class DetectionManager:
                 area_overlap = s1.is_overlap(s2)
                 # If there is overlap
                 if area_overlap > s1.area() or area_overlap > s2.area():
-                    n_overlaps += 1
                     overlap_set.add(s1)
                     overlap_set.add(s2)
                     squares.remove(s2)
             if len(overlap_set):
                 overlapping_sets.append(overlap_set)
-            if n_overlaps == 0:
+            else:
                 not_overlapping.add(s1)
 
         for overlap_set in overlapping_sets:

@@ -12,8 +12,6 @@ def look_in_all_images(photo_str: str):
     det_manager.draw_percentage(squares)
     det_manager.draw_name(squares)
 
-    #det_manager.detect_overlapping_squares()
-
     cv2.imshow("Result", det_manager.photo_image)
     cv2.waitKey(0)
 
