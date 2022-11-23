@@ -13,11 +13,12 @@ COLOR_SQUARE = rgb_to_bgr((255, 43, 0))
 
 
 class SquareDetection:
-    def __init__(self, points: list[tuple[int]], pMaxX, pMinX, pMaxY, pMinY, img=None):
+    def __init__(self, points: list[tuple[int]], pMaxX, pMinX, pMaxY, pMinY, name, img=None):
         self.points = points
         self.centroid = self.calc_centroid()
         self.distance = self.calc_distance(pMaxX=pMaxX, pMinX=pMinX, pMaxY=pMaxY, pMinY=pMinY)
         self.img = img
+        self.name = name
         self.percentage_match = len(self.points) / MAX_MATCHES
 
         # Showing img or not
@@ -71,9 +72,9 @@ class SquareDetection:
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLOR_PERCENTAGE, 1, cv2.LINE_AA)
         return photo_img
 
-    def draw_name(self, name: str):
+    def draw_name(self):
         crop = self.get_cropped_img()
-        photo_img = cv2.putText(self.img, name, crop[1],
+        photo_img = cv2.putText(self.img, self.name, crop[1],
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLOR_PERCENTAGE, 1, cv2.LINE_AA)
         return photo_img
 

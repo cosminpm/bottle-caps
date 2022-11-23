@@ -7,10 +7,10 @@ from aux_scripts import read_img
 def look_in_all_images(photo_str: str):
     photo_img = read_img(photo_str)
     det_manager = DetectionManager(photo_img)
-
-    det_manager.draw_squares_detections()
-    det_manager.draw_percentage()
-    det_manager.draw_name()
+    squares = det_manager.detect_non_overlapping_squares()
+    det_manager.draw_squares_detections(squares)
+    det_manager.draw_percentage(squares)
+    det_manager.draw_name(squares)
 
     #det_manager.detect_overlapping_squares()
 

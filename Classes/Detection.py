@@ -13,8 +13,8 @@ class Detection:
         self.squares = {}
         self.img = img
         self.sift_match = sift_match
-        self.detect_centroids()
         self.name = name_cap
+        self.detect_centroids()
 
     def detect_centroids(self):
         already_in_square = set()
@@ -45,7 +45,8 @@ class Detection:
                         pMinY = p
 
             if len(points_list) > MIN_NUM_POINTS_IN_SQUARE:
-                square = SquareDetection(points_list, pMaxX=pMaxX, pMinX=pMinX, pMaxY=pMaxY, pMinY=pMinY, img=self.img)
+                square = SquareDetection(points_list, pMaxX=pMaxX, pMinX=pMinX, pMaxY=pMaxY, pMinY=pMinY,
+                                         name=self.name, img=self.img)
                 if square.centroid not in self.squares:
                     self.squares[square.centroid] = [square]
                 else:
@@ -91,5 +92,5 @@ class Detection:
     def draw_name(self, img: np.ndarray) -> np.ndarray:
         squares = self.get_all_squares()
         for square in squares:
-            img = square.draw_name( self.name)
+            img = square.draw_name(self.name)
         return img

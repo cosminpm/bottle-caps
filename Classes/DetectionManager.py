@@ -15,7 +15,6 @@ class DetectionManager:
         self.detections = {}
         self.photo_image = photo_image
         self.get_all_detections(self.photo_image)
-
         self.set_prng_match()
 
     def get_all_detections(self, photo_img: np.ndarray):
@@ -54,37 +53,43 @@ class DetectionManager:
     def detect_non_overlapping_squares(self):
         squares = self.get_all_squares()
         not_overlapping = set()
-        squares_aux = squares.copy()
 
-        for s1 in squares:
+        overlapping_sets = []
+        while len(squares) > 0:
             n_overlaps = 0
-            squares_aux.pop(0)
+            s1 = squares.pop(0)
+            overlap_set = set()
+            squares_aux = squares.copy()
             for s2 in squares_aux:
                 area_overlap = s1.is_overlap(s2)
                 # If there is overlap
                 if area_overlap > s1.area() or area_overlap > s2.area():
                     n_overlaps += 1
-                    if s1.percentage_match > s2.percentage_match:
-                        not_overlapping.add(s1)
-                    else:
-                        not_overlapping.add(s2)
-            squares_aux.append(s1)
+                    overlap_set.add(s1)
+                    overlap_set.add(s2)
+                    squares.remove(s2)
+            if len(overlap_set):
+                overlapping_sets.append(overlap_set)
             if n_overlaps == 0:
                 not_overlapping.add(s1)
 
-        print("tamano overlap", len(not_overlapping))
+        for overlap_set in overlapping_sets:
+            big = None
+            for elem in overlap_set:
+                if big is None or elem.percentage_match > big.percentage_match:
+                    big = elem
+            not_overlapping.add(big)
         return not_overlapping
 
     # Draw
-    def draw_squares_detections(self):
-        squares = self.detect_non_overlapping_squares()
+    def draw_squares_detections(self, squares: list[SquareDetection]):
         for square in squares:
             self.photo_image = square.draw_square()
 
-    def draw_percentage(self):
-        for key in self.detections:
-            self.photo_image = self.detections[key].draw_percentage(self.photo_image)
+    def draw_percentage(self, squares: list[SquareDetection]):
+        for square in squares:
+            self.photo_image = square.draw_percentage()
 
-    def draw_name(self):
-        for key in self.detections:
-            self.photo_image = self.detections[key].draw_name(self.photo_image)
+    def draw_name(self, squares: list[SquareDetection]):
+        for square in squares:
+            self.photo_image = square.draw_name()
