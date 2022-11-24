@@ -61,7 +61,7 @@ class DetectionManager:
             for s2 in squares_aux:
                 area_overlap = s1.is_overlap(s2)
                 # If there is overlap
-                if area_overlap > s1.area() or area_overlap > s2.area():
+                if area_overlap > (s1.area() - area_overlap) or area_overlap > (s2.area() - area_overlap):
                     overlap_set.add(s2)
                     squares.remove(s2)
             if len(overlap_set) > 1:

@@ -8,6 +8,7 @@ def look_in_all_images(photo_str: str):
     photo_img = read_img(photo_str)
     det_manager = DetectionManager(photo_img)
     squares = det_manager.detect_non_overlapping_squares()
+    #squares = det_manager.get_all_squares()
     det_manager.draw_squares_detections(squares)
     det_manager.draw_percentage(squares)
     det_manager.draw_name(squares)
@@ -22,4 +23,4 @@ def get_value_const():
 
 
 if __name__ == '__main__':
-    look_in_all_images("./test_images/3.jpg")
+    look_in_all_images("./test_images/4.jpg")
