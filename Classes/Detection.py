@@ -16,7 +16,7 @@ class Detection:
         self.name = name_cap
         self.detect_centroids()
 
-    def detect_centroids(self):
+    def detect_centroids(self) -> None:
         already_in_square = set()
         for origin_point in self.sift_match.lst_pix:
             # p_X is on the horizontal axis and p_Y is on the vertical axis
@@ -59,25 +59,25 @@ class Detection:
                 squares.append(square)
         return squares
 
-    def get_cropped_squares(self, img: np.array):
+    def get_cropped_squares(self, img: np.array) -> list:
         croppeds = []
         for key in self.squares.keys():
             for square in self.squares[key]:
                 croppeds.append(square.get_cropped_img(img))
         return croppeds
 
-    def set_prng_match(self):
+    def set_prng_match(self) -> None:
         for square in self.get_all_squares():
             square.set_prng_match(len(self.sift_match.sift_cap.kps))
 
-    def get_max_matches(self):
+    def get_max_matches(self) -> int:
         num_matches = 0
         for square in self.get_all_squares():
             num_matches = max(num_matches, len(square.points))
         return num_matches
 
     # Draw
-    def draw_all_squares(self, img: np.array):
+    def draw_all_squares(self, img: np.array) -> np.ndarray:
         squares = self.get_all_squares()
         for sq in squares:
             img = sq.draw_square()

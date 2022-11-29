@@ -20,13 +20,13 @@ class SIFTMatch:
         self.lst_pix = []
         self.compare_two_imgs()
 
-    def compare_two_imgs(self):
+    def compare_two_imgs(self) -> None:
         # Get the keypoints and descriptors
         matches = MATCHER.match(self.sift_cap.dcp, self.sift_photo.dcp)
         matches = sorted(matches, key=lambda x: x.distance)[:MAX_MATCHES]
         _, self.lst_pix = self.get_pix_kp_img(matches)
 
-    def get_pix_kp_img(self, matches: list):
+    def get_pix_kp_img(self, matches: list) -> tuple[set[tuple[int, int]], set[tuple[int, int]]]:
         cap_kp_lst, photo_kp_lst = set(), set()
 
         for mat in matches:
