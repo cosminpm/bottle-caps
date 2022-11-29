@@ -50,7 +50,7 @@ class DetectionManager:
         return squares
 
     # TODO: Matches can't be one to one, the method must look all overlaping sets and then take one of them that's why case 3 it's failing
-    def detect_non_overlapping_squares(self) -> set[SquareDetection] or None:
+    def detect_non_overlapping_squares(self) -> set[SquareDetection]:
         squares = self.get_all_squares()
         not_overlapping = set()
         overlapping_sets = []
