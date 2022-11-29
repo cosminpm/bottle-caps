@@ -35,3 +35,18 @@ def get_mid_point(p1: tuple[int], p2: tuple[int]) -> tuple:
 
 def rgb_to_bgr(rgb):
     return tuple((rgb[2], rgb[1], rgb[0]))
+
+
+def get_name_from_path(path: str) -> str:
+    return path.split("/")[-1]
+
+
+def resize_image(path_to_image, width, height):
+    src = read_img(path_to_image)
+    resized = cv2.resize(src, (width, height))
+    name = get_name_from_path(path_to_image)
+    cv2.imwrite("./resized_caps_imgs/" + name, resized)
+
+
+if __name__ == '__main__':
+    resize_image(r"./caps_imgs/amstel00.jpg", 100, 100)
