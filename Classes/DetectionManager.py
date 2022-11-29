@@ -17,14 +17,14 @@ class DetectionManager:
         self.get_all_detections(self.photo_image)
         self.set_prng_match()
 
-    def get_all_detections(self, photo_img: np.ndarray):
+    def get_all_detections(self, photo_img: np.ndarray) -> None:
         entries = os.listdir(MY_CAPS_IMGS_FOLDER)
         for name_img in entries:
             cap_str = MY_CAPS_IMGS_FOLDER + name_img
             cap_img = read_img(cap_str)
             self.add_detection(cap_img, photo_img, name_img)
 
-    def set_prng_match(self):
+    def set_prng_match(self) -> None:
         for key in self.detections:
             self.detections[key].set_prng_match()
 
@@ -34,7 +34,7 @@ class DetectionManager:
             max_matches = max(max_matches, self.detections[key].get_max_matches())
         return max_matches
 
-    def add_detection(self, cap_img: np.ndarray, photo_img: np.ndarray, name_cap) -> Detection or None:
+    def add_detection(self, cap_img: np.ndarray, photo_img: np.ndarray, name_cap: str) -> Detection or None:
         sift_cap = SIFTApplied(cap_img)
         sift_photo = SIFTApplied(photo_img)
         match = SIFTMatch(sift_cap, sift_photo)
@@ -50,7 +50,7 @@ class DetectionManager:
         return squares
 
     # TODO: Matches can't be one to one, the method must look all overlaping sets and then take one of them that's why case 3 it's failing
-    def detect_non_overlapping_squares(self):
+    def detect_non_overlapping_squares(self) -> set[SquareDetection] or None:
         squares = self.get_all_squares()
         not_overlapping = set()
         overlapping_sets = []
@@ -79,14 +79,14 @@ class DetectionManager:
         return not_overlapping
 
     # Draw
-    def draw_squares_detections(self, squares: list[SquareDetection]):
+    def draw_squares_detections(self, squares: list[SquareDetection]) -> None:
         for square in squares:
             self.photo_image = square.draw_square()
 
-    def draw_percentage(self, squares: list[SquareDetection]):
+    def draw_percentage(self, squares: list[SquareDetection]) -> None:
         for square in squares:
             self.photo_image = square.draw_percentage()
 
-    def draw_name(self, squares: list[SquareDetection]):
+    def draw_name(self, squares: list[SquareDetection]) -> None:
         for square in squares:
             self.photo_image = square.draw_name()
