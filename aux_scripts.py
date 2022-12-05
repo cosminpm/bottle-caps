@@ -42,12 +42,16 @@ def get_name_from_path(path: str) -> str:
     return path.split("/")[-1]
 
 
-def resize_image(path_to_image, width, height):
+def resize_img_pix_with_name(cap_path, path_output, pix):
+    cap_name = get_name_from_path(cap_path)
+    lst_name_cap = cap_name.split(".")
+    cap_name = lst_name_cap[0] + "_{}".format(str(pix)) + "." + lst_name_cap[-1]
+    resize_image(cap_path, pix, pix, path_output, cap_name)
+
+def resize_image(path_to_image, width, height, where_save, name_output):
     src = read_img(path_to_image)
+    print(width, height)
     resized = cv2.resize(src, (width, height))
-    name = get_name_from_path(path_to_image)
-    cv2.imwrite("./resized_caps_imgs/" + name, resized)
+    print(where_save+name_output)
+    cv2.imwrite(where_save + name_output, resized)
 
-
-if __name__ == '__main__':
-    resize_image(r"./caps_imgs/amstel00.jpg", 100, 100)
