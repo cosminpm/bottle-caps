@@ -1,5 +1,10 @@
+import os
+
 import cv2
 import numpy as np
+import sys
+
+from Classes.KPsDcps import SIFTApplied
 
 
 def find_dominant_color(img: np.ndarray) -> tuple[int, int, int]:
@@ -46,12 +51,32 @@ def resize_img_pix_with_name(cap_path, path_output, pix):
     cap_name = get_name_from_path(cap_path)
     lst_name_cap = cap_name.split(".")
     cap_name = lst_name_cap[0] + "_{}".format(str(pix)) + "." + lst_name_cap[-1]
-    resize_image(cap_path, pix, pix, path_output, cap_name)
+    output = resize_image(cap_path, pix, pix, path_output, cap_name)
+    return output
+
 
 def resize_image(path_to_image, width, height, where_save, name_output):
     src = read_img(path_to_image)
-    print(width, height)
     resized = cv2.resize(src, (width, height))
-    print(where_save+name_output)
-    cv2.imwrite(where_save + name_output, resized)
+    output = where_save + name_output
+    cv2.imwrite(output, resized)
+    return output
 
+
+def resize_all_images(path, output, size):
+    files = os.listdir(path)
+    print(files)
+    for file in files:
+        resize_img_pix_with_name(path + file, output, size)
+
+
+def get_kps_path(path):
+    files = os.listdir(path)
+    for file in files:
+        img = read_img(path + file)
+        print("File {} with {} kps".format(file, len(SIFTApplied(img).kps)))
+
+
+if __name__ == '__main__':
+    resize_all_images("./caps_imgs/", "./resized_caps_imgs/", 200)
+    get_kps_path("./resized_caps_imgs/")

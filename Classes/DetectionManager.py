@@ -7,7 +7,7 @@ from Classes.Detection import Detection
 from aux_scripts import read_img
 from Classes.KPsDcps import SIFTApplied, SIFTMatch
 
-MY_CAPS_IMGS_FOLDER = "./caps_imgs/"
+MY_CAPS_IMGS_FOLDER = "./resized_caps_imgs/"
 
 
 class DetectionManager:
@@ -49,7 +49,6 @@ class DetectionManager:
                 squares.append(square)
         return squares
 
-    # TODO: Matches can't be one to one, the method must look all overlaping sets and then take one of them that's why case 3 it's failing
     def detect_non_overlapping_squares(self) -> set[SquareDetection]:
         squares = self.get_all_squares()
         not_overlapping = set()
