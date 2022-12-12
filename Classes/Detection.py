@@ -4,7 +4,7 @@ from Classes.SquareDetection import SquareDetection
 from aux_scripts import distance_between_two_points
 from Classes.KPsDcps import SIFTMatch
 
-MIN_NUM_POINTS_IN_SQUARE = 10
+MIN_NUM_POINTS_IN_SQUARE = 13
 MAX_DISTANCE = 50
 
 
