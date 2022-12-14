@@ -4,6 +4,8 @@ import cv2
 import numpy as np
 import sys
 
+from numpy.testing._private.parameterized import param
+
 from Classes.KPsDcps import SIFTApplied
 
 
@@ -75,6 +77,19 @@ def get_kps_path(path):
     for file in files:
         img = read_img(path + file)
         print("File {} with {} kps".format(file, len(SIFTApplied(img).kps)))
+
+
+def hough_transform_circle(path_to_image):
+    img = cv2.imread(path_to_image, 0)
+    img = cv2.medianBlur(img, 5)
+    cimg = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 20,
+                               param1=50, param2=30, minRadius=20, maxRadius=90)
+    circles = np.uint16(np.around(circles))
+    for i in circles[0, :]:
+        cv2.circle(cimg, (i[0], i[1]), i[2], (0, 255, 0), 2)
+        cv2.circle(cimg, (i[0], i[1]), 2, (0, 0, 255), 3)
+    return cimg
 
 
 if __name__ == '__main__':
