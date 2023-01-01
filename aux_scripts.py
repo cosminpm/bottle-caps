@@ -4,8 +4,6 @@ import cv2
 import numpy as np
 import sys
 
-from numpy.testing._private.parameterized import param
-
 from Classes.KPsDcps import SIFTApplied
 
 
@@ -81,17 +79,22 @@ def get_kps_path(path):
 
 def hough_transform_circle(path_to_image):
     img = cv2.imread(path_to_image, 0)
-    img = cv2.medianBlur(img, 5)
-    cimg = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-    circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 20,
-                               param1=50, param2=30, minRadius=20, maxRadius=90)
-    circles = np.uint16(np.around(circles))
-    for i in circles[0, :]:
-        cv2.circle(cimg, (i[0], i[1]), i[2], (0, 255, 0), 2)
-        cv2.circle(cimg, (i[0], i[1]), 2, (0, 0, 255), 3)
-    return cimg
+
+    img = cv2.GaussianBlur(img, (5, 5), cv2.BORDER_DEFAULT)
+    # cimg = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    # circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 20,
+    #                            param1=50, param2=30, minRadius=20, maxRadius=90)
+    # circles = np.uint16(np.around(circles))
+    # for i in circles[0, :]:
+    #     cv2.circle(cimg, (i[0], i[1]), i[2], (0, 255, 0), 2)
+    #     cv2.circle(cimg, (i[0], i[1]), 2, (0, 0, 255), 3)
+    # return cimg
+    return img
 
 
 if __name__ == '__main__':
-    resize_all_images("./caps_imgs/", "./resized_caps_imgs/", 200)
-    get_kps_path("./resized_caps_imgs/")
+    a = hough_transform_circle("./test_images/5.jpg")
+    cv2.imshow("Result", a)
+    cv2.waitKey(0)
+    # resize_all_images("./caps_imgs/", "./resized_caps_imgs/", 200)
+    # get_kps_path("./resized_caps_imgs/")

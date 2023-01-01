@@ -11,7 +11,8 @@ Js2Py==0.71
 kiwisolver==1.4.4
 matplotlib==3.6.0
 numpy==1.23.3
-opencv-python==4.6.0.66
+opencv-contrib-python==4.5.5.64
+opencv-python==4.5.4.60
 packaging==21.3
 Pillow==9.2.0
 pipwin==0.5.2
