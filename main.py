@@ -22,4 +22,4 @@ def get_value_const():
 
 
 if __name__ == '__main__':
-    look_in_all_images("./test_images/3.jpg")
+    look_in_all_images("./test_images/10.jpg")

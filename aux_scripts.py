@@ -2,7 +2,6 @@ import os
 
 import cv2
 import numpy as np
-import sys
 
 from Classes.KPsDcps import SIFTApplied
 
@@ -77,23 +76,49 @@ def get_kps_path(path):
         print("File {} with {} kps".format(file, len(SIFTApplied(img).kps)))
 
 
+def reduce_colors_images(image):
+    pixels = image.reshape((-1, 3)).astype(np.float32)
+
+    # Perform k-means clustering
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+    flags = cv2.KMEANS_RANDOM_CENTERS
+    compactness, labels, centers = cv2.kmeans(pixels, 13, None, criteria, 10, flags)
+
+    # Convert the labels back to an image
+    quantized = centers[labels]
+    quantized = quantized.reshape(image.shape).astype(np.uint8)
+    return quantized
+
+
 def hough_transform_circle(path_to_image):
     img = cv2.imread(path_to_image, 0)
+    img = cv2.GaussianBlur(img, (7, 7), 0)
+    img = reduce_colors_images(img)
 
-    img = cv2.GaussianBlur(img, (5, 5), cv2.BORDER_DEFAULT)
-    # cimg = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    # img = cv2.Canny(img, 65, 65)
+    #
+    # img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+
+    detector = cv2.SimpleBlobDetector_create()
+    
+    keypoints = detector.detect(img)
+    img = cv2.drawKeypoints(img, keypoints, np.array([]), (0, 0, 255),
+                            cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
     # circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 20,
-    #                            param1=50, param2=30, minRadius=20, maxRadius=90)
+    #                            param1=50, param2=18, minRadius=20, maxRadius=90)
+    #
     # circles = np.uint16(np.around(circles))
+
     # for i in circles[0, :]:
-    #     cv2.circle(cimg, (i[0], i[1]), i[2], (0, 255, 0), 2)
-    #     cv2.circle(cimg, (i[0], i[1]), 2, (0, 0, 255), 3)
-    # return cimg
+    #     cv2.circle(img, (i[0], i[1]), i[2], (0, 255, 0), 2)
+    #     cv2.circle(img, (i[0], i[1]), 2, (0, 0, 255), 3)
+
     return img
 
 
 if __name__ == '__main__':
-    a = hough_transform_circle("./test_images/5.jpg")
+    a = hough_transform_circle("./test_images/10.jpg")
     cv2.imshow("Result", a)
     cv2.waitKey(0)
     # resize_all_images("./caps_imgs/", "./resized_caps_imgs/", 200)
