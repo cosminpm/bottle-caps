@@ -17,6 +17,7 @@ class DetectionManager:
         self.get_all_detections(self.photo_image)
         self.set_prng_match()
 
+
     def get_all_detections(self, photo_img: np.ndarray) -> None:
         entries = os.listdir(MY_CAPS_IMGS_FOLDER)
         for name_img in entries:
@@ -34,13 +35,15 @@ class DetectionManager:
             max_matches = max(max_matches, self.detections[key].get_max_matches())
         return max_matches
 
+    # TODO: Change all detecions we won't detect anymore by SIFT, we will detect with blob and HoughCircles
     def add_detection(self, cap_img: np.ndarray, photo_img: np.ndarray, name_cap: str) -> Detection or None:
-        sift_cap = SIFTApplied(cap_img)
-        sift_photo = SIFTApplied(photo_img)
-        match = SIFTMatch(sift_cap, sift_photo)
-        detection = Detection(name_cap, match, photo_img)
-        if len(detection.squares) > 0:
-            self.detections[name_cap] = detection
+        pass
+        # sift_cap = SIFTApplied(cap_img)
+        # sift_photo = SIFTApplied(photo_img)
+        # match = SIFTMatch(sift_cap, sift_photo)
+        # detection = Detection(name_cap, match, photo_img)
+        # if len(detection.squares) > 0:
+        #     self.detections[name_cap] = detection
 
     def get_all_squares(self) -> list[SquareDetection]:
         squares = []
@@ -76,6 +79,9 @@ class DetectionManager:
                     big = square
             not_overlapping.add(big)
         return not_overlapping
+
+    def preprocess_image(self):
+
 
     # Draw
     def draw_squares_detections(self, squares: list[SquareDetection]) -> None:
