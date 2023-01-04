@@ -1,3 +1,4 @@
+import math
 import os
 
 import cv2
@@ -76,13 +77,13 @@ def get_kps_path(path):
         print("File {} with {} kps".format(file, len(SIFTApplied(img).kps)))
 
 
-def reduce_colors_images(image):
+def reduce_colors_images(image, number_of_levels):
     pixels = image.reshape((-1, 3)).astype(np.float32)
 
     # Perform k-means clustering
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
     flags = cv2.KMEANS_RANDOM_CENTERS
-    compactness, labels, centers = cv2.kmeans(pixels, 13, None, criteria, 10, flags)
+    compactness, labels, centers = cv2.kmeans(pixels, number_of_levels, None, criteria, 10, flags)
 
     # Convert the labels back to an image
     quantized = centers[labels]
@@ -90,36 +91,46 @@ def reduce_colors_images(image):
     return quantized
 
 
-def hough_transform_circle(path_to_image):
-    img = cv2.imread(path_to_image, 0)
-    img = cv2.GaussianBlur(img, (7, 7), 0)
-    img = reduce_colors_images(img)
+def blob_detector(img: np.ndarray, min_area:int, max_area:int, ):
+    params = cv2.SimpleBlobDetector_Params()
 
-    # img = cv2.Canny(img, 65, 65)
-    #
-    # img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    params.filterByArea = True
+    params.minArea = 100
+    params.maxArea = math.inf
 
-    detector = cv2.SimpleBlobDetector_create()
-    
+    detector = cv2.SimpleBlobDetector_create(params)
+
     keypoints = detector.detect(img)
     img = cv2.drawKeypoints(img, keypoints, np.array([]), (0, 0, 255),
                             cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    return img
 
-    # circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 20,
-    #                            param1=50, param2=18, minRadius=20, maxRadius=90)
-    #
-    # circles = np.uint16(np.around(circles))
 
-    # for i in circles[0, :]:
-    #     cv2.circle(img, (i[0], i[1]), i[2], (0, 255, 0), 2)
-    #     cv2.circle(img, (i[0], i[1]), 2, (0, 0, 255), 3)
+def hough_transform_circle(img):
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 20,
+                               param1=50, param2=18, minRadius=20, maxRadius=90)
 
+    circles = np.uint16(np.around(circles))
+
+    for i in circles[0, :]:
+        cv2.circle(img, (i[0], i[1]), i[2], (0, 255, 0), 2)
+        cv2.circle(img, (i[0], i[1]), 2, (0, 0, 255), 3)
+    return img
+
+
+def main(path_to_image):
+    img = cv2.imread(path_to_image, 0)
+    img = cv2.GaussianBlur(img, (15, 15), 0)
+    img = reduce_colors_images(img, 3)
+    img = blob_detector(img,1,1)
+    # img = hough_transform_circle(img)
+
+    # img = cv2.Canny(img, 65, 65)
     return img
 
 
 if __name__ == '__main__':
-    a = hough_transform_circle("./test_images/10.jpg")
+    a = main("./test_images/12.jpg")
     cv2.imshow("Result", a)
     cv2.waitKey(0)
-    # resize_all_images("./caps_imgs/", "./resized_caps_imgs/", 200)
-    # get_kps_path("./resized_caps_imgs/")

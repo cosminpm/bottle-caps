@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
