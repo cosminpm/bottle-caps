@@ -37,8 +37,6 @@ def hough_transform_circle(img, max_radius):
         cv2.circle(img, (x, y), r, (0, 255, 0), 4)
 
     if DEBUG_HOUGH_TRANSFORM:
-
-
         cv2.imshow("Hough-Transform-Debug", img)
         cv2.waitKey(0)
 
