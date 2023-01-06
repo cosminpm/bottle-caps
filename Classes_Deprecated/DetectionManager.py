@@ -17,7 +17,6 @@ class DetectionManager:
         self.get_all_detections(self.photo_image)
         self.set_prng_match()
 
-
     def get_all_detections(self, photo_img: np.ndarray) -> None:
         entries = os.listdir(MY_CAPS_IMGS_FOLDER)
         for name_img in entries:
