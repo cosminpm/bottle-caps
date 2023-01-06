@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
+from statistics import median
 
-DEBUG_BLOB = False
+DEBUG_BLOB = True
 DEBUG_PREPROCESS_BLOBS = False
 
 
@@ -47,17 +48,22 @@ def get_avg_size_all_blobs(img: np.ndarray):
         cv2.imshow("Result", img)
         cv2.waitKey(0)
 
-    return int(get_avg_size_blobs(keypoints)/2)
+    return int(get_avg_size_blobs(keypoints) / 2)
 
 
 def get_avg_size_blobs(kps: list[cv2.KeyPoint]):
-    total_radius = 0
-    for kp in kps:
-        total_radius += kp.size
-
-    avg_radius = total_radius / len(kps)
-    return avg_radius
-
+    kps_size = [int(kp.size) for kp in kps]
+    lst = sorted(kps_size)
+    result = 0
+    if len(lst) % 2 == 1:
+        # List has an odd number of elements
+        result = int((lst[len(lst) // 2]) / 2)
+    else:
+        # List has an even number of elements
+        mid1 = int(lst[(len(lst) // 2) - 1])
+        mid2 = int(lst[len(lst) // 2])
+        result = max(mid2, mid1)
+    return result
 
 def remove_overlapping_blobs(kps: list[cv2.KeyPoint]):
     boxes = []
