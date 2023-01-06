@@ -4,11 +4,10 @@ import os
 import cv2
 import numpy as np
 
-from Classes.KPsDcps import SIFTApplied
+from Classes_Deprecated.KPsDcps import SIFTApplied
 from Scripts.blobs import get_avg_size_all_blobs
-from Scripts.preprocess_image import preprocess_image_blobs
 
-DEBUG_BLOB = True
+DEBUG_BLOB = False
 
 
 def find_dominant_color(img: np.ndarray) -> tuple[int, int, int]:
@@ -92,24 +91,28 @@ def hough_transform_circle(img, max_radius):
         cv2.circle(img, (i[0], i[1]), i[2], (0, 255, 0), 2)
         cv2.circle(img, (i[0], i[1]), 2, (0, 0, 255), 3)
 
-    cv2.imshow("Circles", img)
-    cv2.waitKey(0)
+    # cv2.imshow("Circles", img)
+    # cv2.waitKey(0)
 
     return img
 
 
 def main(path_to_image):
     img = cv2.imread(path_to_image, 0)
-    img_blobs = preprocess_image_blobs(img)
-    avg_size = get_avg_size_all_blobs(img_blobs)
+    avg_size = get_avg_size_all_blobs(img.copy())
+
 
     radius = avg_size/2
+    # img = cv2.Canny(img, 101, 101)
+    # cv2.imshow("Imagen",img)
+    # cv2.waitKey(0)
+
     img = hough_transform_circle(img, radius)
 
-    # img = cv2.Canny(img, 65, 65)
+
 
 
 
 if __name__ == '__main__':
-    a = main("./test_images/14.jpg")
+    a = main("./test_images/9.jpg")
 

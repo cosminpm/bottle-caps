@@ -1,6 +1,6 @@
 import cv2
 
-from Classes.DetectionManager import DetectionManager
+from Classes_Deprecated.DetectionManager import DetectionManager
 from aux_scripts import read_img
 
 
@@ -12,8 +12,8 @@ def look_in_all_images(photo_str: str):
     det_manager.draw_percentage(squares)
     det_manager.draw_name(squares)
 
-    cv2.imshow("Result", det_manager.photo_image)
-    cv2.waitKey(0)
+    # cv2.imshow("Result", det_manager.photo_image)
+    # cv2.waitKey(0)
 
 
 def get_value_const():
