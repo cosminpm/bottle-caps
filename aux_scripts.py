@@ -6,6 +6,7 @@ import numpy as np
 
 from Classes_Deprecated.KPsDcps import SIFTApplied
 from Scripts.blobs import get_avg_size_all_blobs
+from Scripts.hough_transform_circles import hough_transform_circle
 
 DEBUG_BLOB = False
 
@@ -80,39 +81,14 @@ def get_kps_path(path):
         print("File {} with {} kps".format(file, len(SIFTApplied(img).kps)))
 
 
-def hough_transform_circle(img, max_radius):
-    # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 20,
-                               param1=50, param2=18, minRadius=int(max_radius*0.9), maxRadius=int(max_radius*1.1))
-
-    circles = np.uint16(np.around(circles))
-
-    for i in circles[0, :]:
-        cv2.circle(img, (i[0], i[1]), i[2], (0, 255, 0), 2)
-        cv2.circle(img, (i[0], i[1]), 2, (0, 0, 255), 3)
-
-    # cv2.imshow("Circles", img)
-    # cv2.waitKey(0)
-
-    return img
-
-
 def main(path_to_image):
     img = cv2.imread(path_to_image, 0)
     avg_size = get_avg_size_all_blobs(img.copy())
 
-
-    radius = avg_size/2
-    # img = cv2.Canny(img, 101, 101)
-    # cv2.imshow("Imagen",img)
-    # cv2.waitKey(0)
+    radius = avg_size
 
     img = hough_transform_circle(img, radius)
 
 
-
-
-
 if __name__ == '__main__':
     a = main("./test_images/9.jpg")
-

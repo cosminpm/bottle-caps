@@ -47,7 +47,7 @@ def get_avg_size_all_blobs(img: np.ndarray):
         cv2.imshow("Result", img)
         cv2.waitKey(0)
 
-    return get_avg_size_blobs(keypoints)
+    return int(get_avg_size_blobs(keypoints)/2)
 
 
 def get_avg_size_blobs(kps: list[cv2.KeyPoint]):
