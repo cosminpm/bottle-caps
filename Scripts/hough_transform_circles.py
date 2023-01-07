@@ -40,4 +40,4 @@ def hough_transform_circle(img, max_radius):
         cv2.imshow("Hough-Transform-Debug", img)
         cv2.waitKey(0)
 
-    return img
+    return img, len(circles)
