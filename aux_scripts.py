@@ -82,20 +82,16 @@ def get_kps_path(path):
         print("File {} with {} kps".format(file, len(SIFTApplied(img).kps)))
 
 
-def create_json(path_to_image, n):
-    data = {}
-    name_file = os.path.basename(path_to_image).split('/')[-1]
-    data["image name"] = name_file
-    data["number bottlecaps"] = n
-
-    with open('./tests/data.json', 'w') as file:
-        json.dump(data, file, indent=4)
+def get_number_of_caps_in_image(path_to_image: str):
+    img = cv2.imread(path_to_image, 0)
+    avg_size = get_avg_size_all_blobs(img.copy())
+    _, number_of_caps = hough_transform_circle(img, avg_size)
+    return number_of_caps
 
 
 def main(path_to_image):
     img = cv2.imread(path_to_image, 0)
     avg_size = get_avg_size_all_blobs(img.copy())
-
     img, n = hough_transform_circle(img, avg_size)
 
     # The output json file is created
@@ -103,4 +99,4 @@ def main(path_to_image):
 
 
 if __name__ == '__main__':
-    a = main("./test_images/9.jpg")
+    a = main("photo_images/9.jpg")
