@@ -24,5 +24,8 @@ def get_value_const():
     # TODO: Get value of const depending on images
 
 
+
+
+
 if __name__ == '__main__':
     look_in_all_images("./photo_images/13.jpg")
