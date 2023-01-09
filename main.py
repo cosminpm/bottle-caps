@@ -4,6 +4,9 @@ from Classes_Deprecated.DetectionManager import DetectionManager
 from aux_scripts import read_img
 
 
+
+
+
 def look_in_all_images(photo_str: str):
     photo_img = read_img(photo_str)
     det_manager = DetectionManager(photo_img)
