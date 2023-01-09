@@ -94,8 +94,6 @@ def main(path_to_image):
     avg_size = get_avg_size_all_blobs(img.copy())
     img, n = hough_transform_circle(img, avg_size)
 
-    # The output json file is created
-    create_json(path_to_image, n)
 
 
 if __name__ == '__main__':
