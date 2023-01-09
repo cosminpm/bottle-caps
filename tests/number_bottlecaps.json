@@ -15,7 +15,7 @@
     "analyze": 0
   },
   {
-    "name": "../photo_images/4.jpg",
+    "name": "./photo_images/4.jpg",
     "nCaps": 8,
     "analyze": 0
   },
@@ -40,7 +40,7 @@
     "analyze": 0
   },
   {
-    "name": "../photo_images/9.jpg",
+    "name": "./photo_images/9.jpg",
     "nCaps": 16,
     "analyze": 1
   },
