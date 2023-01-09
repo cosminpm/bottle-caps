@@ -13,4 +13,5 @@ def test_number_bottlecaps_detected():
             assert number_of_caps == element['nCaps']
 
 
-
+if __name__ == '__main__':
+    test_number_bottlecaps_detected()
