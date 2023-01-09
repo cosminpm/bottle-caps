@@ -4,7 +4,7 @@ from aux_scripts import get_number_of_caps_in_image
 
 
 def test_number_bottlecaps_detected():
-    file = open('./number_bottlecaps.json')
+    file = open('./tests/number_bottlecaps.json')
     file_test_json = json.load(file)
 
     for element in file_test_json:
