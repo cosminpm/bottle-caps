@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from statistics import median
 
-DEBUG_BLOB = True
+DEBUG_BLOB = False
 DEBUG_PREPROCESS_BLOBS = False
 
 
