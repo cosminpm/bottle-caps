@@ -13,12 +13,4 @@ def test_number_bottlecaps_detected():
             assert number_of_caps == element['nCaps']
 
 
-    #
-    # if name_file in number_caps:
-    #     assert data["number bottlecaps"] == number_caps[name_file]
-    # else:
-    #     assert False
 
-
-if __name__ == '__main__':
-    test_number_bottlecaps_detected()
