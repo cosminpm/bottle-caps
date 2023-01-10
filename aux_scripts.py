@@ -60,6 +60,7 @@ def resize_img_pix_with_name(cap_path, path_output, pix):
     return output
 
 
+
 def resize_image(path_to_image, width, height, where_save, name_output):
     src = read_img(path_to_image)
     resized = cv2.resize(src, (width, height))
