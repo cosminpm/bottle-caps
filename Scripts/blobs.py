@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from statistics import median
 
-DEBUG_BLOB = False
+DEBUG_BLOB = True
 DEBUG_PREPROCESS_BLOBS = False
 
 
@@ -33,9 +33,13 @@ def get_avg_size_all_blobs(img: np.ndarray):
     img = preprocess_image_blobs(img)
     params = cv2.SimpleBlobDetector_Params()
 
+    # Parameters of SimpleBlobDetector
+    # For Area
     params.filterByArea = True
     params.minArea = 100
-    params.maxArea = img.shape[0] * img.shape[1] * (9 / 10)
+    params.maxArea = img.shape[0] * img.shape[1] * (99/100)
+    params.filterByCircularity = False
+    params.filterByConvexity = False
 
     detector = cv2.SimpleBlobDetector_create(params)
 
@@ -48,7 +52,7 @@ def get_avg_size_all_blobs(img: np.ndarray):
         cv2.imshow("Result", img)
         cv2.waitKey(0)
 
-    return int(get_avg_size_blobs(keypoints) / 2)
+    return img, int(get_avg_size_blobs(keypoints) / 2)
 
 
 def get_avg_size_blobs(kps: list[cv2.KeyPoint]):
@@ -57,12 +61,12 @@ def get_avg_size_blobs(kps: list[cv2.KeyPoint]):
     result = 0
     if len(lst) % 2 == 1:
         # List has an odd number of elements
-        result = int((lst[len(lst) // 2]) / 2)
+        result = int(lst[len(lst) // 2])
     else:
         # List has an even number of elements
         mid1 = int(lst[(len(lst) // 2) - 1])
         mid2 = int(lst[len(lst) // 2])
-        result = max(mid2, mid1)
+        result = max(mid2, mid1)/2
     return result
 
 def remove_overlapping_blobs(kps: list[cv2.KeyPoint]):

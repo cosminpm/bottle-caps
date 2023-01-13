@@ -25,6 +25,9 @@ def combine_overlapping_circles(circles):
 
 
 def hough_transform_circle(img, max_radius) -> (np.ndarray, int):
+    img = cv2.GaussianBlur(img, (5, 5), 0)
+    #_, img = cv2.threshold(img, 100, 255, cv2.THRESH_BINARY)
+
     circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 20,
                                param1=50, param2=18, minRadius=int(max_radius * 0.9), maxRadius=int(max_radius * 1.1))
     circles = np.uint16(np.around(circles))
