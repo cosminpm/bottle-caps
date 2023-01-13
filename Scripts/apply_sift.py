@@ -30,9 +30,17 @@ def get_all_detections(cropped_image):
     for name_img in entries:
         cap_str = MY_CAPS_IMGS_FOLDER + name_img
         cap_img = read_img(cap_str)
-        matches.append(compare_two_images(cropped_image, cap_img))
-        cropped_image = cv2.putText(cropped_image, name_img, (0, 0),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+        matches.append((compare_two_images(cropped_image, cap_img), name_img))
+
+    greater = 0
+    name = ""
+    for i in matches:
+        if len(i[0]) > greater:
+            greater = len(i[0])
+            name = i[1]
+
+    cropped_image = cv2.putText(cropped_image, name, (10, 10),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
     return cropped_image
 
 
