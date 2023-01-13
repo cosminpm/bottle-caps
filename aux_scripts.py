@@ -91,9 +91,7 @@ def main(path_to_image):
     img = cv2.imread(path_to_image, 0)
     _, avg_size = get_avg_size_all_blobs(img.copy())
     img, _ = hough_transform_circle(img, avg_size)
-    cv2.imshow("result", img)
-    cv2.waitKey(0)
 
 
 if __name__ == '__main__':
-    a = main("photo_images/10.jpg")
+    a = main("photo_images/9.jpg")

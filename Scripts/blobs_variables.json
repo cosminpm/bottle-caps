@@ -1,5 +1,5 @@
 {
-  "DEBUG_BLOB" : 1,
+  "DEBUG_BLOB" : 0,
   "DEBUG_PREPROCESS_BLOBS" : 0,
 
   "PREPO_number_of_levels": 3,
