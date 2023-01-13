@@ -1,4 +1,6 @@
+import json
 import os
+import pickle
 
 import cv2
 import numpy as np
@@ -8,6 +10,7 @@ from Scripts.blobs import get_avg_size_all_blobs
 from Scripts.HTC import hough_transform_circle
 
 DEBUG_BLOB = False
+MY_CAPS_IMGS_FOLDER = r"C:\Users\cosmi\Desktop\BottleCaps\resized_caps_imgs"
 
 
 def find_dominant_color(img: np.ndarray) -> tuple[int, int, int]:
@@ -86,11 +89,34 @@ def get_number_of_caps_in_image(path_to_image: str):
     return len(circles)
 
 
-def main(path_to_image):
-    img = cv2.imread(path_to_image, 0)
-    _, avg_size = get_avg_size_all_blobs(img.copy())
-    img, _ = hough_transform_circle(img, avg_size)
+def crate_db_for_cap(cap_name, folder: str):
+    cap_path = os.path.join(folder, cap_name)
+    cap_img = cv2.imread(cap_path)
+    sift = cv2.SIFT_create()
+    kps, dcps = sift.detectAndCompute(cap_img, None)
+
+    # Convert the keypoints to a list of lists
+    keypoints_list = [[kp.pt[0], kp.pt[1], kp.size, kp.angle, kp.response, kp.octave, kp.class_id] for kp in kps]
+    dcps = dcps.tolist()
+    # serialized_keypoints = pickle.dumps(keypoints_list)
+    # serialized_descriptors = pickle.dumps(dcps)
+
+    entry = {
+        "name": cap_name,
+        "path": cap_path,
+        "len": len(kps),
+        "kps": keypoints_list,
+        "dcps": dcps
+    }
+    with open(r"C:\Users\cosmi\Desktop\BottleCaps\caps_db\\" + cap_name+".json", "w") as outfile:
+        json.dump(entry, outfile)
+
+
+def create_json_for_all_caps():
+    entries = os.listdir(MY_CAPS_IMGS_FOLDER)
+    for name_img in entries:
+        crate_db_for_cap(name_img, MY_CAPS_IMGS_FOLDER)
 
 
 if __name__ == '__main__':
-    a = main("photo_images/9.jpg")
+    create_json_for_all_caps()
