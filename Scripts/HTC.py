@@ -20,7 +20,7 @@ def combine_overlapping_circles(circles):
     return combined_circles
 
 
-def hough_transform_circle(img, max_radius) -> (np.ndarray, int):
+def hough_transform_circle(img: np.ndarray, max_radius: int) -> (np.ndarray, int):
     img = cv2.GaussianBlur(img, (5, 5), 0)
 
     circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 20,
@@ -31,13 +31,12 @@ def hough_transform_circle(img, max_radius) -> (np.ndarray, int):
 
     circles = combine_overlapping_circles(circles)
 
-    img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-    # Draw combined circles on image
-    for (x, y, r) in circles:
-        cv2.circle(img, (x, y), r, (0, 255, 0), 4)
-
     if VARIABLES['DEBUG_HOUGH_TRANSFORM']:
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+        # Draw combined circles on image
+        for (x, y, r) in circles:
+            cv2.circle(img, (x, y), r, (0, 255, 0), 4)
         cv2.imshow("Hough-Transform-Debug", img)
         cv2.waitKey(0)
 
-    return img, len(circles)
+    return img, circles

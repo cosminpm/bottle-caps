@@ -1,9 +1,7 @@
-import math
 import os
 
 import cv2
 import numpy as np
-import json
 
 from Classes_Deprecated.KPsDcps import SIFTApplied
 from Scripts.blobs import get_avg_size_all_blobs
@@ -85,8 +83,8 @@ def get_kps_path(path):
 def get_number_of_caps_in_image(path_to_image: str):
     img = cv2.imread(path_to_image, 0)
     _, avg_size = get_avg_size_all_blobs(img.copy())
-    _, number_of_caps = hough_transform_circle(img, avg_size)
-    return number_of_caps
+    _, circles = hough_transform_circle(img, avg_size)
+    return len(circles)
 
 
 def main(path_to_image):
