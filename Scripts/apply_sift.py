@@ -11,6 +11,7 @@ MY_CAPS_IMGS_FOLDER = r"C:\Users\cosmi\Desktop\BottleCaps\resized_caps_imgs\\"
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
 MAX_MATCHES = 100
+MIN_MATCH_NUMBER = 13
 
 
 def get_rectangles(circles: list[int, int, int]):
@@ -30,7 +31,9 @@ def get_all_detections(cropped_image):
     for name_img in entries:
         cap_str = MY_CAPS_IMGS_FOLDER + name_img
         cap_img = read_img(cap_str)
-        matches.append((compare_two_images(cropped_image, cap_img), name_img))
+        match = (compare_two_images(cropped_image, cap_img), name_img)
+        if len(match[0]) > MIN_MATCH_NUMBER:
+            matches.append(match)
 
     greater = 0
     name = ""
