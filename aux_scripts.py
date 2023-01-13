@@ -60,7 +60,6 @@ def resize_img_pix_with_name(cap_path, path_output, pix):
     return output
 
 
-
 def resize_image(path_to_image, width, height, where_save, name_output):
     src = read_img(path_to_image)
     resized = cv2.resize(src, (width, height))
@@ -85,17 +84,18 @@ def get_kps_path(path):
 
 def get_number_of_caps_in_image(path_to_image: str):
     img = cv2.imread(path_to_image, 0)
-    avg_size = get_avg_size_all_blobs(img.copy())
+    _, avg_size = get_avg_size_all_blobs(img.copy())
     _, number_of_caps = hough_transform_circle(img, avg_size)
     return number_of_caps
 
 
 def main(path_to_image):
     img = cv2.imread(path_to_image, 0)
-    avg_size = get_avg_size_all_blobs(img.copy())
+    _, avg_size = get_avg_size_all_blobs(img.copy())
     img, n = hough_transform_circle(img, avg_size)
-
+    cv2.imshow("result", img)
+    cv2.waitKey(0)
 
 
 if __name__ == '__main__':
-    a = main("photo_images/9.jpg")
+    a = main("photo_images/8.jpg")
