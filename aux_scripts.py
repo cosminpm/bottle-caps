@@ -68,7 +68,6 @@ def resize_image(path_to_image, width, height, where_save, name_output):
 
 def resize_all_images(path, output, size):
     files = os.listdir(path)
-    print(files)
     for file in files:
         resize_img_pix_with_name(path + file, output, size)
 
