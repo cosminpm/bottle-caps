@@ -34,10 +34,10 @@ def get_all_detections(cropped_image):
 
     greater = 0
     name = ""
-    for i in matches:
-        if len(i[0]) > greater:
-            greater = len(i[0])
-            name = i[1]
+    for match in matches:
+        if len(match[0]) > greater:
+            greater = len(match[0])
+            name = match[1]
 
     cropped_image = cv2.putText(cropped_image, name, (10, 10),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
@@ -68,9 +68,11 @@ def main():
     _, circles = hough_transform_circle(img, avg_size)
     rectangles = get_rectangles(circles)
     cropped_images = cropp_image_into_rectangles(img, rectangles)
+
     for crop, tupla in cropped_images:
         x, y, w, h = tupla[0], tupla[1], tupla[2], tupla[3]
         img[y:y + h, x:x + w] = get_all_detections(crop)
+
     cv2.imshow("a", img)
     cv2.waitKey(0)
 
