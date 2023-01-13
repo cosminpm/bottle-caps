@@ -7,7 +7,7 @@ import json
 
 from Classes_Deprecated.KPsDcps import SIFTApplied
 from Scripts.blobs import get_avg_size_all_blobs
-from Scripts.hough_transform_circles import hough_transform_circle
+from Scripts.HTC import hough_transform_circle
 
 DEBUG_BLOB = False
 
@@ -92,7 +92,7 @@ def get_number_of_caps_in_image(path_to_image: str):
 def main(path_to_image):
     img = cv2.imread(path_to_image, 0)
     _, avg_size = get_avg_size_all_blobs(img.copy())
-    img, n = hough_transform_circle(img, avg_size)
+    img, _ = hough_transform_circle(img, avg_size)
     cv2.imshow("result", img)
     cv2.waitKey(0)
 

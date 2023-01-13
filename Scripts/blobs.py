@@ -1,10 +1,8 @@
+import json
 import cv2
 import numpy as np
-from statistics import median
 
-DEBUG_BLOB = True
-DEBUG_PREPROCESS_BLOBS = False
-
+VARIABLES = json.load(open('Scripts/blobs_variables.json'))
 
 def reduce_colors_images(image, number_of_levels):
     image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
@@ -22,9 +20,9 @@ def reduce_colors_images(image, number_of_levels):
 
 
 def preprocess_image_blobs(img):
-    img = cv2.GaussianBlur(img, (15, 15), 0)
-    img = reduce_colors_images(img, 3)
-    if DEBUG_PREPROCESS_BLOBS:
+    img = cv2.GaussianBlur(img, (VARIABLES['PREPO_convolution_size'], VARIABLES['PREPO_convolution_size']), 0)
+    img = reduce_colors_images(img, VARIABLES['PREPO_number_of_levels'])
+    if VARIABLES['DEBUG_PREPROCESS_BLOBS']:
         cv2.imshow("Preprocess img", img)
         cv2.waitKey(0)
     return img
@@ -37,8 +35,8 @@ def get_avg_size_all_blobs(img: np.ndarray):
     # Parameters of SimpleBlobDetector
     # For Area
     params.filterByArea = True
-    params.minArea = img.shape[0] * img.shape[1] * (1/100)
-    params.maxArea = img.shape[0] * img.shape[1] * (99/100)
+    params.minArea = img.shape[0] * img.shape[1] * VARIABLES['percent_min_area_of_original']
+    params.maxArea = img.shape[0] * img.shape[1] * VARIABLES['percent_max_area_of_original']
     params.filterByCircularity = False
     params.filterByConvexity = False
 
@@ -47,7 +45,7 @@ def get_avg_size_all_blobs(img: np.ndarray):
     keypoints = detector.detect(img)
     keypoints = remove_overlapping_blobs(kps=keypoints)
 
-    if DEBUG_BLOB:
+    if VARIABLES['DEBUG_BLOB']:
         img = cv2.drawKeypoints(img, keypoints, np.array([]), (0, 0, 255),
                                 cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
         cv2.imshow("Result", img)
@@ -69,6 +67,7 @@ def get_avg_size_blobs(kps: list[cv2.KeyPoint]):
         mid2 = int(lst[len(lst) // 2])
         result = max(mid2, mid1)
     return result
+
 
 def remove_overlapping_blobs(kps: list[cv2.KeyPoint]):
     boxes = []
