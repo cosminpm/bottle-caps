@@ -7,6 +7,7 @@ DEBUG_PREPROCESS_BLOBS = False
 
 
 def reduce_colors_images(image, number_of_levels):
+    image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
     pixels = image.reshape((-1, 3)).astype(np.float32)
 
     # Perform k-means clustering
@@ -36,7 +37,7 @@ def get_avg_size_all_blobs(img: np.ndarray):
     # Parameters of SimpleBlobDetector
     # For Area
     params.filterByArea = True
-    params.minArea = 100
+    params.minArea = img.shape[0] * img.shape[1] * (1/100)
     params.maxArea = img.shape[0] * img.shape[1] * (99/100)
     params.filterByCircularity = False
     params.filterByConvexity = False
@@ -66,7 +67,7 @@ def get_avg_size_blobs(kps: list[cv2.KeyPoint]):
         # List has an even number of elements
         mid1 = int(lst[(len(lst) // 2) - 1])
         mid2 = int(lst[len(lst) // 2])
-        result = max(mid2, mid1)/2
+        result = max(mid2, mid1)
     return result
 
 def remove_overlapping_blobs(kps: list[cv2.KeyPoint]):

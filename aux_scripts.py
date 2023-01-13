@@ -98,4 +98,4 @@ def main(path_to_image):
 
 
 if __name__ == '__main__':
-    a = main("photo_images/8.jpg")
+    a = main("photo_images/4.jpg")
