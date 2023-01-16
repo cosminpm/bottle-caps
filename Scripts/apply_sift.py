@@ -65,16 +65,21 @@ def compare_two_images(photo: np.ndarray, cap: np.ndarray):
 
 
 def main():
-    path_to_image = r"C:\Users\cosmi\Desktop\BottleCaps\photo_images\9.jpg"
+    path_to_image = r"..\photo_images\9.jpg"
     img = cv2.imread(path_to_image, 0)
     _, avg_size = get_avg_size_all_blobs(img.copy())
     _, circles = hough_transform_circle(img, avg_size)
+
+    # Get the positions of the rectangles
     rectangles = get_rectangles(circles)
+    # Crop the images from the rectangles
     cropped_images = cropp_image_into_rectangles(img, rectangles)
 
-    for crop, tupla in cropped_images:
-        x, y, w, h = tupla[0], tupla[1], tupla[2], tupla[3]
-        img[y:y + h, x:x + w] = get_all_detections(crop)
+
+    for rectangle_image, pos_rectangle in cropped_images:
+        x, y, w, h = pos_rectangle[0], pos_rectangle[1], pos_rectangle[2], pos_rectangle[3]
+
+        img[y:y + h, x:x + w] = get_all_detections(rectangle_image)
 
     cv2.imshow("a", img)
     cv2.waitKey(0)

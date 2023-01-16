@@ -10,7 +10,8 @@ from Scripts.blobs import get_avg_size_all_blobs
 from Scripts.HTC import hough_transform_circle
 
 DEBUG_BLOB = False
-MY_CAPS_IMGS_FOLDER = r"C:\Users\cosmi\Desktop\BottleCaps\resized_caps_imgs"
+MY_CAPS_IMGS_FOLDER = r"resized_caps_imgs"
+DATABASE_FODLER = r"caps_db"
 
 
 def find_dominant_color(img: np.ndarray) -> tuple[int, int, int]:
@@ -95,11 +96,8 @@ def crate_db_for_cap(cap_name, folder: str):
     sift = cv2.SIFT_create()
     kps, dcps = sift.detectAndCompute(cap_img, None)
 
-    # Convert the keypoints to a list of lists
     keypoints_list = [[kp.pt[0], kp.pt[1], kp.size, kp.angle, kp.response, kp.octave, kp.class_id] for kp in kps]
     dcps = dcps.tolist()
-    # serialized_keypoints = pickle.dumps(keypoints_list)
-    # serialized_descriptors = pickle.dumps(dcps)
 
     entry = {
         "name": cap_name,
@@ -108,9 +106,10 @@ def crate_db_for_cap(cap_name, folder: str):
         "kps": keypoints_list,
         "dcps": dcps
     }
-    with open(r"C:\Users\cosmi\Desktop\BottleCaps\caps_db\\" + cap_name+".json", "w") as outfile:
+    cap_name = cap_name.split(".")[0]
+    cap_result = os.path.join(DATABASE_FODLER, cap_name)
+    with open(cap_result + ".json", "w") as outfile:
         json.dump(entry, outfile)
-
 
 def create_json_for_all_caps():
     entries = os.listdir(MY_CAPS_IMGS_FOLDER)
