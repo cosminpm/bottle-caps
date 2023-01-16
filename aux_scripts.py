@@ -93,16 +93,16 @@ def get_number_of_caps_in_image(path_to_image: str):
 def crate_db_for_cap(cap_name, folder: str):
     cap_path = os.path.join(folder, cap_name)
     cap_img = cv2.imread(cap_path)
+    cap_img = cv2.cvtColor(cap_img, cv2.COLOR_BGR2GRAY)
+
     sift = cv2.SIFT_create()
     kps, dcps = sift.detectAndCompute(cap_img, None)
-
     keypoints_list = [[kp.pt[0], kp.pt[1], kp.size, kp.angle, kp.response, kp.octave, kp.class_id] for kp in kps]
     dcps = dcps.tolist()
 
     entry = {
         "name": cap_name,
         "path": cap_path,
-        "len": len(kps),
         "kps": keypoints_list,
         "dcps": dcps
     }
@@ -110,6 +110,7 @@ def crate_db_for_cap(cap_name, folder: str):
     cap_result = os.path.join(DATABASE_FODLER, cap_name)
     with open(cap_result + ".json", "w") as outfile:
         json.dump(entry, outfile)
+
 
 def create_json_for_all_caps():
     entries = os.listdir(MY_CAPS_IMGS_FOLDER)
