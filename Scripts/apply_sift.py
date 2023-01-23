@@ -47,8 +47,7 @@ def compare_all_dcps(dcp_rectangle):
         kps_cap, dcps_cap = get_kps_and_dcps_from_json(cap_str)
 
         match = (compare_dcps(dcps_cap, dcp_rectangle), cap_str)
-        if len(match[0]) > MIN_MATCH_NUMBER:
-            matches.append(match)
+        matches.append(match)
     return matches
 
 
@@ -117,27 +116,37 @@ def get_dict_all_matches(path_to_image: str) -> list[dict]:
 
     for rectangle_image, pos_rectangle in cropped_images:
         _, dcp_rectangle = get_dcp_and_kps(rectangle_image)
+
+        # Get the best possible match for each cap
         best_match_json = get_best_match(dcp_rectangle)
-        # Add entry to json
-        if best_match_json['percentage'] > 0:
-            best_match_json['positions'] = {"x": pos_rectangle[0],
-                                            "y": pos_rectangle[1],
-                                            "w": pos_rectangle[2],
-                                            "h": pos_rectangle[3]}
-            best_match_json['name'] = get_name_from_json(best_match_json['path_file'])
-            caps_matches.append(best_match_json)
+        # Get the position of the rectangle
+        best_match_json['positions'] = {"x": pos_rectangle[0],
+                                        "y": pos_rectangle[1],
+                                        "w": pos_rectangle[2],
+                                        "h": pos_rectangle[3]}
+        best_match_json['name'] = get_name_from_json(best_match_json['path_file'])
+        caps_matches.append(best_match_json)
 
     return caps_matches
 
 
+def filter_matches(all_caps_matches:list[dict]) -> list[dict]:
+    result = []
+    for match in all_caps_matches:
+        if match['percentage'] > MIN_MATCH_NUMBER:
+            result.append(match)
+    return result
+
+
 def draw_matches(path_to_image: str):
     all_matches = get_dict_all_matches(path_to_image=path_to_image)
-    for match in all_matches:
+    good_matches = filter_matches(all_matches)
+    for match in good_matches:
         print(match)
 
     # drawing matches on image
     img = cv2.imread(path_to_image)
-    for match in all_matches:
+    for match in good_matches:
         match_pos = match['positions']
         x, y, w, h = match_pos['x'], match_pos['y'], match_pos['w'], match_pos['h']
         name = match['name']
