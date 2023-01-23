@@ -6,7 +6,7 @@ import numpy as np
 
 from Scripts.HTC import hough_transform_circle
 from Scripts.blobs import get_avg_size_all_blobs
-from aux_scripts import read_img, rgb_to_bgr
+from aux_scripts import read_img, rgb_to_bgr, resize_image
 
 MY_CAPS_IMGS_FOLDER = r"C:\Users\cosmi\Desktop\BottleCaps\caps_db"
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
@@ -104,34 +104,50 @@ def compare_dcps(cap_dcp, photo_dcp):
     return matches
 
 
+def preprocess_image_size(img):
+    height, width = img.shape[:2]
+    size = height * width
+    max_size_img = 1000 * 1000
+    resized = img
+    while size > max_size_img:
+        resized = resize_image(img, 0.66)
+        height, width = img.shape[:2]
+        size = height * width
+    return resized
+
+
 def get_dict_all_matches(path_to_image: str) -> list[dict]:
     img = cv2.imread(path_to_image)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
+    # Preprocess image
+    img = preprocess_image_size(img)
+
     _, avg_size = get_avg_size_all_blobs(img.copy())
-    _, circles = hough_transform_circle(img, avg_size)
-
-    # Get the positions of the rectangles
-    rectangles = get_rectangles(circles)
-    # Crop the images from the rectangles
-    cropped_images = cropp_image_into_rectangles(img, rectangles)
-
-    # Final dictionary which will contain all the positions and info from the cap
     caps_matches = []
+    if avg_size != 0:
+        _, circles = hough_transform_circle(img, avg_size)
 
-    for rectangle_image, pos_rectangle in cropped_images:
-        _, dcp_rectangle = get_dcp_and_kps(rectangle_image)
+        # Get the positions of the rectangles
+        rectangles = get_rectangles(circles)
+        # Crop the images from the rectangles
+        cropped_images = cropp_image_into_rectangles(img.copy(), rectangles)
 
-        # Get the best possible match for each cap
-        best_match_json = get_best_match(dcp_rectangle)
-        # Get the position of the rectangle
-        best_match_json['positions'] = {"x": pos_rectangle[0],
-                                        "y": pos_rectangle[1],
-                                        "w": pos_rectangle[2],
-                                        "h": pos_rectangle[3]}
-        best_match_json['name'] = get_name_from_json(best_match_json['path_file'])
-        caps_matches.append(best_match_json)
+        # Final dictionary which will contain all the positions and info from the cap
+        caps_matches = []
 
+        for rectangle_image, pos_rectangle in cropped_images:
+            _, dcp_rectangle = get_dcp_and_kps(rectangle_image)
+
+            # Get the best possible match for each cap
+            best_match_json = get_best_match(dcp_rectangle)
+            # Get the position of the rectangle
+            best_match_json['positions'] = {"x": pos_rectangle[0],
+                                            "y": pos_rectangle[1],
+                                            "w": pos_rectangle[2],
+                                            "h": pos_rectangle[3]}
+            best_match_json['name'] = get_name_from_json(best_match_json['path_file'])
+            caps_matches.append(best_match_json)
     return caps_matches
 
 
@@ -139,7 +155,6 @@ def filter_matches(all_caps_matches: list[dict]) -> (list[dict], list[dict]):
     good_matches = []
     bad_matches = []
     for match in all_caps_matches:
-        print(match['success'])
         if match['success'] > SUCCESS_MIN:
             good_matches.append(match)
         else:
@@ -158,18 +173,18 @@ def draw_match(img, match, color_name, color_circle):
 
     cv2.putText(img, name.upper(), (x, int(y + h / 2)), cv2.FONT_HERSHEY_SIMPLEX, 1 * 0.33, color_name, 1,
                 cv2.LINE_AA)
-
     return img
 
 
 def draw_matches(path_to_image: str):
     COLOR_NAME = rgb_to_bgr(255, 255, 0)
     GREEN_CIRCLE = rgb_to_bgr(50, 205, 50)
-
     RED_CIRCLE = rgb_to_bgr(255, 0, 0)
 
+    # Get matches
     all_matches = get_dict_all_matches(path_to_image=path_to_image)
-
+    if len(all_matches) == 0:
+        print("ERROR: NO CAPS FOUND")
     good_matches, bad_matches = filter_matches(all_matches)
 
     # drawing good matches on image
@@ -180,13 +195,23 @@ def draw_matches(path_to_image: str):
     for match in bad_matches:
         draw_match(img, match, COLOR_NAME, RED_CIRCLE)
 
-    cv2.imshow("a", img)
+    cv2.imshow(path_to_image, img)
     cv2.waitKey(0)
 
 
+def apply_to_all_images():
+    entries = os.listdir('..\photo_images')
+    for entry in entries:
+        try:
+            path_to_image = os.path.join(r"..\photo_images", entry)
+            draw_matches(path_to_image=path_to_image)
+        except Exception:
+            print("Hay un error con {}".format(entry))
+
+
 def main():
-    path_to_image = r"..\photo_images\9.jpg"
-    draw_matches(path_to_image=path_to_image)
+    # TODO: Improve this. fix error
+    apply_to_all_images()
 
 
 if __name__ == '__main__':

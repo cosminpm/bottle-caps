@@ -62,11 +62,16 @@ def resize_img_pix_with_name(cap_path, path_output, pix):
     cap_name = get_name_from_path(cap_path)
     lst_name_cap = cap_name.split(".")
     cap_name = lst_name_cap[0] + "_{}".format(str(pix)) + "." + lst_name_cap[-1]
-    output = resize_image(cap_path, pix, pix, path_output, cap_name)
+    output = resize_image_and_save(cap_path, pix, pix, path_output, cap_name)
     return output
 
 
-def resize_image(path_to_image, width, height, where_save, name_output):
+def resize_image(src, factor):
+    height, width = src.shape[:2]
+    return cv2.resize(src, (int(src * factor), int(height * factor)))
+
+
+def resize_image_and_save(path_to_image, width, height, where_save, name_output):
     src = read_img(path_to_image)
     resized = cv2.resize(src, (width, height))
     output = where_save + name_output
@@ -96,11 +101,13 @@ def get_number_of_caps_in_image(path_to_image: str):
 
 def crate_db_for_cap(cap_name, folder: str):
     cap_path = os.path.join(folder, cap_name)
+
     cap_img = cv2.imread(cap_path)
     cap_img = cv2.cvtColor(cap_img, cv2.COLOR_BGR2GRAY)
 
     sift = cv2.SIFT_create()
     kps, dcps = sift.detectAndCompute(cap_img, None)
+
     keypoints_list = [[kp.pt[0], kp.pt[1], kp.size, kp.angle, kp.response, kp.octave, kp.class_id] for kp in kps]
     dcps = dcps.tolist()
 

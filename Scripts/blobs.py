@@ -52,13 +52,15 @@ def get_avg_size_all_blobs(img: np.ndarray):
         cv2.imshow("Result", img)
         cv2.waitKey(0)
 
-    return img, int(get_avg_size_blobs(keypoints) / 2)
+    if len(keypoints) == 0:
+        return img, 0
+    else:
+        return img, int(get_avg_size_blobs(keypoints) / 2)
 
 
 def get_avg_size_blobs(kps: list[cv2.KeyPoint]):
     kps_size = [int(kp.size) for kp in kps]
     lst = sorted(kps_size)
-    result = 0
     if len(lst) % 2 == 1:
         # List has an odd number of elements
         result = int(lst[len(lst) // 2])
