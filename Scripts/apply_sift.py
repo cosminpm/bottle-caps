@@ -6,7 +6,7 @@ import numpy as np
 
 from Scripts.HTC import hough_transform_circle
 from Scripts.blobs import get_avg_size_all_blobs
-from aux_scripts import read_img
+from aux_scripts import read_img, rgb_to_bgr
 
 MY_CAPS_IMGS_FOLDER = r"C:\Users\cosmi\Desktop\BottleCaps\caps_db"
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
@@ -141,7 +141,24 @@ def filter_matches(all_caps_matches: list[dict]) -> (list[dict], list[dict]):
     return good_matches, bad_matches
 
 
+def draw_match(img, match, color_name, color_circle):
+    match_pos = match['positions']
+    x, y, w, h = match_pos['x'], match_pos['y'], match_pos['w'], match_pos['h']
+    center = (x + int(w / 2), y + int(h / 2))
+    radius = int(w / 2)
+    name = match['name']
+    cv2.circle(img, center, radius, color_circle, 4)
+    cv2.putText(img, name, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color_name, 1, cv2.LINE_AA)
+    return img
+
+
 def draw_matches(path_to_image: str):
+    GREEN_NAME = rgb_to_bgr(124, 252, 0)
+    GREEN_CIRCLE = rgb_to_bgr(50, 205, 50)
+
+    RED_NAME = rgb_to_bgr(220, 20, 60)
+    RED_CIRCLE = rgb_to_bgr(255, 0, 0)
+
     all_matches = get_dict_all_matches(path_to_image=path_to_image)
 
     good_matches, bad_matches = filter_matches(all_matches)
@@ -149,16 +166,10 @@ def draw_matches(path_to_image: str):
     # drawing good matches on image
     img = cv2.imread(path_to_image)
     for match in good_matches:
-        match_pos = match['positions']
-        x, y, w, h = match_pos['x'], match_pos['y'], match_pos['w'], match_pos['h']
-        name = match['name']
-        cv2.putText(img, name, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1, cv2.LINE_AA)
+        draw_match(img, match, GREEN_NAME, GREEN_CIRCLE)
 
     for match in bad_matches:
-        match_pos = match['positions']
-        x, y, w, h = match_pos['x'], match_pos['y'], match_pos['w'], match_pos['h']
-        name = match['name']
-        cv2.putText(img, name, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1, cv2.LINE_AA)
+        draw_match(img, match, RED_NAME, RED_CIRCLE)
 
     cv2.imshow("a", img)
     cv2.waitKey(0)

@@ -4,6 +4,7 @@ import numpy as np
 
 VARIABLES = json.load(open(r'C:\Users\cosmi\Desktop\BottleCaps\Scripts\blobs_variables.json'))
 
+
 def reduce_colors_images(image, number_of_levels):
     image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
     pixels = image.reshape((-1, 3)).astype(np.float32)

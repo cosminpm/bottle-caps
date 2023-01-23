@@ -25,8 +25,8 @@ def hough_transform_circle(img: np.ndarray, max_radius: int) -> (np.ndarray, int
 
     circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 20,
                                param1=50, param2=18,
-                               minRadius=int(max_radius * VARIABLES['multiplier_left_max_radious']),
-                               maxRadius=int(max_radius * VARIABLES['multiplier_right_max_radious']))
+                               minRadius=int(max_radius * VARIABLES['multiplier_left_max_radius']),
+                               maxRadius=int(max_radius * VARIABLES['multiplier_right_max_radius']))
     circles = np.uint16(np.around(circles))
 
     circles = combine_overlapping_circles(circles)

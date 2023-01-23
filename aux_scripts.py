@@ -5,7 +5,7 @@ import pickle
 import cv2
 import numpy as np
 
-from Classes_Deprecated.KPsDcps import SIFTApplied
+from Scripts.KPsDcps import SIFTApplied
 from Scripts.blobs import get_avg_size_all_blobs
 from Scripts.HTC import hough_transform_circle
 
@@ -48,6 +48,10 @@ def get_mid_point(p1: tuple[int], p2: tuple[int]) -> tuple[int, int]:
 
 def rgb_to_bgr(rgb: tuple[int, int, int]) -> tuple[int, int, int]:
     return tuple((rgb[2], rgb[1], rgb[0]))
+
+
+def rgb_to_bgr(r: int, g: int, b: int) -> tuple[int, int, int]:
+    return tuple((b, g, r))
 
 
 def get_name_from_path(path: str) -> str:
