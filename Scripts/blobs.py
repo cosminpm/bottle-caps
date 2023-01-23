@@ -57,9 +57,9 @@ def get_avg_size_all_blobs(img: np.ndarray):
 def get_avg_size_blobs(kps: list[cv2.KeyPoint]):
     kps_size = [int(kp.size) for kp in kps]
     lst = sorted(kps_size)
-    result = 0
     if len(lst) % 2 == 1:
         # List has an odd number of elements
+
         result = int(lst[len(lst) // 2])
     else:
         # List has an even number of elements
