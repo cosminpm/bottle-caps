@@ -12,7 +12,7 @@ MY_CAPS_IMGS_FOLDER = r"C:\Users\cosmi\Desktop\BottleCaps\caps_db"
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
 MAX_MATCHES = 100
-MIN_MATCH_NUMBER = 13
+MIN_MATCH_NUMBER = 20
 
 
 def get_rectangles(circles: list[int, int, int]):
@@ -27,15 +27,14 @@ def get_rectangles(circles: list[int, int, int]):
 
 
 # Return the json file with that is the best match for that file
-def get_best_match(dcp_rectangle):
+def get_best_match(dcp_rectangle) -> dict or None:
     matches = compare_all_dcps(dcp_rectangle)
-    greater = 0
-    cap_file = ""
+    cap_file = {'percentage': 0,
+                'path_file': None}
     for match in matches:
-        if len(match[0]) > greater:
-            greater = len(match[0])
-            cap_file = match[1]
-
+        if len(match[0]) > cap_file['percentage']:
+            cap_file['percentage'] = len(match[0])
+            cap_file['path_file'] = match[1]
     return cap_file
 
 
@@ -57,7 +56,9 @@ def get_name_from_json(path):
     with open(path, "r") as file:
         data = json.load(file)
         name = data["name"]
+        name = name.split('.')[-2][:-4]
     return name
+
 
 def get_kps_and_dcps_from_json(path):
     with open(path, "r") as file:
@@ -99,8 +100,7 @@ def compare_dcps(cap_dcp, photo_dcp):
     return matches
 
 
-def main():
-    path_to_image = r"..\photo_images\9.jpg"
+def get_dict_all_matches(path_to_image: str) -> list[dict]:
     img = cv2.imread(path_to_image)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -112,17 +112,44 @@ def main():
     # Crop the images from the rectangles
     cropped_images = cropp_image_into_rectangles(img, rectangles)
 
-    for rectangle_image, pos_rectangle in cropped_images:
-        x, y, w, h = pos_rectangle[0], pos_rectangle[1], pos_rectangle[2], pos_rectangle[3]
+    # Final dictionary which will contain all the positions and info from the cap
+    caps_matches = []
 
+    for rectangle_image, pos_rectangle in cropped_images:
         _, dcp_rectangle = get_dcp_and_kps(rectangle_image)
         best_match_json = get_best_match(dcp_rectangle)
-        if best_match_json:
-            name = get_name_from_json(best_match_json)
-            cv2.putText(img, name, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 255, 255), 1, cv2.LINE_AA)
+        # Add entry to json
+        if best_match_json['percentage'] > 0:
+            best_match_json['positions'] = {"x": pos_rectangle[0],
+                                            "y": pos_rectangle[1],
+                                            "w": pos_rectangle[2],
+                                            "h": pos_rectangle[3]}
+            best_match_json['name'] = get_name_from_json(best_match_json['path_file'])
+            caps_matches.append(best_match_json)
+
+    return caps_matches
+
+
+def draw_matches(path_to_image: str):
+    all_matches = get_dict_all_matches(path_to_image=path_to_image)
+    for match in all_matches:
+        print(match)
+
+    # drawing matches on image
+    img = cv2.imread(path_to_image)
+    for match in all_matches:
+        match_pos = match['positions']
+        x, y, w, h = match_pos['x'], match_pos['y'], match_pos['w'], match_pos['h']
+        name = match['name']
+        cv2.putText(img, name, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1, cv2.LINE_AA)
 
     cv2.imshow("a", img)
     cv2.waitKey(0)
+
+
+def main():
+    path_to_image = r"..\photo_images\9.jpg"
+    draw_matches(path_to_image=path_to_image)
 
 
 if __name__ == '__main__':
