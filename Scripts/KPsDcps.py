@@ -4,7 +4,6 @@ MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
 MAX_MATCHES = 100
 
-
 class SIFTApplied:
     def __init__(self, img):
         # Detect sift keypoints and descriptors for an img of a bottle cap

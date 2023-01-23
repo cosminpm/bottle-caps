@@ -130,23 +130,31 @@ def get_dict_all_matches(path_to_image: str) -> list[dict]:
     return caps_matches
 
 
-def filter_matches(all_caps_matches:list[dict]) -> list[dict]:
-    result = []
+def filter_matches(all_caps_matches: list[dict]) -> (list[dict], list[dict]):
+    good_matches = []
+    bad_matches = []
     for match in all_caps_matches:
         if match['percentage'] > MIN_MATCH_NUMBER:
-            result.append(match)
-    return result
+            good_matches.append(match)
+        else:
+            bad_matches.append(match)
+    return good_matches, bad_matches
 
 
 def draw_matches(path_to_image: str):
     all_matches = get_dict_all_matches(path_to_image=path_to_image)
-    good_matches = filter_matches(all_matches)
-    for match in good_matches:
-        print(match)
 
-    # drawing matches on image
+    good_matches, bad_matches = filter_matches(all_matches)
+
+    # drawing good matches on image
     img = cv2.imread(path_to_image)
     for match in good_matches:
+        match_pos = match['positions']
+        x, y, w, h = match_pos['x'], match_pos['y'], match_pos['w'], match_pos['h']
+        name = match['name']
+        cv2.putText(img, name, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1, cv2.LINE_AA)
+
+    for match in bad_matches:
         match_pos = match['positions']
         x, y, w, h = match_pos['x'], match_pos['y'], match_pos['w'], match_pos['h']
         name = match['name']
