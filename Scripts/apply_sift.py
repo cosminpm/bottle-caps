@@ -12,7 +12,7 @@ MY_CAPS_IMGS_FOLDER = r"C:\Users\cosmi\Desktop\BottleCaps\caps_db"
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
 MAX_MATCHES = 100
-MIN_MATCH_NUMBER = 20
+SUCCESS_MIN = 0.65
 
 
 def get_rectangles(circles: list[int, int, int]):
@@ -29,12 +29,16 @@ def get_rectangles(circles: list[int, int, int]):
 # Return the json file with that is the best match for that file
 def get_best_match(dcp_rectangle) -> dict or None:
     matches = compare_all_dcps(dcp_rectangle)
-    cap_file = {'percentage': 0,
+    cap_file = {'num_matches': 0,
                 'path_file': None}
     for match in matches:
-        if len(match[0]) > cap_file['percentage']:
-            cap_file['percentage'] = len(match[0])
+        if len(match[0]) > cap_file['num_matches']:
+            cap_file['num_matches'] = len(match[0])
             cap_file['path_file'] = match[1]
+            cap_file['len_cap_dcp'] = match[2]
+            cap_file['len_rectangle_dcp'] = match[3]
+            # Important, here is how we define the success rate
+            cap_file['success'] = cap_file['num_matches'] / cap_file['len_rectangle_dcp']
     return cap_file
 
 
@@ -46,7 +50,8 @@ def compare_all_dcps(dcp_rectangle):
         cap_str = os.path.join(MY_CAPS_IMGS_FOLDER, name_img)
         kps_cap, dcps_cap = get_kps_and_dcps_from_json(cap_str)
 
-        match = (compare_dcps(dcps_cap, dcp_rectangle), cap_str)
+        # A match is a tuple which contains the matches, the path of the cap, the len of the photo cap and the len fo descriptors of the rectangle
+        match = (compare_dcps(dcps_cap, dcp_rectangle), cap_str, len(dcps_cap), len(dcp_rectangle))
         matches.append(match)
     return matches
 
@@ -134,7 +139,8 @@ def filter_matches(all_caps_matches: list[dict]) -> (list[dict], list[dict]):
     good_matches = []
     bad_matches = []
     for match in all_caps_matches:
-        if match['percentage'] > MIN_MATCH_NUMBER:
+        print(match['success'])
+        if match['success'] > SUCCESS_MIN:
             good_matches.append(match)
         else:
             bad_matches.append(match)
@@ -146,9 +152,9 @@ def draw_match(img, match, color_name, color_circle):
     x, y, w, h = match_pos['x'], match_pos['y'], match_pos['w'], match_pos['h']
     center = (x + int(w / 2), y + int(h / 2))
     radius = int(w / 2)
-    name = match['name'] + " " + str(match['percentage'])
+    name = match['name'] + " " + "{:.2f}".format(match['success'])
     cv2.circle(img, center, radius, color_circle, 4)
-    img = cv2.rectangle(img, (x, int(y + h / 2) - 10), (x + w + 20, int(y + h / 2) + 3), (0, 0, 0), -1)
+    img = cv2.rectangle(img, (x, int(y + h / 2) - 10), (x + w + 25, int(y + h / 2) + 3), (0, 0, 0), -1)
 
     cv2.putText(img, name.upper(), (x, int(y + h / 2)), cv2.FONT_HERSHEY_SIMPLEX, 1 * 0.33, color_name, 1,
                 cv2.LINE_AA)
