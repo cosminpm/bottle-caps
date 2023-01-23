@@ -146,17 +146,20 @@ def draw_match(img, match, color_name, color_circle):
     x, y, w, h = match_pos['x'], match_pos['y'], match_pos['w'], match_pos['h']
     center = (x + int(w / 2), y + int(h / 2))
     radius = int(w / 2)
-    name = match['name']
+    name = match['name'] + " " + str(match['percentage'])
     cv2.circle(img, center, radius, color_circle, 4)
-    cv2.putText(img, name, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color_name, 1, cv2.LINE_AA)
+    img = cv2.rectangle(img, (x, int(y + h / 2) - 10), (x + w + 20, int(y + h / 2) + 3), (0, 0, 0), -1)
+
+    cv2.putText(img, name.upper(), (x, int(y + h / 2)), cv2.FONT_HERSHEY_SIMPLEX, 1 * 0.33, color_name, 1,
+                cv2.LINE_AA)
+
     return img
 
 
 def draw_matches(path_to_image: str):
-    GREEN_NAME = rgb_to_bgr(124, 252, 0)
+    COLOR_NAME = rgb_to_bgr(255, 255, 0)
     GREEN_CIRCLE = rgb_to_bgr(50, 205, 50)
 
-    RED_NAME = rgb_to_bgr(220, 20, 60)
     RED_CIRCLE = rgb_to_bgr(255, 0, 0)
 
     all_matches = get_dict_all_matches(path_to_image=path_to_image)
@@ -166,10 +169,10 @@ def draw_matches(path_to_image: str):
     # drawing good matches on image
     img = cv2.imread(path_to_image)
     for match in good_matches:
-        draw_match(img, match, GREEN_NAME, GREEN_CIRCLE)
+        draw_match(img, match, COLOR_NAME, GREEN_CIRCLE)
 
     for match in bad_matches:
-        draw_match(img, match, RED_NAME, RED_CIRCLE)
+        draw_match(img, match, COLOR_NAME, RED_CIRCLE)
 
     cv2.imshow("a", img)
     cv2.waitKey(0)
