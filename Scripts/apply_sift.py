@@ -26,19 +26,30 @@ def get_rectangles(circles: list[int, int, int]):
     return rectangles
 
 
+def calculate_success(new):
+    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.5
+    second_param =  (new['num_matches'] / new['len_cap_dcp']) * 0.5
+    return first_param + second_param
+
+
 # Return the json file with that is the best match for that file
 def get_best_match(dcp_rectangle) -> dict or None:
     matches = compare_all_dcps(dcp_rectangle)
     cap_file = {'num_matches': 0,
-                'path_file': None}
+                'path_file': None,
+                'success': 0}
+
     for match in matches:
-        if len(match[0]) > cap_file['num_matches']:
-            cap_file['num_matches'] = len(match[0])
-            cap_file['path_file'] = match[1]
-            cap_file['len_cap_dcp'] = match[2]
-            cap_file['len_rectangle_dcp'] = match[3]
-            # Important, here is how we define the success rate
-            cap_file['success'] = cap_file['num_matches'] / cap_file['len_rectangle_dcp']
+        new = {'num_matches': len(match[0]),
+               'path_file': match[1],
+               'len_cap_dcp': match[2],
+               'len_rectangle_dcp': match[3]}
+        # Important, here is how we define the success rate
+        new['success'] = calculate_success(new)
+
+        if new['success'] > cap_file['success']:
+            cap_file = new
+    print(cap_file)
     return cap_file
 
 
@@ -60,7 +71,7 @@ def get_name_from_json(path):
     with open(path, "r") as file:
         data = json.load(file)
         name = data["name"]
-        name = name.split('.')[-2]#[:-4]
+        name = name.split('.')[-2]  # [:-4]
     return name
 
 
@@ -143,7 +154,6 @@ def get_dict_all_matches(path_to_image: str) -> list[dict]:
         caps_matches = []
 
         for rectangle_image, pos_rectangle in cropped_images:
-
             _, dcp_rectangle = get_dcp_and_kps(rectangle_image)
 
             # Get the best possible match for each cap
