@@ -3,7 +3,7 @@ import json
 import cv2
 import numpy as np
 
-VARIABLES = json.load(open(r'C:\Users\cosmi\Desktop\BottleCaps\Scripts\HTC_variables.json'))
+VARIABLES = json.load(open(r'./HTC_variables.json'))
 
 
 def combine_overlapping_circles(circles):
