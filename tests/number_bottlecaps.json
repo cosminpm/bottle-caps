@@ -1,15 +1,5 @@
 [
   {
-    "name": "1.jpg",
-    "nCaps": 5,
-    "analyze": 0
-  },
-  {
-    "name": "2.jpg",
-    "nCaps": 5,
-    "analyze": 0
-  },
-  {
     "name": "3.jpg",
     "nCaps": 5,
     "analyze": 0
@@ -17,7 +7,7 @@
   {
     "name": "./photo_images/4.jpg",
     "nCaps": 8,
-    "analyze": 0
+    "analyze": 1
   },
   {
     "name": "5.jpg",

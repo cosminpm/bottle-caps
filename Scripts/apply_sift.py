@@ -6,9 +6,9 @@ import numpy as np
 
 from Scripts.HTC import hough_transform_circle
 from Scripts.blobs import get_avg_size_all_blobs
-from aux_scripts import read_img, rgb_to_bgr, resize_image
+from aux_scripts import rgb_to_bgr, resize_image
 
-MY_CAPS_IMGS_FOLDER = r"C:\Users\cosmi\Desktop\BottleCaps\caps_db"
+MY_CAPS_IMGS_FOLDER = r"../caps_db"
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
 MAX_MATCHES = 100
