@@ -77,12 +77,18 @@ def get_kps_and_dcps_from_json(path):
 def cropp_image_into_rectangles(photo_image: np.ndarray, rectangles: list):
     cropped_images = []
     for x, y, w, h in rectangles:
+        # Sometimes we have to garantee that rectangle size is greater than 0
+        if y < 0:
+            y = 0
+        if x < 0:
+            x = 0
         cropped_image = photo_image[y:y + h, x:x + w]
-        cropped_images.append((cropped_image, (x, y, w, h)))
+        if len(cropped_image) > 0:
+            cropped_images.append((cropped_image, (x, y, w, h)))
     return cropped_images
 
 
-def get_dcp_and_kps(img: np.ndarray):
+def get_dcp_and_kps(img):
     return SIFT.detectAndCompute(img, None)
 
 
@@ -137,6 +143,7 @@ def get_dict_all_matches(path_to_image: str) -> list[dict]:
         caps_matches = []
 
         for rectangle_image, pos_rectangle in cropped_images:
+
             _, dcp_rectangle = get_dcp_and_kps(rectangle_image)
 
             # Get the best possible match for each cap
@@ -184,7 +191,7 @@ def draw_matches(path_to_image: str):
     # Get matches
     all_matches = get_dict_all_matches(path_to_image=path_to_image)
     if len(all_matches) == 0:
-        print("ERROR: NO CAPS FOUND")
+        print("No caps found in : {}".format(path_to_image))
     good_matches, bad_matches = filter_matches(all_matches)
 
     # drawing good matches on image
@@ -200,17 +207,16 @@ def draw_matches(path_to_image: str):
 
 
 def apply_to_all_images():
-    entries = os.listdir('..\photo_images')
+    entries = os.listdir('../photo_images')
     for entry in entries:
         try:
             path_to_image = os.path.join(r"..\photo_images", entry)
             draw_matches(path_to_image=path_to_image)
-        except Exception:
-            print("Hay un error con {}".format(entry))
+        except Exception as e:
+            print("There is an error with {} being the Exception:{} ".format(entry, e))
 
 
 def main():
-    # TODO: Improve this. fix error
     apply_to_all_images()
 
 
