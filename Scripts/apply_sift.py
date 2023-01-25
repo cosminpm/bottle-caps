@@ -8,7 +8,7 @@ from Scripts.HTC import hough_transform_circle
 from Scripts.blobs import get_avg_size_all_blobs
 from aux_scripts import rgb_to_bgr, resize_image
 
-MY_CAPS_IMGS_FOLDER = r"../caps_db"
+MY_CAPS_IMGS_FOLDER = r"../caps_db-s3"
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
 MAX_MATCHES = 100
@@ -60,7 +60,7 @@ def get_name_from_json(path):
     with open(path, "r") as file:
         data = json.load(file)
         name = data["name"]
-        name = name.split('.')[-2][:-4]
+        name = name.split('.')[-2]#[:-4]
     return name
 
 
