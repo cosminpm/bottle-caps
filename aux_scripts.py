@@ -5,13 +5,12 @@ import pickle
 import cv2
 import numpy as np
 
-from Scripts.KPsDcps import SIFTApplied
 from Scripts.blobs import get_avg_size_all_blobs
 from Scripts.HTC import hough_transform_circle
 
 DEBUG_BLOB = False
-MY_CAPS_IMGS_FOLDER = r"resized_caps_imgs"
-DATABASE_FODLER = r"caps_db"
+MY_CAPS_IMGS_FOLDER = r"caps-s3"
+DATABASE_FODLER = r"caps_db-s3"
 
 
 def find_dominant_color(img: np.ndarray) -> tuple[int, int, int]:
@@ -85,13 +84,6 @@ def resize_all_images(path, output, size):
         resize_img_pix_with_name(path + file, output, size)
 
 
-def get_kps_path(path):
-    files = os.listdir(path)
-    for file in files:
-        img = read_img(path + file)
-        print("File {} with {} kps".format(file, len(SIFTApplied(img).kps)))
-
-
 def get_number_of_caps_in_image(path_to_image: str):
     img = cv2.imread(path_to_image, 0)
     _, avg_size = get_avg_size_all_blobs(img.copy())
@@ -106,9 +98,12 @@ def crate_db_for_cap(cap_name, folder: str):
     cap_img = cv2.cvtColor(cap_img, cv2.COLOR_BGR2GRAY)
 
     sift = cv2.SIFT_create()
+
     kps, dcps = sift.detectAndCompute(cap_img, None)
+    dcps = np.argsort(dcps, axis=0)[::-1][:100]
 
     keypoints_list = [[kp.pt[0], kp.pt[1], kp.size, kp.angle, kp.response, kp.octave, kp.class_id] for kp in kps]
+
     dcps = dcps.tolist()
 
     entry = {

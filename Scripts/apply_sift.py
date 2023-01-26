@@ -27,9 +27,9 @@ def get_rectangles(circles: list[int, int, int]):
 
 
 def calculate_success(new):
-    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.5
-    second_param =  (new['num_matches'] / new['len_cap_dcp']) * 0.5
-    return first_param + second_param
+    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.15
+    second_param =  (new['num_matches'] /new['len_cap_dcp']) * 0.85
+    return   first_param + second_param
 
 
 # Return the json file with that is the best match for that file
@@ -101,13 +101,6 @@ def cropp_image_into_rectangles(photo_image: np.ndarray, rectangles: list):
 
 def get_dcp_and_kps(img):
     return SIFT.detectAndCompute(img, None)
-
-
-def compare_two_images(photo: np.ndarray, cap: np.ndarray):
-    cap_kps, cap_dcp = get_dcp_and_kps(cap)
-    photo_kps, photo_dcp = get_dcp_and_kps(photo)
-    matches = compare_dcps(cap_dcp, photo_dcp)
-    return matches
 
 
 def compare_dcps(cap_dcp, photo_dcp):
@@ -217,10 +210,10 @@ def draw_matches(path_to_image: str):
 
 
 def apply_to_all_images():
-    entries = os.listdir('../photo_images')
+    entries = os.listdir('../photo_images_2')
     for entry in entries:
         try:
-            path_to_image = os.path.join(r"..\photo_images", entry)
+            path_to_image = os.path.join(r"..\photo_images_2", entry)
             draw_matches(path_to_image=path_to_image)
         except Exception as e:
             print("There is an error with {} being the Exception:{} ".format(entry, e))
