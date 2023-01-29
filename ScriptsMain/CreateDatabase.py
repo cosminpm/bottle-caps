@@ -3,6 +3,8 @@ import os
 
 import cv2
 import numpy as np
+from pathlib import Path
+
 
 DEBUG_BLOB = False
 MY_CAPS_IMGS_FOLDER = r"caps-s3"
@@ -70,14 +72,18 @@ def crate_db_for_cap(cap_name, folder: str):
     }
     cap_name = cap_name.split(".")[0]
     cap_result = os.path.join(DATABASE_FODLER, cap_name)
-    with open(cap_result + ".json", "w") as outfile:
+
+    with open('../' + cap_result + ".json", "w") as outfile:
         json.dump(entry, outfile)
 
 
 def create_json_for_all_caps():
-    entries = os.listdir(MY_CAPS_IMGS_FOLDER)
+    path = Path(os.getcwd())
+    path_caps = os.path.join(path.parent.absolute(), MY_CAPS_IMGS_FOLDER)
+
+    entries = os.listdir(path_caps)
     for name_img in entries:
-        crate_db_for_cap(name_img, MY_CAPS_IMGS_FOLDER)
+        crate_db_for_cap(name_img, path_caps)
 
 
 if __name__ == '__main__':
