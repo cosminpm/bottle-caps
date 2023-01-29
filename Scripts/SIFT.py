@@ -50,7 +50,6 @@ def get_best_match(dcp_rectangle) -> dict or None:
         # Important, here is how we define the success rate
 
         new['success'] = calculate_success(new)
-        print(new)
         if new['success'] > cap_file['success']:
             cap_file = new
     return cap_file
