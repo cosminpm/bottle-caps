@@ -11,6 +11,8 @@ DEBUG_BLOB = False
 MY_CAPS_IMGS_FOLDER = r"caps-s3"
 DATABASE_FODLER = r"caps_db-s3"
 
+# MY_CAPS_IMGS_FOLDER = r"resized_caps_imgs"
+# DATABASE_FODLER = r"caps_db"
 
 def find_dominant_color(img: np.ndarray) -> tuple[int, int, int]:
     colors = {}
@@ -102,7 +104,7 @@ def crate_db_for_cap(cap_name, folder: str):
 
     keypoints_list = [[kp.pt[0], kp.pt[1], kp.size, kp.angle, kp.response, kp.octave, kp.class_id] for kp in kps]
 
-    dcps = dcps.tolist()
+    dcps = dcps.tolist()[:200]
 
     entry = {
         "name": cap_name,
