@@ -1,0 +1,5 @@
+{
+  "MY_CAPS_IMGS_FOLDER": "../caps_db-s3",
+  "MAX_MATCHES": 100,
+  "SUCCESS_MIN": 0.65
+}

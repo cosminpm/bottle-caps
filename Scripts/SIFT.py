@@ -8,11 +8,9 @@ from Scripts.HTC import hough_transform_circle
 from Scripts.blobs import get_avg_size_all_blobs
 from aux_scripts import rgb_to_bgr, resize_image
 
-MY_CAPS_IMGS_FOLDER = r"../caps_db-s3"
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
-MAX_MATCHES = 100
-SUCCESS_MIN = 0.65
+VARIABLES = json.load(open(r'./SIFT_variable.json'))
 
 
 def get_rectangles(circles: list[int, int, int]):
@@ -49,16 +47,15 @@ def get_best_match(dcp_rectangle) -> dict or None:
 
         if new['success'] > cap_file['success']:
             cap_file = new
-    print(cap_file)
     return cap_file
 
 
 # Returns a list of (matches, path_to_json) from the dbs that compared with the file
 def compare_all_dcps(dcp_rectangle):
-    entries = os.listdir(MY_CAPS_IMGS_FOLDER)
+    entries = os.listdir(VARIABLES['MY_CAPS_IMGS_FOLDER'])
     matches = []
     for name_img in entries:
-        cap_str = os.path.join(MY_CAPS_IMGS_FOLDER, name_img)
+        cap_str = os.path.join(VARIABLES['MY_CAPS_IMGS_FOLDER'], name_img)
         kps_cap, dcps_cap = get_kps_and_dcps_from_json(cap_str)
 
         # A match is a tuple which contains the matches, the path of the cap, the len of the photo cap and the len fo descriptors of the rectangle
@@ -110,7 +107,7 @@ def compare_dcps(cap_dcp, photo_dcp):
         else:
             cap_dcp = np.array(cap_dcp, dtype=np.float32)
     matches = MATCHER.match(cap_dcp, photo_dcp)
-    matches = sorted(matches, key=lambda x: x.distance)[:MAX_MATCHES]
+    matches = sorted(matches, key=lambda x: x.distance)[:VARIABLES['MAX_MATCHES']]
     return matches
 
 
@@ -165,7 +162,7 @@ def filter_matches(all_caps_matches: list[dict]) -> (list[dict], list[dict]):
     good_matches = []
     bad_matches = []
     for match in all_caps_matches:
-        if match['success'] > SUCCESS_MIN:
+        if match['success'] > VARIABLES['SUCCESS_MIN']:
             good_matches.append(match)
         else:
             bad_matches.append(match)
