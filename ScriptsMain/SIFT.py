@@ -4,9 +4,9 @@ import os
 import cv2
 import numpy as np
 
-from Scripts.HTC import hough_transform_circle
-from Scripts.blobs import get_avg_size_all_blobs
-from aux_scripts import rgb_to_bgr, resize_image
+from ScriptsMain.HTC import hough_transform_circle
+from ScriptsMain.blobs import get_avg_size_all_blobs
+from CreateDatabase import rgb_to_bgr, resize_image
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
@@ -213,9 +213,9 @@ def draw_matches(path_to_image: str):
 
 
 def apply_to_all_images():
-    entries = os.listdir('../photo_images_2')
+    entries = os.listdir('../photo_images__shorter')
     for entry in entries:
-        path_to_image = os.path.join(r"../photo_images_2", entry)
+        path_to_image = os.path.join(r"../photo_images__shorter", entry)
         draw_matches(path_to_image=path_to_image)
 
         # print("There is an error with {} being the Exception:{} ".format(entry, e))
