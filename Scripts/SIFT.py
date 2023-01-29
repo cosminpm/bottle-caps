@@ -29,9 +29,10 @@ def get_rectangles(circles: list[int, int, int]):
 
 
 def calculate_success(new):
-    first_param = (new['num_matches'] / new['len_rectangle_dcp'])  # * 0.15
-    # second_param = (new['num_matches'] / new['len_cap_dcp']) * 0.85
-    result = first_param  # + second_param
+    print(new)
+    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.25
+    second_param = (new['num_matches'] / new['len_cap_dcp']) * 0.75
+    result = first_param + second_param
     return result
 
 
@@ -217,7 +218,7 @@ def apply_to_all_images():
         path_to_image = os.path.join(r"../photo_images_2", entry)
         draw_matches(path_to_image=path_to_image)
 
-        #print("There is an error with {} being the Exception:{} ".format(entry, e))
+        # print("There is an error with {} being the Exception:{} ".format(entry, e))
 
 
 def main():
