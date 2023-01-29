@@ -1,9 +1,12 @@
 import json
-
+import os
 import cv2
 import numpy as np
 
-VARIABLES = json.load(open(r'./HTC_variables.json'))
+script_path = os.path.abspath(__file__)
+script_dir = os.path.dirname(script_path)
+file_path = os.path.join(script_dir, 'HTC_variables.json')
+VARIABLES = json.load(open(file_path))
 
 
 def combine_overlapping_circles(circles):

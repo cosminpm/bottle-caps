@@ -99,7 +99,6 @@ def crate_db_for_cap(cap_name, folder: str):
     sift = cv2.SIFT_create()
 
     kps, dcps = sift.detectAndCompute(cap_img, None)
-    dcps = np.argsort(dcps, axis=0)[::-1][:100]
 
     keypoints_list = [[kp.pt[0], kp.pt[1], kp.size, kp.angle, kp.response, kp.octave, kp.class_id] for kp in kps]
 

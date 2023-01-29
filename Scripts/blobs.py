@@ -1,8 +1,13 @@
 import json
 import cv2
 import numpy as np
+import os
 
-VARIABLES = json.load(open(r'./blobs_variables.json'))
+script_path = os.path.abspath(__file__)
+script_dir = os.path.dirname(script_path)
+file_path = os.path.join(script_dir, 'blobs_variables.json')
+
+VARIABLES = json.load(open(file_path))
 
 
 def reduce_colors_images(image, number_of_levels):

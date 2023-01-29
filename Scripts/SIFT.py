@@ -10,7 +10,11 @@ from aux_scripts import rgb_to_bgr, resize_image
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
-VARIABLES = json.load(open(r'./SIFT_variable.json'))
+
+script_path = os.path.abspath(__file__)
+script_dir = os.path.dirname(script_path)
+file_path = os.path.join(script_dir, 'SIFT_variable.json')
+VARIABLES = json.load(open(file_path))
 
 
 def get_rectangles(circles: list[int, int, int]):
@@ -25,9 +29,10 @@ def get_rectangles(circles: list[int, int, int]):
 
 
 def calculate_success(new):
-    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.15
-    second_param =  (new['num_matches'] /new['len_cap_dcp']) * 0.85
-    return   first_param + second_param
+    first_param = (new['num_matches'] / new['len_rectangle_dcp'])  # * 0.15
+    # second_param = (new['num_matches'] / new['len_cap_dcp']) * 0.85
+    result = first_param  # + second_param
+    return result
 
 
 # Return the json file with that is the best match for that file
@@ -209,11 +214,10 @@ def draw_matches(path_to_image: str):
 def apply_to_all_images():
     entries = os.listdir('../photo_images_2')
     for entry in entries:
-        try:
-            path_to_image = os.path.join(r"..\photo_images_2", entry)
-            draw_matches(path_to_image=path_to_image)
-        except Exception as e:
-            print("There is an error with {} being the Exception:{} ".format(entry, e))
+        path_to_image = os.path.join(r"../photo_images_2", entry)
+        draw_matches(path_to_image=path_to_image)
+
+        #print("There is an error with {} being the Exception:{} ".format(entry, e))
 
 
 def main():
