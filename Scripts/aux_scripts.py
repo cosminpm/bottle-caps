@@ -4,9 +4,6 @@ import os
 import cv2
 import numpy as np
 
-from Scripts.blobs import get_avg_size_all_blobs
-from Scripts.HTC import hough_transform_circle
-
 DEBUG_BLOB = False
 MY_CAPS_IMGS_FOLDER = r"caps-s3"
 DATABASE_FODLER = r"caps_db-s3"
@@ -14,10 +11,6 @@ DATABASE_FODLER = r"caps_db-s3"
 
 def read_img(img_path: str) -> np.ndarray:
     return cv2.cvtColor(cv2.imread(img_path), 1)
-
-
-def rgb_to_bgr(rgb: tuple[int, int, int]) -> tuple[int, int, int]:
-    return tuple((rgb[2], rgb[1], rgb[0]))
 
 
 def rgb_to_bgr(r: int, g: int, b: int) -> tuple[int, int, int]:
