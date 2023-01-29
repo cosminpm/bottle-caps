@@ -29,7 +29,6 @@ def get_rectangles(circles: list[int, int, int]):
 
 
 def calculate_success(new):
-    print(new)
     first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.25
     second_param = (new['num_matches'] / new['len_cap_dcp']) * 0.75
     result = first_param + second_param
@@ -209,13 +208,13 @@ def draw_matches(path_to_image: str):
         draw_match(img, match, COLOR_NAME, RED_CIRCLE)
 
     cv2.imshow(path_to_image, img)
-    cv2.waitKey(0)
+    #cv2.waitKey(0)
 
 
 def apply_to_all_images():
-    entries = os.listdir('../photo_images__shorter')
+    entries = os.listdir('../photo_images_larger')
     for entry in entries:
-        path_to_image = os.path.join(r"../photo_images__shorter", entry)
+        path_to_image = os.path.join(r"../photo_images_larger", entry)
         draw_matches(path_to_image=path_to_image)
 
         # print("There is an error with {} being the Exception:{} ".format(entry, e))

@@ -74,6 +74,7 @@ def crate_db_for_cap(cap_name, folder: str):
     cap_result = os.path.join(DATABASE_FODLER, cap_name)
 
     with open('../' + cap_result + ".json", "w") as outfile:
+        print("Writing:{}".format(cap_result))
         json.dump(entry, outfile)
 
 
