@@ -45,5 +45,5 @@ coverage.xml
 # Django stuff:
 *.log
 *.pot
-
+.gitignore
 # Sphinx docum
