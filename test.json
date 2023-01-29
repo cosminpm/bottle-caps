@@ -1,4 +1,0 @@
-[{'num_matches': 11, 'path_file': '../caps_db-s3\\t_cap_blue_200.json', 'len_cap_dcp': 100, 'len_rectangle_dcp': 212, 'success': 0.10128301886792453, 'positions': {'x': 316, 'y': 34, 'w': 220, 'h': 220}, 'name': 't_cap_blue_200'},
-  {'num_matches': 11, 'path_file': '../caps_db-s3\\cap-91.json', 'len_cap_dcp': 100, 'len_rectangle_dcp': 183, 'success': 0.10251639344262295, 'positions': {'x': 362, 'y': 422, 'w': 196, 'h': 196}, 'name': 'cap-91'},
-  {'num_matches': 7, 'path_file': '../caps_db-s3\\cap-56.json', 'len_cap_dcp': 100, 'len_rectangle_dcp': 87, 'success': 0.07156896551724139, 'positions': {'x': 74, 'y': 462, 'w': 232, 'h': 232}, 'name': 'cap-56'},
-  {'num_matches': 14, 'path_file': '../caps_db-s3\\cap-91.json', 'len_cap_dcp': 100, 'len_rectangle_dcp': 333, 'success': 0.12530630630630632, 'positions': {'x': 0, 'y': 156, 'w': 232, 'h': 232}, 'name': 'cap-91'}]
