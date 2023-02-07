@@ -212,9 +212,9 @@ def draw_matches(path_to_image: str):
 
 
 def apply_to_all_images():
-    entries = os.listdir('../photo_images_larger')
+    entries = os.listdir('../database/photo_images_larger')
     for entry in entries:
-        path_to_image = os.path.join(r"../photo_images_larger", entry)
+        path_to_image = os.path.join(r"../database/photo_images_larger", entry)
         draw_matches(path_to_image=path_to_image)
 
 def main():

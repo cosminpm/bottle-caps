@@ -7,8 +7,8 @@ from pathlib import Path
 
 
 DEBUG_BLOB = False
-MY_CAPS_IMGS_FOLDER = r"caps-s3"
-DATABASE_FODLER = r"caps_db-s3"
+MY_CAPS_IMGS_FOLDER = r"./database/caps-s3"
+DATABASE_FODLER = r"./database/caps-s3"
 
 
 def read_img(img_path: str) -> np.ndarray:
