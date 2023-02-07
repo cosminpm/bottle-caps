@@ -208,7 +208,7 @@ def draw_matches(path_to_image: str):
         draw_match(img, match, COLOR_NAME, RED_CIRCLE)
 
     cv2.imshow(path_to_image, img)
-    #cv2.waitKey(0)
+    cv2.waitKey(0)
 
 
 def apply_to_all_images():
@@ -216,9 +216,6 @@ def apply_to_all_images():
     for entry in entries:
         path_to_image = os.path.join(r"../photo_images_larger", entry)
         draw_matches(path_to_image=path_to_image)
-
-        # print("There is an error with {} being the Exception:{} ".format(entry, e))
-
 
 def main():
     apply_to_all_images()
