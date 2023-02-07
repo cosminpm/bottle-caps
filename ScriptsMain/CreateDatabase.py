@@ -7,8 +7,8 @@ from pathlib import Path
 
 
 DEBUG_BLOB = False
-MY_CAPS_IMGS_FOLDER = r"./database/caps-s3"
-DATABASE_FODLER = r"./database/caps-s3"
+MY_CAPS_IMGS_FOLDER = r"database\caps-s3"
+DATABASE_FODLER = r"database\caps_db-s3"
 
 
 def read_img(img_path: str) -> np.ndarray:
@@ -53,6 +53,7 @@ def resize_all_images(path, output, size):
 def crate_db_for_cap(cap_name, folder: str):
     cap_path = os.path.join(folder, cap_name)
 
+    print(cap_path)
     cap_img = cv2.imread(cap_path)
     cap_img = cv2.cvtColor(cap_img, cv2.COLOR_BGR2GRAY)
 
