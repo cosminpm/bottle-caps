@@ -1,31 +1,40 @@
 # BottleCaps
 
-The idea of this app is to have a database with all the caps you have then you take a photo of some caps someone has or a cap you had found on the street, with this you would compare all the caps with this photo and it would tell if you have the cap or not.
+The idea behind this app is to maintain a database of all the bottle caps you have collected, and then take a photo of some caps that you have found or someone else has. The app will then compare the photo with the caps in the database and tell you whether or not you already have that cap. 
 
 ## Summary
-Bottle caps is an script which uses computer vision *(mainly OpenCV)* among other algorithms to detect and match bottle caps from a databse. *Currently only works locally but the plan is to make it work with AWS servers with a lambda function.* It uses the following OpenCV methods: __Simple Blob Detector__, __Hough Transform Circles__ and __Scale-Invariant Feature Transform__. Also a different preprocess on every step of the image is necessary. 
+
+BottleCaps is an application that uses computer vision _(mainly OpenCV)_ and other algorithms to detect and match bottle caps from a database. Currently, it only works locally, but the plan is to make it work with AWS servers using a lambda function. It employs the following OpenCV methods: __Simple Blob Detector__, __Hough Transform Circles__, and __Scale-Invariant Feature Transform__. Preprocessing is required for each step of the image.
 
 ## Flow
 
-Here I am going to explain how the code works, I won't go into the code too much, just explaining the main actions.
+The following is an explanation of how the code works. The actual code will not be described in detail.
 
 ### Creation of the database
 
-### Blobs detection
-My first intution was to use directly hough transform circles, but this didn't work as expected, as it detected multiple false positives as the program didn't know the size of the circles. As more than one cap can be in the photo, the radius of the circle may be different. This is the reason why I first apply __Simple Blob detector__. But first I reduce the color of the photo to 3 levels __(it is suggested to take the photo above an white paper or caps with high contrast from the background)__. From all the blobls we remove the overlapping ones, as we don't need them and might be multiple detection of the same cap. Then we get the median size for all the blobls.
+The database is created using json, each file of the database has descriptors, keypoints and name among other iformation. The numebr of keypoints and descriptors is limited to a variable.
 
-- __Why median over average?__ Because sometimes there might be a big blob that is a false positive and we are not interested. If we took the average this would increase the radius and won't be the output we wanted. The same issue would be for small false positives. Also all bottle caps have the same diameter __37 mm__.
+### Blobs detection
+
+Initially, I attempted to use Hough Transform Circles directly, but it resulted in multiple false positives because the program could not determine the size of the circles. As multiple caps could be present in a photo, the radius of the circles could differ. To overcome this, I applied Simple Blob Detector first. Before this, I reduced the color of the photo to 3 levels (it is suggested to take the photo on a white background or against caps with high contrast from the background). Overlapping blobs were removed as they were not needed and could be multiple detections of the same cap. The median size of all blobs was then determined.
+
+- Why median over average? Sometimes a large blob might be a false positive and not relevant. If the average was used, this would increase the radius and produce incorrect results. The same issue would occur for small false positives. All bottle caps have a diameter of 37mm.
 
 ### Hough Transform Circles
-Now we have an approximate radius for gettings the caps. We use this as an approximator and we take a low boud and an upper bound from this radius. Also a preprocess is applied here. Then Hough Transform Circles is applied and we have the positions of all circles.
+
+Using the approximate radius determined from the blobs, a lower and upper bound was established. Preprocessing was then applied before Hough Transform Circles was used to determine the positions of all circles.
 
 ### Scale-Invariant Feature Transform
 
-Now we have the positions of the circles and their radius. With the database and cropping the image, we compare each image with an entry of the database. We apply our comparison method and we decide if it is a match or not, we keep the best match.
+With the positions of the circles and their radii determined, the image was cropped and each crop was compared to an entry in the database using a comparison method. The best match was kept if it was a match or not.
 
-__TO DO: This tasks are currently under development or we have a plan for this__
-- Have a tree structure of the database or use clustering for grouping the images, so we don't dont have to compare all the caps from the photo with all the caps from the database. Because this is an $O(n^2)$ algorithm, but if we use trees this would change to $O(nlogn)$, also clustering would be a good option as we would only have $O(nk)$ being $k$ the number of clusters we have.
+## TO DO 
 
-- Improve the decision of a match or not by having the maximum number of keypoints detected in an image. In this way we can decide where to place the threshold. If an image has low quality it would detect less keypoints and it would not make sense to keep the threshold for a big quality image. 
+The following tasks are currently under development or planned for the future:
 
-- Create an app for Android and iOS app. (Currently under development)
+- Implement a tree structure for the database or use clustering to group images, reducing the algorithm from $O(n^2)$ to $O(nlogn)$ using trees or $O(nk)$ using clustering (where $k$ is the number of clusters).
+
+- Improve the match decision by using the maximum number of keypoints detected in an image. This will determine the threshold. If an image has low quality, fewer keypoints will be detected, and it would not make sense to maintain the threshold for a high-quality image.
+
+- Develop an Android and iOS app using Flutter (currently under development).
+- Deploy on AWS using a lambda function.
