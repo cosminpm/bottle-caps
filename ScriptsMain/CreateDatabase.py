@@ -15,8 +15,8 @@ def read_img(img_path: str) -> np.ndarray:
     return cv2.cvtColor(cv2.imread(img_path), 1)
 
 
-def rgb_to_bgr(r: int, g: int, b: int) -> tuple[int, int, int]:
-    return tuple((b, g, r))
+def rgb_to_bgr(img: np.ndarray) -> np.ndarray:
+    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 
 def get_name_from_path(path: str) -> str:
