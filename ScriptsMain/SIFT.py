@@ -18,6 +18,14 @@ VARIABLES = json.load(open(file_path))
 
 
 def get_rectangles(circles: list[int, int, int]):
+    print(circles)
+    """
+    Given
+    :param circles:
+    :type circles:
+    :return:
+    :rtype:
+    """
     rectangles = []
     for x, y, r in circles:
         x1 = x - r
@@ -129,6 +137,11 @@ def preprocess_image_size(img):
 
 
 def get_dict_all_matches(path_to_image: str) -> list[dict]:
+    """
+
+    :param str path_to_image: Path to the image that is going to be analyzed
+    :return: Returns a json with information about the match
+    """
     img = cv2.imread(path_to_image)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -188,7 +201,11 @@ def draw_match(img, match, color_name, color_circle):
     return img
 
 
-def draw_matches(path_to_image: str):
+def draw_matches(path_to_image: str) -> None:
+    """
+    :param str path_to_image:  Path to the image that is going to be analyzed
+    """
+
     COLOR_NAME = rgb_to_bgr(255, 255, 0)
     GREEN_CIRCLE = rgb_to_bgr(50, 205, 50)
     RED_CIRCLE = rgb_to_bgr(255, 0, 0)
@@ -211,14 +228,20 @@ def draw_matches(path_to_image: str):
     cv2.waitKey(0)
 
 
-def apply_to_all_images():
-    entries = os.listdir('../database/photo_images_larger')
+def apply_to_all_images(folder_photos: str) -> None:
+    """
+    Main function, given a folder detect and identify all the caps, only iterates and applies the main method
+    :param str folder_photos: Folder of the photos that are going to be analyzed
+    """
+    entries = os.listdir(folder_photos)
     for entry in entries:
-        path_to_image = os.path.join(r"../database/photo_images_larger", entry)
+        path_to_image = os.path.join(folder_photos, entry)
         draw_matches(path_to_image=path_to_image)
 
+
 def main():
-    apply_to_all_images()
+    folder_photos = '../database/photo_images_larger'
+    apply_to_all_images(folder_photos=folder_photos)
 
 
 if __name__ == '__main__':
