@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Optional
 
 import cv2
 import numpy as np
@@ -36,7 +37,7 @@ def calculate_success(new):
 
 
 # Return the json file with that is the best match for that file
-def get_best_match(dcp_rectangle) -> dict or None:
+def get_best_match(dcp_rectangle) -> Optional[dict]:
     matches = compare_all_dcps(dcp_rectangle)
     cap_file = {'num_matches': 0,
                 'path_file': None,
@@ -64,7 +65,7 @@ def compare_all_dcps(dcp_rectangle):
         kps_cap, dcps_cap = get_kps_and_dcps_from_json(cap_str)
 
         # A match is a tuple which contains the matches, the path of the cap, the len of the photo cap and the len fo descriptors of the rectangle
-        match = (compare_dcps(dcps_cap, dcp_rectangle), cap_str, len(dcps_cap), len(dcp_rectangle))
+        match = (get_matches_after_matcher_sift(dcps_cap, dcp_rectangle), cap_str, len(dcps_cap), len(dcp_rectangle))
         matches.append(match)
     return matches
 
@@ -87,10 +88,10 @@ def get_kps_and_dcps_from_json(path):
     return keypoints, descriptors
 
 
-def cropp_image_into_rectangles(photo_image: np.ndarray, rectangles: list):
+def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list):
     cropped_images = []
     for x, y, w, h in rectangles:
-        # Sometimes we have to garantee that rectangle size is greater than 0
+        # Sometimes we have to guarantee that rectangle size is greater than 0
         if y < 0:
             y = 0
         if x < 0:
@@ -101,22 +102,34 @@ def cropp_image_into_rectangles(photo_image: np.ndarray, rectangles: list):
     return cropped_images
 
 
-def get_dcp_and_kps(img):
+def get_dcp_and_kps(img: np.ndarray):
     return SIFT.detectAndCompute(img, None)
 
 
-def compare_dcps(cap_dcp, photo_dcp):
-    if cap_dcp.dtype != photo_dcp.dtype:
+def get_matches_after_matcher_sift(cap_dcp: np.ndarray, rectangle_image: np.ndarray):
+    """
+    Compare descriptors of the cap image and the rectangle of the cap of the photo image
+
+    :param np.ndarray cap_dcp: descriptors pf the cap image of the database
+    :param np.ndarray rectangle_image: descriptors of the image of the rectangle
+    :return: returns the matches (a list) sorted limited to a max size
+    """
+    if cap_dcp.dtype != rectangle_image.dtype:
         if cap_dcp.dtype == np.float32:
-            photo_dcp = np.array(photo_dcp, dtype=np.float32)
+            rectangle_image = np.array(rectangle_image, dtype=np.float32)
         else:
             cap_dcp = np.array(cap_dcp, dtype=np.float32)
-    matches = MATCHER.match(cap_dcp, photo_dcp)
-    matches = sorted(matches, key=lambda x: x.distance)[:VARIABLES['MAX_MATCHES']]
-    return matches
+    matches = MATCHER.match(cap_dcp, rectangle_image)
+    return sorted(matches, key=lambda x: x.distance)[:VARIABLES['MAX_MATCHES']]
 
 
-def preprocess_image_size(img):
+def preprocess_image_size(img: np.ndarray):
+    """
+    Preprocess the image for SIFT currently it resizes it
+
+    :param np.ndarray img: Original image, preprocess it for SIFT
+    :return: np.ndarray The image preprocessed for SIFT
+    """
     height, width = img.shape[:2]
     size = height * width
     max_size_img = 1000 * 1000
@@ -130,9 +143,10 @@ def preprocess_image_size(img):
 
 def get_dict_all_matches(path_to_image: str) -> list[dict]:
     """
+    This is one of the more important functions for this project, it creates the json for all the matches
 
     :param str path_to_image: Path to the image that is going to be analyzed
-    :return: Returns a json with information about the match
+    :return: Returns a list of json with all the information about the match
     """
     img = cv2.imread(path_to_image)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -148,27 +162,44 @@ def get_dict_all_matches(path_to_image: str) -> list[dict]:
         # Get the positions of the rectangles
         rectangles = get_rectangles(circles)
         # Crop the images from the rectangles
-        cropped_images = cropp_image_into_rectangles(img.copy(), rectangles)
+        cropped_images = crop_image_into_rectangles(img.copy(), rectangles)
 
         # Final dictionary which will contain all the positions and info from the cap
         caps_matches = []
 
         for rectangle_image, pos_rectangle in cropped_images:
-            _, dcp_rectangle = get_dcp_and_kps(rectangle_image)
-
-            # Get the best possible match for each cap
-            best_match_json = get_best_match(dcp_rectangle)
-            # Get the position of the rectangle
-            best_match_json['positions'] = {"x": pos_rectangle[0],
-                                            "y": pos_rectangle[1],
-                                            "w": pos_rectangle[2],
-                                            "h": pos_rectangle[3]}
-            best_match_json['name'] = get_name_from_json(best_match_json['path_file'])
+            best_match_json = create_dict_for_one_match(rectangle_image=rectangle_image, pos_rectangle=pos_rectangle)
             caps_matches.append(best_match_json)
     return caps_matches
 
 
-def filter_matches(all_caps_matches: list[dict]) -> (list[dict], list[dict]):
+def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[int, int, int, int]) -> dict:
+    """
+    Creates the info of the json about one match, it focuses on getting the descriptors and keypoints and then getting the best match for that cap on the photo
+
+    :param np.ndarray rectangle_image: Rectangle of the cap in the photo image
+    :param tuple[int, int, int, int] pos_rectangle: Position of the rectangle in the original photo
+    :return: dictionary with the information of the match, such as the position of the match, the name, success...
+    """
+    _, dcp_rectangle = get_dcp_and_kps(rectangle_image)
+    # Get the best possible match for each cap
+    best_match_json = get_best_match(dcp_rectangle)
+    # Get the position of the rectangle
+    best_match_json['positions'] = {"x": pos_rectangle[0],
+                                    "y": pos_rectangle[1],
+                                    "w": pos_rectangle[2],
+                                    "h": pos_rectangle[3]}
+    best_match_json['name'] = get_name_from_json(best_match_json['path_file'])
+    return best_match_json
+
+
+def filter_if_best_martch_is_good_enough_all_matches(all_caps_matches: list[dict]) -> (list[dict], list[dict]):
+    """
+    Having all the matches, for each mach if their success ratio is enough for considering them a match
+
+    :param list[dict] all_caps_matches: list of all the matches
+    :return: returns the same input but splitting them into two different categories
+    """
     good_matches = []
     bad_matches = []
     for match in all_caps_matches:
@@ -179,7 +210,8 @@ def filter_matches(all_caps_matches: list[dict]) -> (list[dict], list[dict]):
     return good_matches, bad_matches
 
 
-def draw_match(img: np.ndarray, match: dict, color_name: tuple[int], color_circle: tuple[int]) -> np.ndarray:
+def draw_match(img: np.ndarray, match: dict, color_name: tuple[int, int, int],
+               color_circle: tuple[int, int, int]) -> np.ndarray:
     """
     Draws the info of the match, a circle around the cap, the name of the cap and the percentage of success
 
@@ -187,7 +219,7 @@ def draw_match(img: np.ndarray, match: dict, color_name: tuple[int], color_circl
     :param dict match: dictionary which contains info about the match
     :param tuple[int] color_name: color used for drawing the name
     :param tuple[int] color_circle: color used for drawing the circle
-    :return: np.ndarray the match drawed with the circle and the name of the cap, also the percentage of success
+    :return: np.ndarray the match drawn with the circle and the name of the cap, also the percentage of success
     """
     match_pos = match['positions']
     x, y, w, h = match_pos['x'], match_pos['y'], match_pos['w'], match_pos['h']
@@ -214,7 +246,7 @@ def draw_matches(path_to_image: str, all_matches: list[dict]) -> None:
     GREEN_CIRCLE = rgb_to_bgr(50, 205, 50)
     RED_CIRCLE = rgb_to_bgr(255, 0, 0)
 
-    good_matches, bad_matches = filter_matches(all_matches)
+    good_matches, bad_matches = filter_if_best_martch_is_good_enough_all_matches(all_matches)
 
     # drawing good matches on image
     img = cv2.imread(path_to_image)
