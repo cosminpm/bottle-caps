@@ -18,14 +18,6 @@ VARIABLES = json.load(open(file_path))
 
 
 def get_rectangles(circles: list[int, int, int]):
-    print(circles)
-    """
-    Given
-    :param circles:
-    :type circles:
-    :return:
-    :rtype:
-    """
     rectangles = []
     for x, y, r in circles:
         x1 = x - r
@@ -187,7 +179,16 @@ def filter_matches(all_caps_matches: list[dict]) -> (list[dict], list[dict]):
     return good_matches, bad_matches
 
 
-def draw_match(img, match, color_name, color_circle):
+def draw_match(img: np.ndarray, match: dict, color_name: tuple[int], color_circle: tuple[int]) -> np.ndarray:
+    """
+    Draws the info of the match, a circle around the cap, the name of the cap and the percentage of success
+
+    :param np.ndarray img : photo original image
+    :param dict match: dictionary which contains info about the match
+    :param tuple[int] color_name: color used for drawing the name
+    :param tuple[int] color_circle: color used for drawing the circle
+    :return: np.ndarray the match drawed with the circle and the name of the cap, also the percentage of success
+    """
     match_pos = match['positions']
     x, y, w, h = match_pos['x'], match_pos['y'], match_pos['w'], match_pos['h']
     center = (x + int(w / 2), y + int(h / 2))
@@ -201,19 +202,18 @@ def draw_match(img, match, color_name, color_circle):
     return img
 
 
-def draw_matches(path_to_image: str) -> None:
+def draw_matches(path_to_image: str, all_matches: list[dict]) -> None:
     """
-    :param str path_to_image:  Path to the image that is going to be analyzed
+    Iterates over all the matches and draws them on a single image
+
+    :param str path_to_image:  Path of the image that is going to be drawn
+    :param list[dict] all_matches: List of dict that contains the info about the matches
     """
 
     COLOR_NAME = rgb_to_bgr(255, 255, 0)
     GREEN_CIRCLE = rgb_to_bgr(50, 205, 50)
     RED_CIRCLE = rgb_to_bgr(255, 0, 0)
 
-    # Get matches
-    all_matches = get_dict_all_matches(path_to_image=path_to_image)
-    if len(all_matches) == 0:
-        print("No caps found in : {}".format(path_to_image))
     good_matches, bad_matches = filter_matches(all_matches)
 
     # drawing good matches on image
@@ -228,20 +228,25 @@ def draw_matches(path_to_image: str) -> None:
     cv2.waitKey(0)
 
 
-def apply_to_all_images(folder_photos: str) -> None:
+def apply_main_method_to_all_images(folder_photos: str) -> None:
     """
     Main function, given a folder detect and identify all the caps, only iterates and applies the main method
+
     :param str folder_photos: Folder of the photos that are going to be analyzed
     """
     entries = os.listdir(folder_photos)
     for entry in entries:
         path_to_image = os.path.join(folder_photos, entry)
-        draw_matches(path_to_image=path_to_image)
+        all_matches = get_dict_all_matches(path_to_image)
+        if len(all_matches) > 0:
+            draw_matches(path_to_image=path_to_image, all_matches=all_matches)
+        else:
+            print("No caps found in : {}".format(path_to_image))
 
 
 def main():
     folder_photos = '../database/photo_images_larger'
-    apply_to_all_images(folder_photos=folder_photos)
+    apply_main_method_to_all_images(folder_photos=folder_photos)
 
 
 if __name__ == '__main__':
