@@ -38,7 +38,7 @@ def calculate_success(new):
 
 # Return the json file with that is the best match for that file
 def get_best_match(dcp_rectangle) -> Optional[dict]:
-    matches = compare_all_dcps(dcp_rectangle)
+    matches = compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle)
     cap_file = {'num_matches': 0,
                 'path_file': None,
                 'success': 0}
@@ -56,8 +56,15 @@ def get_best_match(dcp_rectangle) -> Optional[dict]:
     return cap_file
 
 
-# Returns a list of (matches, path_to_json) from the dbs that compared with the file
-def compare_all_dcps(dcp_rectangle):
+# TODO: Improve here so the comparison is not with all the images
+def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.ndarray):
+    """
+    Compare the current image with the database and returns a list with the matches,name,and both descriptors
+
+    :param np.ndarray dcp_rectangle: the descritpros of the rectangle
+    :return: Returns all the matches of that image
+    """
+
     entries = os.listdir(VARIABLES['MY_CAPS_IMGS_FOLDER'])
     matches = []
     for name_img in entries:
@@ -71,14 +78,23 @@ def compare_all_dcps(dcp_rectangle):
 
 
 def get_name_from_json(path):
+    """
+
+    :param str path: Path of the image
+    :return: Returns the name of the image based on their name
+    """
     with open(path, "r") as file:
         data = json.load(file)
-        name = data["name"]
-        name = name.split('.')[-2]  # [:-4]
-    return name
+        return data["name"].split('.')[-2]
 
 
-def get_kps_and_dcps_from_json(path):
+def get_kps_and_dcps_from_json(path: str):
+    """
+    Loads the descriptors and keypoints of the json to the correct format
+
+    :param str path: path of the cap and the json
+    :return: returns a tuple which contains the keypoints and descriptors
+    """
     with open(path, "r") as file:
         data = json.load(file)
         keypoints = data["kps"]
@@ -88,7 +104,14 @@ def get_kps_and_dcps_from_json(path):
     return keypoints, descriptors
 
 
-def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list):
+def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list[tuple[int, int, int, int]]):
+    """
+    Crop the image based on the rectangles, if the position is negative put it to zero
+
+    :param np.ndarray photo_image: the original photo
+    :param list[tuple[int, int, int, int]] rectangles: a list of tuples with the x,y and width and height position
+    :return: list[np.ndarray, tuple[int, int, int, int]] Returns a list of list which contains the cropped image and the position on where it was cropped
+    """
     cropped_images = []
     for x, y, w, h in rectangles:
         # Sometimes we have to guarantee that rectangle size is greater than 0
@@ -103,6 +126,13 @@ def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list):
 
 
 def get_dcp_and_kps(img: np.ndarray):
+    """
+    Detect and compute the descriptors and keypoints of the image
+
+    ":param np.ndarray img: The image to get descriptors and keypoints
+    :return: Returns a tuple with descriptors and keypoints
+    """
+    print(type(SIFT.detectAndCompute(img, None)))
     return SIFT.detectAndCompute(img, None)
 
 
