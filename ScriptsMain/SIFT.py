@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Optional
+from typing import Optional, Any
 
 import cv2
 import numpy as np
@@ -18,7 +18,13 @@ file_path = os.path.join(script_dir, 'SIFT_variable.json')
 VARIABLES = json.load(open(file_path))
 
 
-def get_rectangles(circles: list[int, int, int]):
+def get_rectangles(circles: list[tuple[int, int, int]]) -> list[tuple[int, int, int, int]]:
+    """
+    Based on the center of the circle and the ratio, transform it into a rectangle so the image can be cropped
+
+    :param list[ituple[nt,int,int]] circles: A list with tuples of the circles, x,y (center) and radius
+    :return: Returns the list of rectangles transforming into width and height
+    """
     rectangles = []
     for x, y, r in circles:
         x1 = x - r
@@ -29,15 +35,27 @@ def get_rectangles(circles: list[int, int, int]):
     return rectangles
 
 
-def calculate_success(new):
+# TODO: Improve here
+def calculate_success(new: [dict]) -> float:
+    """
+    Calculates how successfull was the cap match based on the descriptors and the len of the matches
+
+    :param dict new: entry with the dictionary of the cap
+    :return: returns the percentage of the success rate
+    """
     first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.25
     second_param = (new['num_matches'] / new['len_cap_dcp']) * 0.75
     result = first_param + second_param
     return result
 
 
-# Return the json file with that is the best match for that file
-def get_best_match(dcp_rectangle) -> Optional[dict]:
+def get_best_match(dcp_rectangle: np.ndarray) -> Optional[dict]:
+    """
+    Gets the best match based on the success rate from all the json matches
+
+    :param  np.ndarray dcp_rectangle: Descriptors of the rectangle image
+    :return: Returns a dictionary with all the information about the cap
+    """
     matches = compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle)
     cap_file = {'num_matches': 0,
                 'path_file': None,
@@ -88,7 +106,7 @@ def get_name_from_json(path):
         return data["name"].split('.')[-2]
 
 
-def get_kps_and_dcps_from_json(path: str):
+def get_kps_and_dcps_from_json(path: str) -> tuple:
     """
     Loads the descriptors and keypoints of the json to the correct format
 
@@ -104,7 +122,7 @@ def get_kps_and_dcps_from_json(path: str):
     return keypoints, descriptors
 
 
-def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list[tuple[int, int, int, int]]):
+def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list[tuple[int, int, int, int]]) -> list[tuple[Any, tuple[int, int, int, int]]]:
     """
     Crop the image based on the rectangles, if the position is negative put it to zero
 
@@ -125,18 +143,17 @@ def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list[tuple[i
     return cropped_images
 
 
-def get_dcp_and_kps(img: np.ndarray):
+def get_dcp_and_kps(img: np.ndarray) -> tuple:
     """
     Detect and compute the descriptors and keypoints of the image
 
     ":param np.ndarray img: The image to get descriptors and keypoints
     :return: Returns a tuple with descriptors and keypoints
     """
-    print(type(SIFT.detectAndCompute(img, None)))
     return SIFT.detectAndCompute(img, None)
 
 
-def get_matches_after_matcher_sift(cap_dcp: np.ndarray, rectangle_image: np.ndarray):
+def get_matches_after_matcher_sift(cap_dcp: np.ndarray, rectangle_image: np.ndarray) -> list:
     """
     Compare descriptors of the cap image and the rectangle of the cap of the photo image
 
@@ -153,7 +170,7 @@ def get_matches_after_matcher_sift(cap_dcp: np.ndarray, rectangle_image: np.ndar
     return sorted(matches, key=lambda x: x.distance)[:VARIABLES['MAX_MATCHES']]
 
 
-def preprocess_image_size(img: np.ndarray):
+def preprocess_image_size(img: np.ndarray) -> np.ndarray:
     """
     Preprocess the image for SIFT currently it resizes it
 
