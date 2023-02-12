@@ -8,7 +8,6 @@ from pathlib import Path
 DEBUG_BLOB = False
 MY_CAPS_IMGS_FOLDER = r"database/caps-s3"
 DATABASE_FODLER = r"database/caps_db-s3"
-MY_CAPS_IMGS_FOLDER_RGB = "../database/RGB-caps-s3"
 
 
 def read_img(img_path: str) -> np.ndarray:
@@ -105,72 +104,20 @@ def create_json_for_all_caps():
         crate_db_for_cap(name_img, path_caps)
 
 
-# RGB Section for database
+def average_color(path):
+    img = cv2.imread(path)
+    # Convert the image to the BGR color space
+    bgr = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
+
+    # Get the average color of the image
+    avg_color = np.average(np.average(bgr, axis=0), axis=0)
+    return int(avg_color[0]), int(avg_color[1]), int(avg_color[2])
+
 
 def get_all_rgb_images():
-    entries = os.listdir(MY_CAPS_IMGS_FOLDER_RGB)
-    dict_rgb = {}
-    # Variable para comprobar la mascara aplicada a las imagenes. Se podría afinar más en algunas.
-    DEBUG = True
-    for name_img in entries:
-        cap_str = os.path.join(MY_CAPS_IMGS_FOLDER_RGB, name_img)
-        imagen = read_img(cap_str)
-        imagen_rgb = transform_bgr_image_to_rgb(imagen)
-        # Create a circular mask
-        mask, center, radio = create_circular_mask(imagen_rgb)
-        cv2.circle(mask, center, radio, (255, 255, 255), -1)
-        # Apply the mask to the image
-        image_mask = cv2.bitwise_and(imagen_rgb, imagen_rgb, mask=mask)
-
-        r, g, b = cv2.split(image_mask)
-        # Format for k-means,
-        rgb_cap = (r, g, b)
-
-        dict_rgb[cap_str] = rgb_cap
-
-        if DEBUG:
-            cv2.imshow("prueba", image_mask)
-            cv2.waitKey(0)
-
-    return dict_rgb
-
-
-def create_clustering_kmeans():
-    """
-    Create k cluster using kmeans based on the components RGB. Returns a dictionary with the clusters and their corresponding images
-    :return:
-    :rtype:
-    """
-
-    dict_caps = get_all_rgb_images()
-    # rgb_values = list(dict_caps.values())
-    # rgb_matrix = np.array([list(img) for img in rgb_values])
-    # kmeans = KMeans(n_clusters=5)
-    # kmeans.fit(rgb_matrix)
-    #
-    # cluster_dict = {}
-    #
-    # for i, label in enumerate(kmeans.labels_):
-    #     if label not in cluster_dict:
-    #         cluster_dict[label] = []
-    #     for key in dict_caps:
-    #         if rgb_values[i] == dict_caps[key]:
-    #             cluster_dict[label].append(key)
-    #
-    # print(cluster_dict)
-    # return cluster_dict
-    return dict_caps
-
-
-# def predict_cluster_cap(kmean, imagen):
-#     prediction =
-
-def create_circular_mask(imagen):
-    high, width, _ = imagen.shape
-    center = (width // 2, high // 2)
-    radio = min(high, width) // 2
-    mask = np.zeros((high, width), np.uint8)
-    return mask, center, radio
+    avg_color = average_color(r"C:\Users\cosmi\Desktop\BottleCaps\database\caps-s3\cap-54.jpg")
+    print(avg_color)
+    return avg_color
 
 
 def main_rgb():
@@ -178,4 +125,5 @@ def main_rgb():
 
 
 if __name__ == '__main__':
-    create_json_for_all_caps()
+    main_rgb()
+    # create_json_for_all_caps()
