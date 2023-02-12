@@ -1,6 +1,5 @@
 {
   "MY_CAPS_IMGS_FOLDER": "../database/caps_db-s3",
-  "MY_CAPS_IMGS_FOLDER_RGB": "../database/caps-s3",
   "MAX_MATCHES": 200,
   "SUCCESS_MIN": 0.30
 }
