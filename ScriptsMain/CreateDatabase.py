@@ -53,7 +53,6 @@ def resize_all_images(path, output, size):
 def crate_db_for_cap(cap_name, folder: str):
     cap_path = os.path.join(folder, cap_name)
 
-    print(cap_path)
     cap_img = cv2.imread(cap_path)
     cap_img = cv2.cvtColor(cap_img, cv2.COLOR_BGR2GRAY)
 
