@@ -38,7 +38,7 @@ def get_rectangles(circles: list[tuple[int, int, int]]) -> list[tuple[int, int, 
 # TODO: Improve here
 def calculate_success(new: [dict]) -> float:
     """
-    Calculates how successfull was the cap match based on the descriptors and the len of the matches
+    Calculates how successful was the cap match based on the descriptors and the len of the matches
 
     :param dict new: entry with the dictionary of the cap
     :return: returns the percentage of the success rate
