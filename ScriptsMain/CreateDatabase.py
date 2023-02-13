@@ -4,13 +4,11 @@ import os
 import cv2
 import numpy as np
 from pathlib import Path
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
 
 
 DEBUG_BLOB = False
-MY_CAPS_IMGS_FOLDER = r"database/caps-s3"
-DATABASE_FODLER = r"database/caps_db-s3"
+MY_CAPS_IMGS_FOLDER = r"database\caps-s3"
+DATABASE_FODLER = r"database\caps_db-s3"
 
 
 def read_img(img_path: str) -> np.ndarray:
