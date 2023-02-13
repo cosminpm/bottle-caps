@@ -139,7 +139,7 @@ def centroid_histogram(clt):
 
 
 def get_all_rgb_images():
-    path = r"C:\Users\cosmi\Desktop\BottleCaps\database\caps-s3\Untitled.png"
+    path = r"C:\Users\cosmi\Desktop\BottleCaps\database\caps-s3\cap-51.jpg"
 
     org_img = cv2.imread(path)
     img = cv2.cvtColor(org_img, cv2.COLOR_BGR2RGB)
