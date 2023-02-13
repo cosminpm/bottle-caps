@@ -94,7 +94,6 @@ def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.nd
         matches.append(match)
     return matches
 
-
 def get_name_from_json(path):
     """
 
@@ -323,9 +322,11 @@ def apply_main_method_to_all_images(folder_photos: str) -> None:
             print("No caps found in : {}".format(path_to_image))
 
 
+
 def main():
     folder_photos = '../database/photo_images_larger'
     apply_main_method_to_all_images(folder_photos=folder_photos)
+
 
 
 if __name__ == '__main__':
