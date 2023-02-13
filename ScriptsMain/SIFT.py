@@ -7,8 +7,7 @@ import numpy as np
 
 from ScriptsMain.HTC import hough_transform_circle
 from ScriptsMain.blobs import get_avg_size_all_blobs
-from CreateDatabase import read_img, rgb_to_bgr, resize_image, transform_bgr_image_to_rgb
-from sklearn.cluster import KMeans
+from CreateDatabase import rgb_to_bgr, resize_image
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
