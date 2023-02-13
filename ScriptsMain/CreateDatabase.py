@@ -4,7 +4,7 @@ import os
 import cv2
 import numpy as np
 from pathlib import Path
-
+from sklearn.cluster import KMeans
 
 DEBUG_BLOB = False
 MY_CAPS_IMGS_FOLDER = r"database\caps-s3"
@@ -17,6 +17,10 @@ def read_img(img_path: str) -> np.ndarray:
 
 def rgb_to_bgr(r: int, g: int, b: int) -> tuple[int, int, int]:
     return tuple((b, g, r))
+
+
+def rgb_to_bgr_image(img: np.ndarray):
+    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 
 def get_name_from_path(path: str) -> str:
@@ -85,6 +89,92 @@ def create_json_for_all_caps():
     entries = os.listdir(path_caps)
     for name_img in entries:
         crate_db_for_cap(name_img, path_caps)
+
+
+def create_circular_mask(imagen):
+    high, width, _ = imagen.shape
+    center = (width // 2, high // 2)
+    radio = min(high, width) // 2
+    mask = np.zeros((high, width), np.uint8)
+    return mask, center, radio
+
+
+def get_dict_rgb_images():
+    """
+    Create a dictionary based on the RGB values of all images
+
+    :return: Returns the dictionary associating the path of each image and the average value of its RGB values
+    """
+    path = Path(os.getcwd())
+    caps_folder = os.path.join(path.parent.absolute(), MY_CAPS_IMGS_FOLDER)
+    entries = os.listdir(caps_folder)
+    dict_rgb = {}
+
+    for name_img in entries:
+        cap_str = os.path.join(caps_folder, name_img)
+        image = read_img(cap_str)
+        imagen_rgb = rgb_to_bgr_image(image)
+        # Create a circular mask
+        mask, center, radio = create_circular_mask(imagen_rgb)
+        cv2.circle(mask, center, radio, (255, 255, 255), -1)
+        # Apply the mask to the image
+        image_mask = cv2.bitwise_and(imagen_rgb, imagen_rgb, mask=mask)
+        # Format for k-means algorithm
+        b, g, r = cv2.mean(image_mask)[:3]
+        rgb_cap = [r, g, b]
+
+        dict_rgb[cap_str] = rgb_cap
+
+    return dict_rgb
+
+
+# Create k cluster using kmeans based on the components RGB. Returns a dictionary with the clusters and their
+# corresponding images
+def create_clustering_rgb_kmeans():
+    """
+        This function performs image clustering using the k-means algorithm.
+
+        The function takes a dictionary whose keys are the names of the images and
+        whose values are the average RGB values of each image. Then, it fits the
+        k-means algorithm to the RGB values and assigns each image to a cluster.
+
+        The function returns a dictionary whose keys are the labels of the
+        clusters and whose values are the images assigned to that cluster. It also
+        returns the fitted kmeans object.
+
+        :return: Returns dictionary whose keys are the labels of the clusters and whose values are the images assigned
+        to that cluster and KMeans object fitted to the data.
+    """
+
+    dict_caps = get_dict_rgb_images()
+    rgb_values = list(dict_caps.values())
+    kmeans = KMeans(n_clusters=10, n_init=10)
+    kmeans.fit(rgb_values)
+    cluster_dict = {}
+
+    for i, label in enumerate(kmeans.labels_):
+        if label not in cluster_dict:
+            cluster_dict[label] = []
+        for key in dict_caps:
+            if rgb_values[i] == dict_caps[key]:
+                cluster_dict[label].append(key)
+    return cluster_dict, kmeans
+
+
+def get_cluster_belong_to(kmeans, image):
+    """
+       This function predicts the cluster to which a given image belongs.
+
+       The function takes a fitted k-means object and an image. It calculates
+       the average RGB value of the image and uses the k-means object to predict
+       the cluster to which the image belongs.
+
+       :return: the label of the cluster to which the image belongs.
+    """
+    b, g, r = cv2.mean(image)[:3]
+    rgb_cap = [r, g, b]
+    cluster = kmeans.predict(rgb_cap)
+    return cluster
 
 
 if __name__ == '__main__':
