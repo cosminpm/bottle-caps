@@ -5,10 +5,12 @@ import cv2
 import numpy as np
 from pathlib import Path
 from sklearn.cluster import KMeans
+from joblib import dump, load
 
 DEBUG_BLOB = False
 MY_CAPS_IMGS_FOLDER = r"database\caps-s3"
 DATABASE_FODLER = r"database\caps_db-s3"
+CLUSTER_FOLDER = r"database\cluster"
 
 
 def read_img(img_path: str) -> np.ndarray:
@@ -120,8 +122,18 @@ def get_dict_rgb_images():
         # Apply the mask to the image
         image_mask = cv2.bitwise_and(imagen_rgb, imagen_rgb, mask=mask)
         # Format for k-means algorithm
-        b, g, r = cv2.mean(image_mask)[:3]
-        rgb_cap = [r, g, b]
+        # b, g, r = cv2.mean(image_mask)[:3]
+
+        red = image_mask[:, :, 0]
+        green = image_mask[:, :, 1]
+        blue = image_mask[:, :, 2]
+
+        # Calculate median of RGB values
+        median_r = np.median(red)
+        median_g = np.median(green)
+        median_b = np.median(blue)
+
+        rgb_cap = [median_r, median_g, median_b]
 
         dict_rgb[cap_str] = rgb_cap
 
@@ -153,11 +165,11 @@ def create_clustering_rgb_kmeans():
     cluster_dict = {}
 
     for i, label in enumerate(kmeans.labels_):
-        if label not in cluster_dict:
-            cluster_dict[label] = []
+        if int(label) not in cluster_dict:
+            cluster_dict[int(label)] = []
         for key in dict_caps:
             if rgb_values[i] == dict_caps[key]:
-                cluster_dict[label].append(key)
+                cluster_dict[int(label)].append(key)
     return cluster_dict, kmeans
 
 
@@ -177,5 +189,24 @@ def get_cluster_belong_to(kmeans, image):
     return cluster
 
 
+def create_json_clusters_images():
+    cluster_dict, model_kmeans = create_clustering_rgb_kmeans()
+
+    path = Path(os.getcwd())
+    path_folder = os.path.join(path.parent.absolute(), CLUSTER_FOLDER)
+    name_model = os.path.join(path_folder, 'kmeans_model.joblib')
+
+    dump(model_kmeans, name_model)
+
+    name_file = os.path.join(path_folder, 'clusters.json')
+
+    entry = cluster_dict
+
+    with open(name_file, "w") as outfile:
+        print("Writing:{}".format(path_folder))
+        json.dump(entry, outfile, indent=4, separators=(',', ': '))
+
+
 if __name__ == '__main__':
-    create_json_for_all_caps()
+    # create_json_for_all_caps()
+    create_json_clusters_images()
