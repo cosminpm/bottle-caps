@@ -19,10 +19,26 @@ def read_img(img_path: str) -> np.ndarray:
 
 
 def rgb_to_bgr(r: int, g: int, b: int) -> tuple[int, int, int]:
+    """
+    Given a tuple of colors it returns the same tuple but changing the order, this is because OpenCV uses BGR instead of RGB
+
+    :param int r: value from 0 to 255 to represent red
+    :param int g: int r: value from 0 to 255 to represent green
+    :param int b: int r: value from 0 to 255 to represent blu
+    :return: The tuple with the three colors
+    """
     return tuple((b, g, r))
 
 
-def bgr_to_rgb_image(img: np.ndarray):
+
+
+def transform_bgr_image_to_rgb(img: np.ndarray) -> np.ndarray:
+    """
+    Transforms the image to numpy rgb from bgr
+
+    :param np.ndarray img: The original image
+    :return: The image transformed to rgb
+    """
     return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 
