@@ -11,7 +11,6 @@ VARIABLES = json.load(open(file_path))
 
 
 def reduce_colors_images(image, number_of_levels):
-    image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
     pixels = image.reshape((-1, 3)).astype(np.float32)
 
     # Perform k-means clustering
@@ -27,7 +26,8 @@ def reduce_colors_images(image, number_of_levels):
 
 def preprocess_image_blobs(img):
     img = cv2.GaussianBlur(img, (VARIABLES['PREPO_convolution_size'], VARIABLES['PREPO_convolution_size']), 0)
-    img = reduce_colors_images(img, VARIABLES['PREPO_number_of_levels'])
+    image = cv2.cvtColor(img.copy(), cv2.COLOR_GRAY2BGR)
+    img = reduce_colors_images(image, VARIABLES['PREPO_number_of_levels'])
     if VARIABLES['DEBUG_PREPROCESS_BLOBS']:
         cv2.imshow("Preprocess img", img)
         cv2.waitKey(0)

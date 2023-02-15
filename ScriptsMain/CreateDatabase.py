@@ -5,7 +5,8 @@ import cv2
 import numpy as np
 from pathlib import Path
 from sklearn.cluster import KMeans
-from joblib import dump, load
+from joblib import dump
+from blobs import reduce_colors_images
 
 DEBUG_BLOB = False
 MY_CAPS_IMGS_FOLDER = r"database\caps-s3"
@@ -21,7 +22,7 @@ def rgb_to_bgr(r: int, g: int, b: int) -> tuple[int, int, int]:
     return tuple((b, g, r))
 
 
-def rgb_to_bgr_image(img: np.ndarray):
+def bgr_to_rgb_image(img: np.ndarray):
     return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 
@@ -92,13 +93,13 @@ def create_json_for_all_caps():
     for name_img in entries:
         crate_db_for_cap(name_img, path_caps)
 
-
-def create_circular_mask(imagen):
-    high, width, _ = imagen.shape
-    center = (width // 2, high // 2)
-    radio = min(high, width) // 2
-    mask = np.zeros((high, width), np.uint8)
-    return mask, center, radio
+def find_closest_color(color, palette):
+    # Calculate the distance between the color and each color in the palette
+    distances = np.sqrt(np.sum((palette - color) ** 2, axis=1))
+    # Find the index of the closest color in the palette
+    index = np.argmin(distances)
+    # Return the closest color
+    return palette[index]
 
 
 def get_dict_rgb_images():
@@ -115,98 +116,77 @@ def get_dict_rgb_images():
     for name_img in entries:
         cap_str = os.path.join(caps_folder, name_img)
         image = read_img(cap_str)
-        imagen_rgb = rgb_to_bgr_image(image)
-        # Create a circular mask
-        mask, center, radio = create_circular_mask(imagen_rgb)
-        cv2.circle(mask, center, radio, (255, 255, 255), -1)
-        # Apply the mask to the image
-        image_mask = cv2.bitwise_and(imagen_rgb, imagen_rgb, mask=mask)
-        # Format for k-means algorithm
-        # b, g, r = cv2.mean(image_mask)[:3]
 
-        red = image_mask[:, :, 0]
-        green = image_mask[:, :, 1]
-        blue = image_mask[:, :, 2]
+        # Define the set of colors to reduce to
 
+        colors  =  np.array([
+            [255, 255, 255],  # white
+            [0, 0, 0],  # black
+            [128, 128, 128],  # gray
+            [255, 0, 0],  # red
+            [255, 128, 0],  # orange
+            [255, 255, 0],  # yellow
+            [128, 255, 0],  # lime green
+            [0, 255, 0],  # green
+            [0, 255, 128],  # spring green
+            [0, 255, 255],  # cyan
+            [0, 128, 255],  # azure
+            [0, 0, 255],  # blue
+            [127, 0, 255],  # purple
+            [255, 0, 255],  # magenta
+            [255, 51, 153],  # rose
+            [204, 153, 255],  # lavender
+            [102, 0, 51],  # maroon
+            [153, 51, 0],  # brown
+            [255, 153, 51],  # coral
+            [255, 204, 153],  # peach
+            [255, 255, 153],  # pale yellow
+            [204, 255, 153],  # pale green
+            [153, 255, 153],  # pale lime green
+            [153, 255, 204],  # pale spring green
+            [153, 255, 255],  # pale cyan
+            [153, 204, 255],  # pale azure
+            [153, 153, 255],  # pale blue
+            [204, 153, 255],  # pale purple
+            [255, 153, 255],  # pale magenta
+            [255, 204, 229],  # pale rose
+            [229, 204, 255],  # pale lavender
+            [127, 51, 0],  # dark brown
+            [255, 0, 102],  # dark pink
+            [51, 51, 0],  # olive
+            [0, 51, 51],  # teal
+            [0, 0, 51],  # navy blue
+            [102, 0, 102],  # dark purple
+            [102, 0, 51],  # dark red
+            [153, 102, 51],  # dark tan
+            [102, 102, 153],  # slate blue
+            [51, 102, 153],  # steel blue
+            [153, 51, 102],  # dark magenta
+            [102, 51, 102],  # dark violet
+            [102, 153, 51],  # dark lime green
+            [51, 153, 102],  # dark sea green
+            [153, 51, 51],  # dark salmon
+            [51, 153, 153]  # dark turquoise
+        ])
+        # Iterate over each pixel in the image and replace its color with the closest color in the set
+        for i in range(image.shape[0]):
+            for j in range(image.shape[1]):
+                # Find the closest color in the set of colors
+                color = find_closest_color(image[i, j], colors)
+                # Replace the pixel's color with the closest color
+                image[i, j] = color
+
+        cv2.imshow(name_img, image)
+        cv2.waitKey(0)
+
+        print(image)
         # Calculate median of RGB values
-        median_r = np.median(red)
-        median_g = np.median(green)
-        median_b = np.median(blue)
-
-        rgb_cap = [median_r, median_g, median_b]
-
-        dict_rgb[cap_str] = rgb_cap
+        median = np.median(image)
+        print(median)
 
     return dict_rgb
 
-
-# Create k cluster using kmeans based on the components RGB. Returns a dictionary with the clusters and their
-# corresponding images
-def create_clustering_rgb_kmeans():
-    """
-        This function performs image clustering using the k-means algorithm.
-
-        The function takes a dictionary whose keys are the names of the images and
-        whose values are the average RGB values of each image. Then, it fits the
-        k-means algorithm to the RGB values and assigns each image to a cluster.
-
-        The function returns a dictionary whose keys are the labels of the
-        clusters and whose values are the images assigned to that cluster. It also
-        returns the fitted kmeans object.
-
-        :return: Returns dictionary whose keys are the labels of the clusters and whose values are the images assigned
-        to that cluster and KMeans object fitted to the data.
-    """
-
-    dict_caps = get_dict_rgb_images()
-    rgb_values = list(dict_caps.values())
-    kmeans = KMeans(n_clusters=10, n_init=10)
-    kmeans.fit(rgb_values)
-    cluster_dict = {}
-
-    for i, label in enumerate(kmeans.labels_):
-        if int(label) not in cluster_dict:
-            cluster_dict[int(label)] = []
-        for key in dict_caps:
-            if rgb_values[i] == dict_caps[key]:
-                cluster_dict[int(label)].append(key)
-    return cluster_dict, kmeans
-
-
-def get_cluster_belong_to(kmeans, image):
-    """
-       This function predicts the cluster to which a given image belongs.
-
-       The function takes a fitted k-means object and an image. It calculates
-       the average RGB value of the image and uses the k-means object to predict
-       the cluster to which the image belongs.
-
-       :return: the label of the cluster to which the image belongs.
-    """
-    b, g, r = cv2.mean(image)[:3]
-    rgb_cap = [r, g, b]
-    cluster = kmeans.predict(rgb_cap)
-    return cluster
-
-
-def create_json_clusters_images():
-    cluster_dict, model_kmeans = create_clustering_rgb_kmeans()
-
-    path = Path(os.getcwd())
-    path_folder = os.path.join(path.parent.absolute(), CLUSTER_FOLDER)
-    name_model = os.path.join(path_folder, 'kmeans_model.joblib')
-
-    dump(model_kmeans, name_model)
-
-    name_file = os.path.join(path_folder, 'clusters.json')
-
-    entry = cluster_dict
-
-    with open(name_file, "w") as outfile:
-        print("Writing:{}".format(path_folder))
-        json.dump(entry, outfile, indent=4, separators=(',', ': '))
-
-
 if __name__ == '__main__':
     # create_json_for_all_caps()
-    create_json_clusters_images()
+    # create_json_clusters_images()
+    get_dict_rgb_images()
