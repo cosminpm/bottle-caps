@@ -7,7 +7,8 @@ import numpy as np
 
 from ScriptsMain.HTC import hough_transform_circle
 from ScriptsMain.blobs import get_avg_size_all_blobs
-from CreateDatabase import rgb_to_bgr, resize_image
+from CreateDatabase import rgb_to_bgr, resize_image, get_frequency_quantized_colors, get_higher_frequency, \
+    exists_color_in_database
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
@@ -85,6 +86,14 @@ def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.nd
 
     entries = os.listdir(VARIABLES['MY_CAPS_IMGS_FOLDER'])
     matches = []
+
+    color_frequencies = get_frequency_quantized_colors(dcp_rectangle)
+    color = get_higher_frequency(color_frequencies)
+    folder_color = exists_color_in_database(color)
+
+    if folder_color is not None:
+        entries = os.listdir(folder_color)
+
     for name_img in entries:
         cap_str = os.path.join(VARIABLES['MY_CAPS_IMGS_FOLDER'], name_img)
         kps_cap, dcps_cap = get_kps_and_dcps_from_json(cap_str)
@@ -93,6 +102,7 @@ def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.nd
         match = (get_matches_after_matcher_sift(dcps_cap, dcp_rectangle), cap_str, len(dcps_cap), len(dcp_rectangle))
         matches.append(match)
     return matches
+
 
 def get_name_from_json(path):
     """
@@ -121,7 +131,8 @@ def get_kps_and_dcps_from_json(path: str) -> tuple:
     return keypoints, descriptors
 
 
-def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list[tuple[int, int, int, int]]) -> list[tuple[Any, tuple[int, int, int, int]]]:
+def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list[tuple[int, int, int, int]]) -> list[
+    tuple[Any, tuple[int, int, int, int]]]:
     """
     Crop the image based on the rectangles, if the position is negative put it to zero
 
@@ -322,11 +333,9 @@ def apply_main_method_to_all_images(folder_photos: str) -> None:
             print("No caps found in : {}".format(path_to_image))
 
 
-
 def main():
     folder_photos = '../database/photo_images_larger'
     apply_main_method_to_all_images(folder_photos=folder_photos)
-
 
 
 if __name__ == '__main__':

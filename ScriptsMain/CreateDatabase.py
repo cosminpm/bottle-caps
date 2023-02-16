@@ -4,9 +4,7 @@ import os
 import cv2
 import numpy as np
 from pathlib import Path
-from sklearn.cluster import KMeans
-from joblib import dump
-from blobs import reduce_colors_images
+from utils import set_colors, dict_colors
 
 DEBUG_BLOB = False
 MY_CAPS_IMGS_FOLDER = r"database\caps-s3"
@@ -28,8 +26,6 @@ def rgb_to_bgr(r: int, g: int, b: int) -> tuple[int, int, int]:
     :return: The tuple with the three colors
     """
     return tuple((b, g, r))
-
-
 
 
 def transform_bgr_image_to_rgb(img: np.ndarray) -> np.ndarray:
@@ -73,9 +69,8 @@ def resize_all_images(path, output, size):
         resize_img_pix_with_name(path + file, output, size)
 
 
-def crate_db_for_cap(cap_name, folder: str):
+def crate_db_for_cap(cap_name, folder: str, cluster_folder: str):
     cap_path = os.path.join(folder, cap_name)
-
     cap_img = cv2.imread(cap_path)
     cap_img = cv2.cvtColor(cap_img, cv2.COLOR_BGR2GRAY)
 
@@ -94,9 +89,9 @@ def crate_db_for_cap(cap_name, folder: str):
         "dcps": dcps
     }
     cap_name = cap_name.split(".")[0]
-    cap_result = os.path.join(DATABASE_FODLER, cap_name)
+    cap_result = os.path.join(cluster_folder, cap_name)
 
-    with open('../' + cap_result + ".json", "w") as outfile:
+    with open(cap_result + ".json", "w") as outfile:
         print("Writing:{}".format(cap_result))
         json.dump(entry, outfile)
 
@@ -109,6 +104,30 @@ def create_json_for_all_caps():
     for name_img in entries:
         crate_db_for_cap(name_img, path_caps)
 
+
+def create_cap_in_database(cap_name, cluster):
+    name_cluster = str(cluster)
+    path = Path(os.getcwd())
+    bd_folder = os.path.join(path.parent.absolute(), CLUSTER_FOLDER)
+    cluster_folder = os.path.join(bd_folder, name_cluster)
+    path_caps = os.path.join(path.parent.absolute(), MY_CAPS_IMGS_FOLDER)
+
+    if not os.path.exists(cluster_folder):
+        os.mkdir(cluster_folder)
+    crate_db_for_cap(cap_name, path_caps, cluster_folder)
+
+
+def exists_color_in_database(color):
+    str_color = str(color)
+    path = Path(os.getcwd())
+    bd_folder = os.path.join(path.parent.absolute(), CLUSTER_FOLDER)
+    color_folder = os.path.join(bd_folder, str_color)
+
+    if os.path.exists(color_folder):
+        return color_folder
+    return None
+
+
 def find_closest_color(color, palette):
     # Calculate the distance between the color and each color in the palette
     distances = np.sqrt(np.sum((palette - color) ** 2, axis=1))
@@ -118,7 +137,46 @@ def find_closest_color(color, palette):
     return palette[index]
 
 
-def get_dict_rgb_images():
+def get_pixels_cap(image):
+    # Obtener las dimensiones de la imagen
+    height, width = image.shape[:2]
+
+    # Calcular el radio de la circunferencia
+    center = (int(width / 2), int(height / 2))
+    radius = int(min(height, width) / 2)
+
+    x_c = image.shape[1] // 2
+    y_c = image.shape[0] // 2
+
+    y, x = np.ogrid[0:image.shape[0], 0:image.shape[1]]
+    mask = (x - x_c) ** 2 + (y - y_c) ** 2 <= radius ** 2
+    pixels = image[mask]
+
+    return pixels
+
+
+def get_frequency_quantized_colors(image):
+    # Define the set of colors to reduce to
+    color_frequencies = {}
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            # Find the closest color in the set of colors
+            color = find_closest_color(image[i, j], set_colors)
+            color_tuple = tuple(color)
+            if color_tuple in color_frequencies:
+                color_frequencies[color_tuple] += 1
+            else:
+                color_frequencies[color_tuple] = 1
+    return color_frequencies
+
+
+def get_higher_frequency(frequencies):
+    ordered_frequencies = sorted(frequencies.values(), reverse=True)
+    key = [k for k, v in frequencies.items() if v == ordered_frequencies[0]]
+    return key
+
+
+def create_database_caps():
     """
     Create a dictionary based on the RGB values of all images
 
@@ -127,82 +185,50 @@ def get_dict_rgb_images():
     path = Path(os.getcwd())
     caps_folder = os.path.join(path.parent.absolute(), MY_CAPS_IMGS_FOLDER)
     entries = os.listdir(caps_folder)
-    dict_rgb = {}
 
     for name_img in entries:
         cap_str = os.path.join(caps_folder, name_img)
         image = read_img(cap_str)
 
-        # Define the set of colors to reduce to
+        # pixels_cap = get_pixels_cap(image)
 
-        colors  =  np.array([
-            [255, 255, 255],  # white
-            [0, 0, 0],  # black
-            [128, 128, 128],  # gray
-            [255, 0, 0],  # red
-            [255, 128, 0],  # orange
-            [255, 255, 0],  # yellow
-            [128, 255, 0],  # lime green
-            [0, 255, 0],  # green
-            [0, 255, 128],  # spring green
-            [0, 255, 255],  # cyan
-            [0, 128, 255],  # azure
-            [0, 0, 255],  # blue
-            [127, 0, 255],  # purple
-            [255, 0, 255],  # magenta
-            [255, 51, 153],  # rose
-            [204, 153, 255],  # lavender
-            [102, 0, 51],  # maroon
-            [153, 51, 0],  # brown
-            [255, 153, 51],  # coral
-            [255, 204, 153],  # peach
-            [255, 255, 153],  # pale yellow
-            [204, 255, 153],  # pale green
-            [153, 255, 153],  # pale lime green
-            [153, 255, 204],  # pale spring green
-            [153, 255, 255],  # pale cyan
-            [153, 204, 255],  # pale azure
-            [153, 153, 255],  # pale blue
-            [204, 153, 255],  # pale purple
-            [255, 153, 255],  # pale magenta
-            [255, 204, 229],  # pale rose
-            [229, 204, 255],  # pale lavender
-            [127, 51, 0],  # dark brown
-            [255, 0, 102],  # dark pink
-            [51, 51, 0],  # olive
-            [0, 51, 51],  # teal
-            [0, 0, 51],  # navy blue
-            [102, 0, 102],  # dark purple
-            [102, 0, 51],  # dark red
-            [153, 102, 51],  # dark tan
-            [102, 102, 153],  # slate blue
-            [51, 102, 153],  # steel blue
-            [153, 51, 102],  # dark magenta
-            [102, 51, 102],  # dark violet
-            [102, 153, 51],  # dark lime green
-            [51, 153, 102],  # dark sea green
-            [153, 51, 51],  # dark salmon
-            [51, 153, 153]  # dark turquoise
-        ])
+        color_frequencies = get_frequency_quantized_colors(image)
+
+        # Calculate median of RGB values
+        # median = np.median(pixels)
+
+        key = get_higher_frequency(color_frequencies)
+        create_cap_in_database(name_img, key)
+
+
+def debug_color_reduction():
+    path = Path(os.getcwd())
+    caps_folder = os.path.join(path.parent.absolute(), MY_CAPS_IMGS_FOLDER)
+    entries = os.listdir(caps_folder)
+
+    color_frequencies = {}
+    for name_img in entries:
+        cap_str = os.path.join(caps_folder, name_img)
+        image = read_img(cap_str)
         # Iterate over each pixel in the image and replace its color with the closest color in the set
         for i in range(image.shape[0]):
             for j in range(image.shape[1]):
                 # Find the closest color in the set of colors
-                color = find_closest_color(image[i, j], colors)
-                # Replace the pixel's color with the closest color
+                color = find_closest_color(image[i, j], set_colors)
+                color_tuple = tuple(color)
+                if color_tuple in color_frequencies:
+                    color_frequencies[color_tuple] += 1
+                else:
+                    color_frequencies[color_tuple] = 1
                 image[i, j] = color
+
+        for color, frequency in color_frequencies.items():
+            print(f"Imagen: {name_img} Color: {color} Nombre_Color: {dict_colors[color]} frecuencia: {frequency}")
 
         cv2.imshow(name_img, image)
         cv2.waitKey(0)
 
-        print(image)
-        # Calculate median of RGB values
-        median = np.median(image)
-        print(median)
-
-    return dict_rgb
 
 if __name__ == '__main__':
-    # create_json_for_all_caps()
-    # create_json_clusters_images()
-    get_dict_rgb_images()
+    create_database_caps()
+    # debug_color_reduction()
