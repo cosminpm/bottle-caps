@@ -24,6 +24,7 @@ def combine_overlapping_circles(circles):
 
 
 def hough_transform_circle(img: np.ndarray, max_radius: int) -> (np.ndarray, int):
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img = cv2.GaussianBlur(img, (5, 5), 0)
 
     circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 20,

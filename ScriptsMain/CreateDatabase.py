@@ -118,6 +118,7 @@ def create_cap_in_database(cap_name, cluster):
 
 
 def exists_color_in_database(color):
+    print(color)
     str_color = str(color)
     path = Path(os.getcwd())
     bd_folder = os.path.join(path.parent.absolute(), CLUSTER_FOLDER)
@@ -170,10 +171,11 @@ def get_frequency_quantized_colors(image):
     return color_frequencies
 
 
-def get_higher_frequency(frequencies):
+def get_higher_frequency(frequencies, n=1):
     ordered_frequencies = sorted(frequencies.values(), reverse=True)
-    key = [k for k, v in frequencies.items() if v == ordered_frequencies[0]]
-    return key
+    n_most_frequent = ordered_frequencies[n - 1]  # get the n-th highest frequency
+    keys = [k for k, v in frequencies.items() if v == n_most_frequent]
+    return keys
 
 
 def create_database_caps():
@@ -201,34 +203,54 @@ def create_database_caps():
         create_cap_in_database(name_img, key)
 
 
+def quantize_image(image: np.ndarray):
+    color_frequencies = {}
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            # Find the closest color in the set of colors
+            color = find_closest_color(image[i, j], set_colors)
+            color_tuple = tuple(color)
+            if color_tuple in color_frequencies:
+                color_frequencies[color_tuple] += 1
+            else:
+                color_frequencies[color_tuple] = 1
+            image[i, j] = color
+    return image
+
+
+def debug_one_image(path_to_image: str):
+    image = read_img(path_to_image)
+    # Iterate over each pixel in the image and replace its color with the closest color in the set
+    color_frequencies = {}
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            # Find the closest color in the set of colors
+            color = find_closest_color(image[i, j], set_colors)
+            color_tuple = tuple(color)
+            if color_tuple in color_frequencies:
+                color_frequencies[color_tuple] += 1
+            else:
+                color_frequencies[color_tuple] = 1
+            image[i, j] = color
+
+    for color, frequency in color_frequencies.items():
+        print(f"Imagen: {path_to_image} Color: {color} Nombre_Color: {dict_colors[color]} frecuencia: {frequency}")
+
+    cv2.imshow(path_to_image, image)
+    cv2.waitKey(0)
+
+
 def debug_color_reduction():
     path = Path(os.getcwd())
     caps_folder = os.path.join(path.parent.absolute(), MY_CAPS_IMGS_FOLDER)
     entries = os.listdir(caps_folder)
 
-    color_frequencies = {}
     for name_img in entries:
+        print(name_img)
         cap_str = os.path.join(caps_folder, name_img)
-        image = read_img(cap_str)
-        # Iterate over each pixel in the image and replace its color with the closest color in the set
-        for i in range(image.shape[0]):
-            for j in range(image.shape[1]):
-                # Find the closest color in the set of colors
-                color = find_closest_color(image[i, j], set_colors)
-                color_tuple = tuple(color)
-                if color_tuple in color_frequencies:
-                    color_frequencies[color_tuple] += 1
-                else:
-                    color_frequencies[color_tuple] = 1
-                image[i, j] = color
-
-        for color, frequency in color_frequencies.items():
-            print(f"Imagen: {name_img} Color: {color} Nombre_Color: {dict_colors[color]} frecuencia: {frequency}")
-
-        cv2.imshow(name_img, image)
-        cv2.waitKey(0)
+        debug_one_image(cap_str)
 
 
 if __name__ == '__main__':
-    create_database_caps()
-    # debug_color_reduction()
+    # create_database_caps()
+    debug_one_image(r"C:\Users\cosmi\Desktop\BottleCaps\database\caps-s3\super_bock_200.jpg")

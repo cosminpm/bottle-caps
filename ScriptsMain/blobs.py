@@ -24,10 +24,9 @@ def reduce_colors_images(image, number_of_levels):
     return quantized
 
 
-def preprocess_image_blobs(img):
-    img = cv2.GaussianBlur(img, (VARIABLES['PREPO_convolution_size'], VARIABLES['PREPO_convolution_size']), 0)
-    image = cv2.cvtColor(img.copy(), cv2.COLOR_GRAY2BGR)
-    img = reduce_colors_images(image, VARIABLES['PREPO_number_of_levels'])
+def preprocess_image_blobs(image):
+    img = cv2.GaussianBlur(image, (VARIABLES['PREPO_convolution_size'], VARIABLES['PREPO_convolution_size']), 0)
+    img = reduce_colors_images(img, VARIABLES['PREPO_number_of_levels'])
     if VARIABLES['DEBUG_PREPROCESS_BLOBS']:
         cv2.imshow("Preprocess img", img)
         cv2.waitKey(0)

@@ -8,7 +8,7 @@ import numpy as np
 from ScriptsMain.HTC import hough_transform_circle
 from ScriptsMain.blobs import get_avg_size_all_blobs
 from CreateDatabase import rgb_to_bgr, resize_image, get_frequency_quantized_colors, get_higher_frequency, \
-    exists_color_in_database
+    exists_color_in_database, read_img, quantize_image
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
@@ -88,7 +88,8 @@ def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.nd
     matches = []
 
     color_frequencies = get_frequency_quantized_colors(dcp_rectangle)
-    color = get_higher_frequency(color_frequencies)
+    print(color_frequencies)
+    color = get_higher_frequency(color_frequencies, 2)
     folder_color = exists_color_in_database(color)
 
     if folder_color is not None:
@@ -205,20 +206,22 @@ def get_dict_all_matches(path_to_image: str) -> list[dict]:
     :param str path_to_image: Path to the image that is going to be analyzed
     :return: Returns a list of json with all the information about the match
     """
-    img = cv2.imread(path_to_image)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img = read_img(path_to_image)
 
     # Preprocess image
     img = preprocess_image_size(img)
 
     _, avg_size = get_avg_size_all_blobs(img.copy())
     caps_matches = []
+
     if avg_size != 0:
         _, circles = hough_transform_circle(img, avg_size)
 
         # Get the positions of the rectangles
         rectangles = get_rectangles(circles)
         # Crop the images from the rectangles
+        cv2.imshow( "imagen",img)
+        cv2.waitKey(0)
         cropped_images = crop_image_into_rectangles(img.copy(), rectangles)
 
         # Final dictionary which will contain all the positions and info from the cap
@@ -306,7 +309,7 @@ def draw_matches(path_to_image: str, all_matches: list[dict]) -> None:
     good_matches, bad_matches = filter_if_best_martch_is_good_enough_all_matches(all_matches)
 
     # drawing good matches on image
-    img = cv2.imread(path_to_image)
+    img = read_img(path_to_image)
     for match in good_matches:
         draw_match(img, match, COLOR_NAME, GREEN_CIRCLE)
 
@@ -334,7 +337,7 @@ def apply_main_method_to_all_images(folder_photos: str) -> None:
 
 
 def main():
-    folder_photos = '../database/photo_images_larger'
+    folder_photos = '../database/photo_images_shorter'
     apply_main_method_to_all_images(folder_photos=folder_photos)
 
 
