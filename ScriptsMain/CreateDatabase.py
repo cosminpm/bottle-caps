@@ -96,15 +96,6 @@ def crate_db_for_cap(cap_name, folder: str, cluster_folder: str):
         json.dump(entry, outfile)
 
 
-def create_json_for_all_caps():
-    path = Path(os.getcwd())
-    path_caps = os.path.join(path.parent.absolute(), MY_CAPS_IMGS_FOLDER)
-
-    entries = os.listdir(path_caps)
-    for name_img in entries:
-        crate_db_for_cap(name_img, path_caps)
-
-
 def create_cap_in_database(cap_name, cluster):
     name_cluster = str(cluster)
     path = Path(os.getcwd())
@@ -191,12 +182,7 @@ def create_database_caps():
         cap_str = os.path.join(caps_folder, name_img)
         image = read_img(cap_str)
 
-        # pixels_cap = get_pixels_cap(image)
-
         color_frequencies = get_frequency_quantized_colors(image)
-
-        # Calculate median of RGB values
-        # median = np.median(pixels)
 
         key = get_higher_frequency(color_frequencies)
         create_cap_in_database(name_img, key)
@@ -233,4 +219,5 @@ def debug_color_reduction():
 
 
 if __name__ == '__main__':
+    #debug_one_image(r"C:\Users\cosmi\Desktop\BottleCaps\database\caps-s3\cap-97.jpg")
     create_database_caps()

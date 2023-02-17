@@ -213,18 +213,15 @@ def get_dict_all_matches(path_to_image: str) -> list[dict]:
     # Preprocess image
     img = preprocess_image_size(img)
 
-    _, avg_size = get_avg_size_all_blobs(img.copy())
+    _, avg_size = get_avg_size_all_blobs(img)
     caps_matches = []
 
     if avg_size != 0:
         _, circles = hough_transform_circle(img, avg_size)
-
         # Get the positions of the rectangles
         rectangles = get_rectangles(circles)
         # Crop the images from the rectangles
-
-        cropped_images = crop_image_into_rectangles(img.copy(), rectangles)
-
+        cropped_images = crop_image_into_rectangles(img, rectangles)
         # Final dictionary which will contain all the positions and info from the cap
         caps_matches = []
 
@@ -244,7 +241,6 @@ def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[
     """
     _, dcp_rectangle = get_dcp_and_kps(rectangle_image)
 
-    #
     color_frequencies = get_frequency_quantized_colors(rectangle_image)
     color = get_higher_frequency(color_frequencies)
 
