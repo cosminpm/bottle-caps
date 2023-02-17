@@ -87,9 +87,13 @@ def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.nd
     entries = os.listdir(VARIABLES['MY_CAPS_IMGS_FOLDER'])
     matches = []
 
-    color_frequencies = get_frequency_quantized_colors(dcp_rectangle)
-    print(color_frequencies)
-    color = get_higher_frequency(color_frequencies, 2)
+    # TODO MEJORAR Y CAMBIAR ESTE ERROR
+    # julio boo no es aqui en este metodo es en otro lado
+    image_for_color = cv2.cvtColor(dcp_rectangle, cv2.COLOR_RGB2BGR)
+    image_for_color = quantize_image(image_for_color)
+
+    color_frequencies = get_frequency_quantized_colors(image_for_color)
+    color = get_higher_frequency(color_frequencies)
     folder_color = exists_color_in_database(color)
 
     if folder_color is not None:
@@ -220,8 +224,7 @@ def get_dict_all_matches(path_to_image: str) -> list[dict]:
         # Get the positions of the rectangles
         rectangles = get_rectangles(circles)
         # Crop the images from the rectangles
-        cv2.imshow( "imagen",img)
-        cv2.waitKey(0)
+
         cropped_images = crop_image_into_rectangles(img.copy(), rectangles)
 
         # Final dictionary which will contain all the positions and info from the cap
@@ -242,6 +245,11 @@ def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[
     :return: dictionary with the information of the match, such as the position of the match, the name, success...
     """
     _, dcp_rectangle = get_dcp_and_kps(rectangle_image)
+    # todo boo julioCAMBIAR AQUI
+    image_to_quatize = quantize_image(rectangle_image)
+    color_frequencies = get_frequency_quantized_colors(image_to_quatize)
+    color = get_higher_frequency(color_frequencies)
+    print(color, "AAAAAAAA AQUIIIII")
     # Get the best possible match for each cap
     best_match_json = get_best_match(dcp_rectangle)
     # Get the position of the rectangle

@@ -49,7 +49,6 @@ set_colors = np.array([
     [153, 51, 51],  # dark salmon
     [51, 153, 153]  # dark turquoise
 ])
-
 dict_colors = {
     (255, 255, 255): 'white',
     (0, 0, 0): 'black',
