@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from typing import Optional, Any
 
 import cv2
@@ -8,7 +9,7 @@ import numpy as np
 from ScriptsMain.HTC import hough_transform_circle
 from ScriptsMain.blobs import get_avg_size_all_blobs
 from CreateDatabase import rgb_to_bgr, resize_image, get_frequency_quantized_colors, get_higher_frequency, \
-    exists_color_in_database, read_img, quantize_image
+    exists_color_in_database, read_img
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
@@ -50,14 +51,17 @@ def calculate_success(new: [dict]) -> float:
     return result
 
 
-def get_best_match(dcp_rectangle: np.ndarray) -> Optional[dict]:
+def get_best_match(dcp_rectangle: np.ndarray, color) -> Optional[dict]:
     """
     Gets the best match based on the success rate from all the json matches
 
     :param  np.ndarray dcp_rectangle: Descriptors of the rectangle image
     :return: Returns a dictionary with all the information about the cap
     """
-    matches = compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle)
+    start = time.time()
+    matches = compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle, color)
+    end = time.time()
+    print("Time consumed in working: ", end - start)
     cap_file = {'num_matches': 0,
                 'path_file': None,
                 'success': 0}
@@ -76,10 +80,11 @@ def get_best_match(dcp_rectangle: np.ndarray) -> Optional[dict]:
 
 
 # TODO: Improve here so the comparison is not with all the images
-def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.ndarray):
+def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.ndarray, color):
     """
     Compare the current image with the database and returns a list with the matches,name,and both descriptors
 
+    :param color:
     :param np.ndarray dcp_rectangle: the descritpros of the rectangle
     :return: Returns all the matches of that image
     """
@@ -87,13 +92,6 @@ def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.nd
     entries = os.listdir(VARIABLES['MY_CAPS_IMGS_FOLDER'])
     matches = []
 
-    # TODO MEJORAR Y CAMBIAR ESTE ERROR
-    # julio boo no es aqui en este metodo es en otro lado
-    image_for_color = cv2.cvtColor(dcp_rectangle, cv2.COLOR_RGB2BGR)
-    image_for_color = quantize_image(image_for_color)
-
-    color_frequencies = get_frequency_quantized_colors(image_for_color)
-    color = get_higher_frequency(color_frequencies)
     folder_color = exists_color_in_database(color)
 
     if folder_color is not None:
@@ -245,13 +243,13 @@ def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[
     :return: dictionary with the information of the match, such as the position of the match, the name, success...
     """
     _, dcp_rectangle = get_dcp_and_kps(rectangle_image)
-    # todo boo julioCAMBIAR AQUI
-    image_to_quatize = quantize_image(rectangle_image)
-    color_frequencies = get_frequency_quantized_colors(image_to_quatize)
+
+    #
+    color_frequencies = get_frequency_quantized_colors(rectangle_image)
     color = get_higher_frequency(color_frequencies)
-    print(color, "AAAAAAAA AQUIIIII")
+
     # Get the best possible match for each cap
-    best_match_json = get_best_match(dcp_rectangle)
+    best_match_json = get_best_match(dcp_rectangle, color)
     # Get the position of the rectangle
     best_match_json['positions'] = {"x": pos_rectangle[0],
                                     "y": pos_rectangle[1],
