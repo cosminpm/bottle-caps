@@ -4,7 +4,7 @@ import os
 import cv2
 import numpy as np
 from pathlib import Path
-from utils import  colors_for_clustering
+from utils import colors_for_clustering
 
 DEBUG_BLOB = False
 MY_CAPS_IMGS_FOLDER = r"database\caps-s3"
@@ -69,7 +69,7 @@ def resize_all_images(path, output, size):
         resize_img_pix_with_name(path + file, output, size)
 
 
-def crate_db_for_cap(cap_name, folder: str, cluster_folder: str):
+def crate_db_for_cap(cap_name: str, folder: str, cluster_folder: str):
     cap_path = os.path.join(folder, cap_name)
     cap_img = cv2.imread(cap_path)
     cap_img = cv2.cvtColor(cap_img, cv2.COLOR_BGR2GRAY)
@@ -96,11 +96,10 @@ def crate_db_for_cap(cap_name, folder: str, cluster_folder: str):
         json.dump(entry, outfile)
 
 
-def create_cap_in_database(cap_name, cluster):
-    name_cluster = str(cluster)
+def create_cap_in_database(cap_name: str, cluster: str):
     path = Path(os.getcwd())
     bd_folder = os.path.join(path.parent.absolute(), CLUSTER_FOLDER)
-    cluster_folder = os.path.join(bd_folder, name_cluster)
+    cluster_folder = os.path.join(bd_folder, cluster)
     path_caps = os.path.join(path.parent.absolute(), MY_CAPS_IMGS_FOLDER)
 
     if not os.path.exists(cluster_folder):
@@ -108,12 +107,12 @@ def create_cap_in_database(cap_name, cluster):
     crate_db_for_cap(cap_name, path_caps, cluster_folder)
 
 
-def exists_color_in_database(color):
+def exists_color_in_database(color:list[tuple[int,int,int]]):
     str_color = str(color)
     path = Path(os.getcwd())
     bd_folder = os.path.join(path.parent.absolute(), CLUSTER_FOLDER)
-    color_folder = os.path.join(bd_folder, str_color)
-
+    color_folder = os.path.join(bd_folder, str_color) + "_" + colors_for_clustering[color[0]]
+    print(color_folder)
     if os.path.exists(color_folder):
         return color_folder
     return None
@@ -126,7 +125,6 @@ def find_closest_color(color, palette):
     index = np.argmin(distances)
     # Return the closest color
     return palette[index]
-
 
 
 def is_inside_circle(x: int, y: int, cx: int, cy: int, r: int):
@@ -169,7 +167,7 @@ def get_frequency_quantized_colors(image: np.ndarray):
 
 def get_higher_frequency(frequencies, n=1):
     ordered_frequencies = sorted(frequencies.values(), reverse=True)
-    n_most_frequent = ordered_frequencies[n - 1]  # get the n-th highest frequency
+    n_most_frequent = ordered_frequencies[n - 1]  # get the n-th the highest frequency
     keys = [k for k, v in frequencies.items() if v == n_most_frequent]
     return keys
 
@@ -191,39 +189,9 @@ def create_database_caps():
         color_frequencies = get_frequency_quantized_colors(image)
 
         key = get_higher_frequency(color_frequencies)
-        create_cap_in_database(name_img, key)
-
-
-def debug_one_image(path_to_image: str):
-    image = read_img(path_to_image)
-    # Iterate over each pixel in the image and replace its color with the closest color in the set
-    color_frequencies = {}
-    for i in range(image.shape[0]):
-        for j in range(image.shape[1]):
-            # Find the closest color in the set of colors
-            color = find_closest_color(image[i, j], set_colors)
-            color_tuple = tuple(color)
-            if color_tuple in color_frequencies:
-                color_frequencies[color_tuple] += 1
-            else:
-                color_frequencies[color_tuple] = 1
-            image[i, j] = color
-
-    key = get_higher_frequency(color_frequencies)
-    cv2.imshow(path_to_image, image)
-    cv2.waitKey(0)
-
-
-def debug_color_reduction():
-    path = Path(os.getcwd())
-    caps_folder = os.path.join(path.parent.absolute(), MY_CAPS_IMGS_FOLDER)
-    entries = os.listdir(caps_folder)
-
-    for name_img in entries:
-        cap_str = os.path.join(caps_folder, name_img)
-        debug_one_image(cap_str)
+        name_folder_cluster = str(key) + '_' + colors_for_clustering[key[0]]
+        create_cap_in_database(cap_name=name_img, cluster=name_folder_cluster)
 
 
 if __name__ == '__main__':
-    # debug_one_image(r"C:\Users\cosmi\Desktop\BottleCaps\database\caps-s3\cap-97.jpg")
     create_database_caps()

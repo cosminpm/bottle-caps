@@ -90,6 +90,7 @@ def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.nd
 
     folder_color = exists_color_in_database(color)
 
+
     if folder_color is not None:
         entries = os.listdir(folder_color)
 
