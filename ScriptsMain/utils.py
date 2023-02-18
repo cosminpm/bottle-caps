@@ -1,7 +1,6 @@
 colors_for_clustering = {
     (255, 255, 255): "white",
     (0, 0, 0): "black",
-    (128, 128, 128): "gray",
     (255, 0, 0): "red",
     (255, 128, 0): "orange",
     (255, 255, 0): "yellow",

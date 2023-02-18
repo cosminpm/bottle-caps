@@ -337,7 +337,7 @@ def apply_main_method_to_all_images(folder_photos: str) -> None:
 
 
 def main():
-    folder_photos = '../database/photo_images_shorter'
+    folder_photos = '../database/photo_images_larger'
     apply_main_method_to_all_images(folder_photos=folder_photos)
 
 
