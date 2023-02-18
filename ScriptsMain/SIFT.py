@@ -1,6 +1,5 @@
 import json
 import os
-import time
 from typing import Optional, Any
 
 import cv2
@@ -22,9 +21,9 @@ VARIABLES = json.load(open(file_path))
 
 def get_rectangles(circles: list[tuple[int, int, int]]) -> list[tuple[int, int, int, int]]:
     """
-    Based on the center of the circle and the ratio, transform it into a rectangle so the image can be cropped
+    Based in the center of the circle and the ratio, transform it into a rectangle so the image can be cropped
 
-    :param list[ituple[nt,int,int]] circles: A list with tuples of the circles, x,y (center) and radius
+    :param list[tuple[nt,int,int]] circles: A list with tuples of the circles, x,y (center) and radius
     :return: Returns the list of rectangles transforming into width and height
     """
     rectangles = []
@@ -58,10 +57,7 @@ def get_best_match(dcp_rectangle: np.ndarray, color) -> Optional[dict]:
     :param  np.ndarray dcp_rectangle: Descriptors of the rectangle image
     :return: Returns a dictionary with all the information about the cap
     """
-    start = time.time()
     matches = compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle, color)
-    end = time.time()
-    print("Time consumed in working: ", end - start)
     cap_file = {'num_matches': 0,
                 'path_file': None,
                 'success': 0}
@@ -244,6 +240,7 @@ def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[
     color_frequencies = get_frequency_quantized_colors(rectangle_image)
     color = get_higher_frequency(color_frequencies)
 
+    print(color)
     # Get the best possible match for each cap
     best_match_json = get_best_match(dcp_rectangle, color)
     # Get the position of the rectangle

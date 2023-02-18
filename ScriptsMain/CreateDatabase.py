@@ -4,7 +4,7 @@ import os
 import cv2
 import numpy as np
 from pathlib import Path
-from utils import set_colors
+from utils import  colors_for_clustering
 
 DEBUG_BLOB = False
 MY_CAPS_IMGS_FOLDER = r"database\caps-s3"
@@ -128,36 +128,42 @@ def find_closest_color(color, palette):
     return palette[index]
 
 
-def get_pixels_cap(image):
-    # Obtener las dimensiones de la imagen
-    height, width = image.shape[:2]
 
-    # Calcular el radio de la circunferencia
-    center = (int(width / 2), int(height / 2))
-    radius = int(min(height, width) / 2)
+def is_inside_circle(x: int, y: int, cx: int, cy: int, r: int):
+    """
+    Function to check if a pixel is inside a circle
 
-    x_c = image.shape[1] // 2
-    y_c = image.shape[0] // 2
+    :param int x: coordinate x of the pixel
+    :param int y: coordinate y of the pixel
+    :param int cx: coordinate x of the center's image
+    :param int cy: coordinate y of the center's image
+    :param int r: radius of the circle
 
-    y, x = np.ogrid[0:image.shape[0], 0:image.shape[1]]
-    mask = (x - x_c) ** 2 + (y - y_c) ** 2 <= radius ** 2
-    pixels = image[mask]
+    :return bool: If the pixel is inside or not
+    """
 
-    return pixels
+    distance_squared = (x - cx) ** 2 + (y - cy) ** 2
+    return distance_squared <= r ** 2
 
 
-def get_frequency_quantized_colors(image):
+def get_frequency_quantized_colors(image: np.ndarray):
     # Define the set of colors to reduce to
     color_frequencies = {}
+
+    cx, cy = image.shape[0] // 2, image.shape[1] // 2
+    r = min(cx, cy)
+
+    list_images = np.array([k for k in colors_for_clustering.keys()])
     for i in range(image.shape[0]):
         for j in range(image.shape[1]):
             # Find the closest color in the set of colors
-            color = find_closest_color(image[i, j], set_colors)
-            color_tuple = tuple(color)
-            if color_tuple in color_frequencies:
-                color_frequencies[color_tuple] += 1
-            else:
-                color_frequencies[color_tuple] = 1
+            if is_inside_circle(i, j, cx, cy, r):
+                color = find_closest_color(image[i, j], list_images)
+                color_tuple = tuple(color)
+                if color_tuple in color_frequencies:
+                    color_frequencies[color_tuple] += 1
+                else:
+                    color_frequencies[color_tuple] = 1
     return color_frequencies
 
 
@@ -219,5 +225,5 @@ def debug_color_reduction():
 
 
 if __name__ == '__main__':
-    #debug_one_image(r"C:\Users\cosmi\Desktop\BottleCaps\database\caps-s3\cap-97.jpg")
+    # debug_one_image(r"C:\Users\cosmi\Desktop\BottleCaps\database\caps-s3\cap-97.jpg")
     create_database_caps()
