@@ -7,8 +7,7 @@ from pathlib import Path
 from utils import colors_for_clustering, get_higher_frequency, read_img
 
 DEBUG_BLOB = False
-MY_CAPS_IMGS_FOLDER = r"database\caps-s3"
-DATABASE_FODLER = r"database\caps_db-s3"
+MY_CAPS_IMGS_FOLDER = r"database\caps-resized"
 CLUSTER_FOLDER = r"database\cluster"
 
 
