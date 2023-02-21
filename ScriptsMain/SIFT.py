@@ -7,8 +7,9 @@ import numpy as np
 
 from ScriptsMain.HTC import hough_transform_circle
 from ScriptsMain.blobs import get_avg_size_all_blobs
-from CreateDatabase import rgb_to_bgr, resize_image, get_frequency_quantized_colors, get_higher_frequency, \
+from CreateDatabase import  get_frequency_quantized_colors, \
     exists_color_in_database, read_img
+from ScriptsMain.utils import get_higher_frequency, resize_image, rgb_to_bgr
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
@@ -89,13 +90,10 @@ def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.nd
     matches = []
 
     folder_color = exists_color_in_database(color)
-
-
     if folder_color is not None:
         entries = os.listdir(folder_color)
-
     for name_img in entries:
-        cap_str = os.path.join(VARIABLES['MY_CAPS_IMGS_FOLDER'], name_img)
+        cap_str = os.path.join(folder_color, name_img)
         kps_cap, dcps_cap = get_kps_and_dcps_from_json(cap_str)
 
         # A match is a tuple which contains the matches, the path of the cap, the len of the photo cap and the len fo descriptors of the rectangle
@@ -241,7 +239,6 @@ def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[
     color_frequencies = get_frequency_quantized_colors(rectangle_image)
     color = get_higher_frequency(color_frequencies)
 
-    print(color)
     # Get the best possible match for each cap
     best_match_json = get_best_match(dcp_rectangle, color)
     # Get the position of the rectangle

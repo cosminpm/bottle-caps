@@ -1,5 +1,5 @@
 {
-  "MY_CAPS_IMGS_FOLDER": "../database/caps_db-s3",
+  "MY_CAPS_IMGS_FOLDER": "../database/cluster",
   "MAX_MATCHES": 200,
   "SUCCESS_MIN": 0.30
 }
