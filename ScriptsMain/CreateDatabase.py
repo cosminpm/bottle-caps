@@ -4,7 +4,7 @@ import os
 import cv2
 import numpy as np
 from pathlib import Path
-from utils import colors_for_clustering, get_higher_frequency, read_img
+from utils import colors_for_clustering, get_higher_frequency, read_img, rgb_to_bgr
 
 DEBUG_BLOB = False
 MY_CAPS_IMGS_FOLDER = r"database\caps-resized"
@@ -99,6 +99,7 @@ def get_frequency_quantized_colors(image: np.ndarray):
             if is_inside_circle(i, j, cx, cy, r):
                 color = find_closest_color(image[i, j], list_images)
                 color_tuple = tuple(color)
+
                 if color_tuple in color_frequencies:
                     color_frequencies[color_tuple] += 1
                 else:

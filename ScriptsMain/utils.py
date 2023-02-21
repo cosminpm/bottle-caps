@@ -4,21 +4,16 @@ import cv2
 import numpy as np
 
 colors_for_clustering = {
-    (255, 0, 0): "red",
-    (255, 165, 0): "orange",
-    (255, 255, 0): "yellow",
-    (0, 255, 0): "green",
-    (0, 255, 255): "cyan",
+    (0, 128, 0): "green",
     (0, 0, 255): "blue",
     (128, 0, 128): "purple",
     (255, 0, 255): "magenta",
+    (0, 255, 255): "cyan",
+    (255, 255, 255): "white",
+    (128, 128, 128): "gray",
     (255, 192, 203): "pink",
     (165, 42, 42): "brown",
-    (128, 128, 128): "gray",
-    (0, 0, 0): "black",
-    (255, 255, 255): "white",
-    (245, 245, 220): "beige",
-    (64, 224, 208): "turquoise"
+    (128, 0, 0): "maroon",
 }
 
 
@@ -90,9 +85,9 @@ def rgb_to_bgr(r: int, g: int, b: int) -> tuple[int, int, int]:
 
 def main():
     cwd = Path(os.getcwd())
-    path = os.path.join(cwd.parent.absolute(), r'database\my-caps-images')
+    path = os.path.join(cwd.parent.absolute(), r'database\1000-caps-s3-images')
     output = os.path.join(cwd.parent.absolute(), r'database\caps-resized')
-    resize_all_images(path=path, output=output, size=100)
+    resize_all_images(path=path, output=output, size=125)
 
 
 if __name__ == '__main__':

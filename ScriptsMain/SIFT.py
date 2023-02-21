@@ -7,9 +7,9 @@ import numpy as np
 
 from ScriptsMain.HTC import hough_transform_circle
 from ScriptsMain.blobs import get_avg_size_all_blobs
-from CreateDatabase import  get_frequency_quantized_colors, \
+from CreateDatabase import get_frequency_quantized_colors, \
     exists_color_in_database, read_img
-from ScriptsMain.utils import get_higher_frequency, resize_image, rgb_to_bgr
+from ScriptsMain.utils import get_higher_frequency, resize_image, rgb_to_bgr, colors_for_clustering
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
@@ -237,7 +237,9 @@ def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[
     _, dcp_rectangle = get_dcp_and_kps(rectangle_image)
 
     color_frequencies = get_frequency_quantized_colors(rectangle_image)
+    print(color_frequencies)
     color = get_higher_frequency(color_frequencies)
+    print(color, "\n")
 
     # Get the best possible match for each cap
     best_match_json = get_best_match(dcp_rectangle, color)
@@ -247,6 +249,7 @@ def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[
                                     "w": pos_rectangle[2],
                                     "h": pos_rectangle[3]}
     best_match_json['name'] = get_name_from_json(best_match_json['path_file'])
+    best_match_json['color'] = color
     return best_match_json
 
 
@@ -283,11 +286,16 @@ def draw_match(img: np.ndarray, match: dict, color_name: tuple[int, int, int],
     center = (x + int(w / 2), y + int(h / 2))
     radius = int(w / 2)
     name = match['name'] + " " + "{:.2f}".format(match['success'])
-    cv2.circle(img, center, radius, color_circle, 4)
-    img = cv2.rectangle(img, (x, int(y + h / 2) - 10), (x + w + 25, int(y + h / 2) + 3), (0, 0, 0), -1)
+    color_cluster = str(match['color']) + " " + colors_for_clustering[match['color']]
 
+    cv2.circle(img, center, radius, color_circle, 4)
+    img = cv2.rectangle(img, (x, int(y + h / 2) - 10), (x + w + 25, int(y + h / 2) + 15), (0, 0, 0), -1)
     cv2.putText(img, name.upper(), (x, int(y + h / 2)), cv2.FONT_HERSHEY_SIMPLEX, 1 * 0.33, color_name, 1,
                 cv2.LINE_AA)
+
+    cv2.putText(img, color_cluster, (x, int(y + h / 2) + 10), cv2.FONT_HERSHEY_SIMPLEX, 1 * 0.33, color_name, 1,
+                cv2.LINE_AA)
+
     return img
 
 
@@ -328,7 +336,6 @@ def apply_main_method_to_all_images(folder_photos: str) -> None:
         path_to_image = os.path.join(folder_photos, entry)
         all_matches = get_dict_all_matches(path_to_image)
         if len(all_matches) > 0:
-            print(all_matches)
             draw_matches(path_to_image=path_to_image, all_matches=all_matches)
         else:
             print("No caps found in : {}".format(path_to_image))

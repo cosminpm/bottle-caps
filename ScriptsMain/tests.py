@@ -4,11 +4,12 @@ import os
 from ScriptsMain.SIFT import get_dict_all_matches
 
 
-def get_all_names_from_all_matches(all_matches:list[dict]):
+def get_all_names_from_all_matches(all_matches: list[dict]):
     result = set()
     for match in all_matches:
         result.add(match['name'])
     return result
+
 
 def test_get_dict_all_matches_i_have():
     folder_photos = '../database/test-images/test-i-have'
@@ -24,7 +25,3 @@ def test_get_dict_all_matches_i_have():
         result_all_matches = get_all_names_from_all_matches(all_matches)
         expected_result = set(json_solution[entry])
         assert expected_result == result_all_matches
-
-
-
-
