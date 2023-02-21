@@ -7,7 +7,9 @@ import numpy as np
 
 from ScriptsMain.HTC import hough_transform_circle
 from ScriptsMain.blobs import get_avg_size_all_blobs
-from CreateDatabase import rgb_to_bgr, resize_image
+from CreateDatabase import  get_frequency_quantized_colors, \
+    exists_color_in_database, read_img
+from ScriptsMain.utils import get_higher_frequency, resize_image, rgb_to_bgr
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
@@ -20,9 +22,9 @@ VARIABLES = json.load(open(file_path))
 
 def get_rectangles(circles: list[tuple[int, int, int]]) -> list[tuple[int, int, int, int]]:
     """
-    Based on the center of the circle and the ratio, transform it into a rectangle so the image can be cropped
+    Based in the center of the circle and the ratio, transform it into a rectangle so the image can be cropped
 
-    :param list[ituple[nt,int,int]] circles: A list with tuples of the circles, x,y (center) and radius
+    :param list[tuple[nt,int,int]] circles: A list with tuples of the circles, x,y (center) and radius
     :return: Returns the list of rectangles transforming into width and height
     """
     rectangles = []
@@ -49,14 +51,14 @@ def calculate_success(new: [dict]) -> float:
     return result
 
 
-def get_best_match(dcp_rectangle: np.ndarray) -> Optional[dict]:
+def get_best_match(dcp_rectangle: np.ndarray, color) -> Optional[dict]:
     """
     Gets the best match based on the success rate from all the json matches
 
     :param  np.ndarray dcp_rectangle: Descriptors of the rectangle image
     :return: Returns a dictionary with all the information about the cap
     """
-    matches = compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle)
+    matches = compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle, color)
     cap_file = {'num_matches': 0,
                 'path_file': None,
                 'success': 0}
@@ -75,24 +77,30 @@ def get_best_match(dcp_rectangle: np.ndarray) -> Optional[dict]:
 
 
 # TODO: Improve here so the comparison is not with all the images
-def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.ndarray):
+def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.ndarray, color):
     """
     Compare the current image with the database and returns a list with the matches,name,and both descriptors
 
+    :param color:
     :param np.ndarray dcp_rectangle: the descritpros of the rectangle
     :return: Returns all the matches of that image
     """
 
     entries = os.listdir(VARIABLES['MY_CAPS_IMGS_FOLDER'])
     matches = []
+
+    folder_color = exists_color_in_database(color)
+    if folder_color is not None:
+        entries = os.listdir(folder_color)
     for name_img in entries:
-        cap_str = os.path.join(VARIABLES['MY_CAPS_IMGS_FOLDER'], name_img)
+        cap_str = os.path.join(folder_color, name_img)
         kps_cap, dcps_cap = get_kps_and_dcps_from_json(cap_str)
 
         # A match is a tuple which contains the matches, the path of the cap, the len of the photo cap and the len fo descriptors of the rectangle
         match = (get_matches_after_matcher_sift(dcps_cap, dcp_rectangle), cap_str, len(dcps_cap), len(dcp_rectangle))
         matches.append(match)
     return matches
+
 
 def get_name_from_json(path):
     """
@@ -121,7 +129,8 @@ def get_kps_and_dcps_from_json(path: str) -> tuple:
     return keypoints, descriptors
 
 
-def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list[tuple[int, int, int, int]]) -> list[tuple[Any, tuple[int, int, int, int]]]:
+def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list[tuple[int, int, int, int]]) -> list[
+    tuple[Any, tuple[int, int, int, int]]]:
     """
     Crop the image based on the rectangles, if the position is negative put it to zero
 
@@ -194,22 +203,20 @@ def get_dict_all_matches(path_to_image: str) -> list[dict]:
     :param str path_to_image: Path to the image that is going to be analyzed
     :return: Returns a list of json with all the information about the match
     """
-    img = cv2.imread(path_to_image)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img = read_img(path_to_image)
 
     # Preprocess image
     img = preprocess_image_size(img)
 
-    _, avg_size = get_avg_size_all_blobs(img.copy())
+    _, avg_size = get_avg_size_all_blobs(img)
     caps_matches = []
+
     if avg_size != 0:
         _, circles = hough_transform_circle(img, avg_size)
-
         # Get the positions of the rectangles
         rectangles = get_rectangles(circles)
         # Crop the images from the rectangles
-        cropped_images = crop_image_into_rectangles(img.copy(), rectangles)
-
+        cropped_images = crop_image_into_rectangles(img, rectangles)
         # Final dictionary which will contain all the positions and info from the cap
         caps_matches = []
 
@@ -228,8 +235,12 @@ def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[
     :return: dictionary with the information of the match, such as the position of the match, the name, success...
     """
     _, dcp_rectangle = get_dcp_and_kps(rectangle_image)
+
+    color_frequencies = get_frequency_quantized_colors(rectangle_image)
+    color = get_higher_frequency(color_frequencies)
+
     # Get the best possible match for each cap
-    best_match_json = get_best_match(dcp_rectangle)
+    best_match_json = get_best_match(dcp_rectangle, color)
     # Get the position of the rectangle
     best_match_json['positions'] = {"x": pos_rectangle[0],
                                     "y": pos_rectangle[1],
@@ -295,7 +306,7 @@ def draw_matches(path_to_image: str, all_matches: list[dict]) -> None:
     good_matches, bad_matches = filter_if_best_martch_is_good_enough_all_matches(all_matches)
 
     # drawing good matches on image
-    img = cv2.imread(path_to_image)
+    img = read_img(path_to_image)
     for match in good_matches:
         draw_match(img, match, COLOR_NAME, GREEN_CIRCLE)
 
@@ -322,11 +333,9 @@ def apply_main_method_to_all_images(folder_photos: str) -> None:
             print("No caps found in : {}".format(path_to_image))
 
 
-
 def main():
-    folder_photos = '../database/photo_images_larger'
+    folder_photos = '../database/photo_images_shorter'
     apply_main_method_to_all_images(folder_photos=folder_photos)
-
 
 
 if __name__ == '__main__':

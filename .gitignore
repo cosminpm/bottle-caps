@@ -46,3 +46,4 @@ coverage.xml
 *.log
 *.pot
 # Sphinx docum
+/database/1000-caps-s3-images/
