@@ -54,7 +54,6 @@ def exists_color_in_database(color: list[tuple[int, int, int]]):
     path = Path(os.getcwd())
     bd_folder = os.path.join(path.parent.absolute(), CLUSTER_FOLDER)
     color_folder = os.path.join(bd_folder, str_color) + "_" + colors_for_clustering[color]
-    print(color_folder)
     if os.path.exists(color_folder):
         return color_folder
     return None

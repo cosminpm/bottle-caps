@@ -90,7 +90,7 @@ def rgb_to_bgr(r: int, g: int, b: int) -> tuple[int, int, int]:
 
 def main():
     cwd = Path(os.getcwd())
-    path = os.path.join(cwd.parent.absolute(), r'database\1000-caps-s3-images')
+    path = os.path.join(cwd.parent.absolute(), r'database\my-caps-images')
     output = os.path.join(cwd.parent.absolute(), r'database\caps-resized')
     resize_all_images(path=path, output=output, size=100)
 

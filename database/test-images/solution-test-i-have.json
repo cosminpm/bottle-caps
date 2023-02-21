@@ -1,0 +1,40 @@
+{
+  "1.jpg": [
+    "6-kirin_100",
+    "9-maze_100",
+    "8-fresh_100"
+  ],
+  "2.jpg": [
+    "1-crown_100",
+    "4-crown-red_100",
+    "3-salitos_100"
+  ],
+  "3.jpg": [
+    "6-kirin_100",
+    "5-star_100",
+    "8-fresh_100",
+    "10-lion_100",
+    "2-galicia_100"
+  ],
+  "4.jpg": [
+    "4-crown-red_100",
+    "3-salitos_100",
+    "7-tick_100",
+    "1-crown_100",
+    "9-maze_100"
+  ],
+  "5.jpg": [
+    "1-crown_100",
+    "2-galicia_100",
+    "3-salitos_100",
+    "4-crown-red_100",
+    "5-star_100",
+    "6-kirin_100",
+    "7-tick_100",
+    "8-fresh_100",
+    "9-maze_100",
+    "10-lion_100"
+  ]
+}
+
+

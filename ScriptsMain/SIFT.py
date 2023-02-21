@@ -328,13 +328,14 @@ def apply_main_method_to_all_images(folder_photos: str) -> None:
         path_to_image = os.path.join(folder_photos, entry)
         all_matches = get_dict_all_matches(path_to_image)
         if len(all_matches) > 0:
+            print(all_matches)
             draw_matches(path_to_image=path_to_image, all_matches=all_matches)
         else:
             print("No caps found in : {}".format(path_to_image))
 
 
 def main():
-    folder_photos = '../database/photo_images_shorter'
+    folder_photos = '../database/test-images/test-i-have'
     apply_main_method_to_all_images(folder_photos=folder_photos)
 
 
