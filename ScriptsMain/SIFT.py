@@ -7,9 +7,7 @@ import numpy as np
 
 from ScriptsMain.HTC import hough_transform_circle
 from ScriptsMain.blobs import get_avg_size_all_blobs
-from CreateDatabase import get_frequency_quantized_colors, \
-    exists_color_in_database, read_img
-from ScriptsMain.utils import get_higher_frequency, resize_image, rgb_to_bgr, colors_for_clustering
+from ScriptsMain.utils import resize_image, rgb_to_bgr, read_img
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 SIFT = cv2.SIFT_create()
@@ -51,14 +49,16 @@ def calculate_success(new: [dict]) -> float:
     return result
 
 
-def get_best_match(dcp_rectangle: np.ndarray, color) -> Optional[dict]:
+def get_best_match(dcp_rectangle: np.ndarray) -> Optional[dict]:
     """
     Gets the best match based on the success rate from all the json matches
 
     :param  np.ndarray dcp_rectangle: Descriptors of the rectangle image
     :return: Returns a dictionary with all the information about the cap
     """
-    matches = compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle, color)
+    matches = compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle)
+    if matches is None:
+        return None
     cap_file = {'num_matches': 0,
                 'path_file': None,
                 'success': 0}
@@ -77,27 +77,23 @@ def get_best_match(dcp_rectangle: np.ndarray, color) -> Optional[dict]:
 
 
 # TODO: Improve here so the comparison is not with all the images
-def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.ndarray, color):
+def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.ndarray):
     """
     Compare the current image with the database and returns a list with the matches,name,and both descriptors
 
-    :param color:
     :param np.ndarray dcp_rectangle: the descritpros of the rectangle
     :return: Returns all the matches of that image
     """
-
-    entries = os.listdir(VARIABLES['MY_CAPS_IMGS_FOLDER'])
     matches = []
 
-    folder_color = exists_color_in_database(color)
-    if folder_color is not None:
-        entries = os.listdir(folder_color)
+    entries = os.listdir(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster")
     for name_img in entries:
-        cap_str = os.path.join(folder_color, name_img)
+        cap_str = os.path.join(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster", name_img)
         kps_cap, dcps_cap = get_kps_and_dcps_from_json(cap_str)
 
         # A match is a tuple which contains the matches, the path of the cap, the len of the photo cap and the len fo descriptors of the rectangle
-        match = (get_matches_after_matcher_sift(dcps_cap, dcp_rectangle), cap_str, len(dcps_cap), len(dcp_rectangle))
+        match = (
+            get_matches_after_matcher_sift(dcps_cap, dcp_rectangle), cap_str, len(dcps_cap), len(dcp_rectangle))
         matches.append(match)
     return matches
 
@@ -236,21 +232,17 @@ def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[
     """
     _, dcp_rectangle = get_dcp_and_kps(rectangle_image)
 
-    color_frequencies = get_frequency_quantized_colors(rectangle_image)
-    print(color_frequencies)
-    color = get_higher_frequency(color_frequencies)
-    print(color, "\n")
-
     # Get the best possible match for each cap
-    best_match_json = get_best_match(dcp_rectangle, color)
+    best_match_json = get_best_match(dcp_rectangle)
     # Get the position of the rectangle
-    best_match_json['positions'] = {"x": pos_rectangle[0],
-                                    "y": pos_rectangle[1],
-                                    "w": pos_rectangle[2],
-                                    "h": pos_rectangle[3]}
-    best_match_json['name'] = get_name_from_json(best_match_json['path_file'])
-    best_match_json['color'] = color
-    return best_match_json
+    print(best_match_json)
+    if best_match_json is not None and best_match_json['num_matches'] > 0:
+        best_match_json['positions'] = {"x": pos_rectangle[0],
+                                        "y": pos_rectangle[1],
+                                        "w": pos_rectangle[2],
+                                        "h": pos_rectangle[3]}
+        best_match_json['name'] = get_name_from_json(best_match_json['path_file'])
+        return best_match_json
 
 
 def filter_if_best_martch_is_good_enough_all_matches(all_caps_matches: list[dict]) -> (list[dict], list[dict]):
@@ -263,10 +255,11 @@ def filter_if_best_martch_is_good_enough_all_matches(all_caps_matches: list[dict
     good_matches = []
     bad_matches = []
     for match in all_caps_matches:
-        if match['success'] > VARIABLES['SUCCESS_MIN']:
-            good_matches.append(match)
-        else:
-            bad_matches.append(match)
+        if match is not None:
+            if match['success'] > VARIABLES['SUCCESS_MIN']:
+                good_matches.append(match)
+            else:
+                bad_matches.append(match)
     return good_matches, bad_matches
 
 
@@ -286,14 +279,10 @@ def draw_match(img: np.ndarray, match: dict, color_name: tuple[int, int, int],
     center = (x + int(w / 2), y + int(h / 2))
     radius = int(w / 2)
     name = match['name'] + " " + "{:.2f}".format(match['success'])
-    color_cluster = str(match['color']) + " " + colors_for_clustering[match['color']]
 
     cv2.circle(img, center, radius, color_circle, 4)
     img = cv2.rectangle(img, (x, int(y + h / 2) - 10), (x + w + 25, int(y + h / 2) + 15), (0, 0, 0), -1)
     cv2.putText(img, name.upper(), (x, int(y + h / 2)), cv2.FONT_HERSHEY_SIMPLEX, 1 * 0.33, color_name, 1,
-                cv2.LINE_AA)
-
-    cv2.putText(img, color_cluster, (x, int(y + h / 2) + 10), cv2.FONT_HERSHEY_SIMPLEX, 1 * 0.33, color_name, 1,
                 cv2.LINE_AA)
 
     return img

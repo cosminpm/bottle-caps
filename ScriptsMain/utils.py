@@ -3,32 +3,6 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-colors_for_clustering = {
-    (0, 128, 0): "green",
-    (0, 0, 255): "blue",
-    (128, 0, 128): "purple",
-    (255, 0, 255): "magenta",
-    (0, 255, 255): "cyan",
-    (255, 255, 255): "white",
-    (128, 128, 128): "gray",
-    (255, 192, 203): "pink",
-    (165, 42, 42): "brown",
-    (128, 0, 0): "maroon",
-}
-
-
-def get_higher_frequency(frequencies: dict[tuple[int, int, int]:int]):
-    """
-    Get the most frequent element in the list
-
-    :return: Returns the dictionary associating the path of each image and the average value of its RGB values
-    """
-    most_frequent = [None, 0]
-    for rgb in frequencies:
-        if frequencies[rgb] > most_frequent[1]:
-            most_frequent = [rgb, frequencies[rgb]]
-    return most_frequent[0]
-
 
 def get_name_from_path(path: str) -> str:
     return path.split("\\")[-1]
