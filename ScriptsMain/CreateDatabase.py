@@ -49,7 +49,6 @@ def create_cap_in_database(cap_name: str, cluster: str = None):
     crate_db_for_cap(cap_name=cap_name, image_folder=path_caps, result_folder=cluster_folder)
 
 
-
 def create_database_caps():
     """
     Create a dictionary based on the RGB values of all images
@@ -61,7 +60,6 @@ def create_database_caps():
     entries = os.listdir(caps_folder)
 
     for name_img in entries:
-        cap_str = os.path.join(caps_folder, name_img)
         create_cap_in_database(cap_name=name_img)
 
 

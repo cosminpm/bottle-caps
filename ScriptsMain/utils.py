@@ -23,7 +23,8 @@ def read_img(img_path: str) -> np.ndarray:
 # -- Resizing --
 def resize_image(src, factor):
     height, width = src.shape[:2]
-    return cv2.resize(src, (int(src * factor), int(height * factor)))
+    new_size = (int(width * factor), int(height * factor))
+    return cv2.resize(src, new_size)
 
 
 def resize_image_and_save(path_to_image, width, height, where_save, name_output):

@@ -1,5 +1,7 @@
 {
   "MY_CAPS_IMGS_FOLDER": "../database/cluster",
   "MAX_MATCHES": 200,
-  "SUCCESS_MIN": 0.30
+  "SUCCESS_MIN": 0.30,
+  "MAX_WIDTH_IMAGE": 1000,
+  "MAX_HEIGHT_IMAGE": 1000
 }

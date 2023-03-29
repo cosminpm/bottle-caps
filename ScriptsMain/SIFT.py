@@ -183,16 +183,17 @@ def preprocess_image_size(img: np.ndarray) -> np.ndarray:
     """
     height, width = img.shape[:2]
     size = height * width
-    max_size_img = 1000 * 1000
+    max_size_img = VARIABLES["MAX_WIDTH_IMAGE"] * VARIABLES["MAX_HEIGHT_IMAGE"]
     resized = img
     while size > max_size_img:
-        resized = resize_image(img, 0.66)
-        height, width = img.shape[:2]
+        resized = resize_image(resized, 0.66)
+        height, width = resized.shape[:2]
+        print(height, width)
         size = height * width
     return resized
 
 
-def get_dict_all_matches(path_to_image: str) -> list[dict]:
+def get_dict_all_matches(path_to_image: str) -> (list[dict], np.ndarray):
     """
     This is one of the more important functions for this project, it creates the json for all the matches
 
@@ -219,7 +220,7 @@ def get_dict_all_matches(path_to_image: str) -> list[dict]:
         for rectangle_image, pos_rectangle in cropped_images:
             best_match_json = create_dict_for_one_match(rectangle_image=rectangle_image, pos_rectangle=pos_rectangle)
             caps_matches.append(best_match_json)
-    return caps_matches
+    return caps_matches, img
 
 
 def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[int, int, int, int]) -> dict:
@@ -233,16 +234,17 @@ def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[
     _, dcp_rectangle = get_dcp_and_kps(rectangle_image)
 
     # Get the best possible match for each cap
-    best_match_json = get_best_match(dcp_rectangle)
-    # Get the position of the rectangle
-    print(best_match_json)
-    if best_match_json is not None and best_match_json['num_matches'] > 0:
-        best_match_json['positions'] = {"x": pos_rectangle[0],
-                                        "y": pos_rectangle[1],
-                                        "w": pos_rectangle[2],
-                                        "h": pos_rectangle[3]}
-        best_match_json['name'] = get_name_from_json(best_match_json['path_file'])
-        return best_match_json
+    if dcp_rectangle is not None:
+        best_match_json = get_best_match(dcp_rectangle)
+        # Get the position of the rectangle
+        print(best_match_json)
+        if best_match_json is not None and best_match_json['num_matches'] > 0:
+            best_match_json['positions'] = {"x": pos_rectangle[0],
+                                            "y": pos_rectangle[1],
+                                            "w": pos_rectangle[2],
+                                            "h": pos_rectangle[3]}
+            best_match_json['name'] = get_name_from_json(best_match_json['path_file'])
+            return best_match_json
 
 
 def filter_if_best_martch_is_good_enough_all_matches(all_caps_matches: list[dict]) -> (list[dict], list[dict]):
@@ -288,14 +290,18 @@ def draw_match(img: np.ndarray, match: dict, color_name: tuple[int, int, int],
     return img
 
 
-def draw_matches(path_to_image: str, all_matches: list[dict]) -> None:
+def draw_matches_from_path(path_to_image: str, all_matches: list[dict]) -> None:
     """
     Iterates over all the matches and draws them on a single image
 
     :param str path_to_image:  Path of the image that is going to be drawn
     :param list[dict] all_matches: List of dict that contains the info about the matches
     """
+    img = read_img(path_to_image)
+    draw_matches(img=img, all_matches=all_matches)
 
+
+def draw_matches(img: np.ndarray, all_matches: list[dict]):
     COLOR_NAME = rgb_to_bgr(255, 255, 0)
     GREEN_CIRCLE = rgb_to_bgr(50, 205, 50)
     RED_CIRCLE = rgb_to_bgr(255, 0, 0)
@@ -303,14 +309,13 @@ def draw_matches(path_to_image: str, all_matches: list[dict]) -> None:
     good_matches, bad_matches = filter_if_best_martch_is_good_enough_all_matches(all_matches)
 
     # drawing good matches on image
-    img = read_img(path_to_image)
     for match in good_matches:
         draw_match(img, match, COLOR_NAME, GREEN_CIRCLE)
 
     for match in bad_matches:
         draw_match(img, match, COLOR_NAME, RED_CIRCLE)
 
-    cv2.imshow(path_to_image, img)
+    cv2.imshow("Result:", img)
     cv2.waitKey(0)
 
 
@@ -318,20 +323,20 @@ def apply_main_method_to_all_images(folder_photos: str) -> None:
     """
     Main function, given a folder detect and identify all the caps, only iterates and applies the main method
 
-    :param str folder_photos: Folder of the photos that are going to be analyzed
+    param str folder_photos: Folder of the photos that are going to be analyzed
     """
     entries = os.listdir(folder_photos)
     for entry in entries:
         path_to_image = os.path.join(folder_photos, entry)
-        all_matches = get_dict_all_matches(path_to_image)
+        all_matches, img = get_dict_all_matches(path_to_image)
         if len(all_matches) > 0:
-            draw_matches(path_to_image=path_to_image, all_matches=all_matches)
+            draw_matches(img=img, all_matches=all_matches)
         else:
             print("No caps found in : {}".format(path_to_image))
 
 
 def main():
-    folder_photos = '../database/test-images/test-i-have'
+    folder_photos = '../database/test-images/one-image'
     apply_main_method_to_all_images(folder_photos=folder_photos)
 
 

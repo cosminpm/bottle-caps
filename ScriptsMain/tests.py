@@ -20,7 +20,7 @@ def test_get_dict_all_matches_i_have():
 
     for entry in entries:
         path_to_image = os.path.join(folder_photos, entry)
-        all_matches = get_dict_all_matches(path_to_image)
+        all_matches, _ = get_dict_all_matches(path_to_image)
 
         result_all_matches = get_all_names_from_all_matches(all_matches)
         expected_result = set(json_solution[entry])
