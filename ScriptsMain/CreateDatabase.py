@@ -14,7 +14,7 @@ def crate_db_for_cap(cap_name: str, image_folder: str, result_folder: str):
     cap_img = cv2.imread(cap_path)
     cap_img = cv2.cvtColor(cap_img, cv2.COLOR_BGR2GRAY)
 
-    sift = cv2.SIFT_create()
+    sift = cv2.SIFT_create(nfeatures=200)
 
     kps, dcps = sift.detectAndCompute(cap_img, None)
 
