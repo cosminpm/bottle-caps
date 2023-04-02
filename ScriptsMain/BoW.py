@@ -1,31 +1,52 @@
 import json
 import os
+import pickle
 
 from sklearn.cluster import KMeans
 import numpy as np
-import matplotlib
 
 from ScriptsMain.SIFT import get_dcp_and_kps
 from ScriptsMain.utils import read_img
-
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
 
 
 def load_descs():
     script_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     json_folder_path = os.path.join(script_path, "database\cluster")
     descs = []
+    names = []
     for json_file_name in os.listdir(json_folder_path):
         json_file_path = os.path.join(json_folder_path, json_file_name)
         with open(json_file_path, 'r') as f:
-            descs.append(json.load(f)['dcps'])
-    return descs
+            data = json.load(f)
+            names.append(data['name'])
+            descs.append(data['dcps'])
+    return names, descs
+
+
+
+def train_kmeans():
+    descriptors = load_descs()[:100]
+    kmeans = KMeans(n_clusters=500, n_init=10)
+    kmeans.fit(np.vstack(descriptors))
+    return kmeans
+
+
+def save_model(model, filename):
+    with open(filename, 'wb') as f:
+        pickle.dump(model, f)
+
+
+def load_model(filename):
+    with open(filename, 'rb') as f:
+        model = pickle.load(f)
+    return model
 
 
 def main():
     # Step 1: Extract SIFT descriptors from a sample of your changing database
-    descriptors = load_descs()[:100]
+    names, descriptors = load_descs()
+    descriptors = descriptors[:100]
+    names = names[:100]
     # Step 2: Cluster the descriptors into visual words using K-means clustering
     kmeans = KMeans(n_clusters=500, n_init=10)
     kmeans.fit(np.vstack(descriptors))
@@ -33,7 +54,7 @@ def main():
     # Step 3: Assign each descriptor to its nearest visual word
     bags_of_words = []
 
-    all_dcps = load_descs()
+    all_dcps = load_descs()[1][:100]
     for dcp in all_dcps:
         labels = kmeans.predict(dcp)
         bag_of_words = np.zeros(500)
@@ -64,12 +85,13 @@ def main():
         distance = np.linalg.norm(new_histogram - histogram)
         distances.append(distance)
 
-
     k = 5  # Number of closest images to print
     closest_indices = np.argsort(distances)[:k]
     print(f"The {k} closest images are:")
     for i in closest_indices:
-        print(i)
+        print(names[i])
+    print("LEN", len(distances))
+
 
 if __name__ == '__main__':
     main()
