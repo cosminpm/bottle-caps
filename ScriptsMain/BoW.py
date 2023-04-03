@@ -15,6 +15,7 @@ number_of_caps_histogram = 500
 
 file_kmeans = os.path.join(script_path, "models-bow", "model.pkl")
 file_bow = os.path.join(script_path, "models-bow", "bow.json")
+file_histo = os.path.join(script_path, "models-bow", "histo.json")
 
 
 def load_descs():
@@ -87,7 +88,6 @@ def save_bag_of_words(kmeans, filename_bow):
         bags_of_words.append(bag_of_words)
     bags_of_words_list = [list(bow) for bow in bags_of_words]
     with open(filename_bow, 'w') as f:
-
         json.dump(bags_of_words_list, f)
 
 
@@ -95,7 +95,7 @@ def load_bag_of_words(filename_bow):
     """
     Load bags of words from a JSON file.
     Args:
-        filename: Name of the file.
+        filename_bow: Name of the file.
     Returns:
         List of bags of words.
     """
@@ -104,38 +104,50 @@ def load_bag_of_words(filename_bow):
     return bags_of_words
 
 
-def main():
-    # Step 2: Cluster the descriptors into visual words using K-means clustering
-
-    kmeans = load_model_kmeans(file_kmeans)
-
-    # Step 3: Assign each descriptor to its nearest visual word
-    bags_of_words = load_bag_of_words(filename_bow=file_bow)
-    # Step 4: Represent each image as a histogram of visual words
+def save_histograms(bags_of_words, filename_histo):
     histograms = []
-    for bag_of_words in bags_of_words:
-        histogram = bag_of_words / np.sum(bag_of_words)
+    for bag in bags_of_words:
+        histogram = bag / np.sum(bags_of_words)
         histograms.append(histogram)
 
-    # Step 5: Compare a new SIFT descriptor to the histograms of visual words for all images in the changing database
+    histo_list = [list(histogram) for histogram in histograms]
+    with open(filename_histo, 'w') as f:
+        json.dump(histo_list, f)
 
-    img = os.path.join(script_path, r"database\test-images\test-i-have\6.png")
+
+def load_histogram(filename_histo):
+    with open(filename_histo, 'r') as f:
+        bags_of_words = json.load(f)
+    return bags_of_words
+
+
+def get_histogram(kmeans, descriptor):
+    new_label = kmeans.predict(descriptor)
+    new_histogram = np.zeros(number_of_clusters)
+    new_histogram[new_label] += 1
+    new_histogram /= np.sum(new_histogram)
+    return new_histogram
+
+
+def main():
+    kmeans = load_model_kmeans(file_kmeans)
+    histograms = load_histogram(filename_histo=file_histo)
+
+    img = os.path.join(script_path, "database", "test-images", "test-i-have", "7.png")
 
     _, new_descriptor = get_dcp_and_kps(read_img(img))  # replace with a new SIFT descriptor
     new_descriptor = new_descriptor.astype('float')
 
-    new_label = kmeans.predict(new_descriptor)
-    new_histogram = np.zeros(number_of_clusters)
-    new_histogram[new_label] += 1
-    new_histogram /= np.sum(new_histogram)
+    new_histogram = get_histogram(kmeans, new_descriptor)
+
     distances = []
     for histogram in histograms:
         distance = np.linalg.norm(new_histogram - histogram)
         distances.append(distance)
 
-    k = 50  # Number of closest images to print
+    k = 20  # Number of closest images to print
     closest_indices = np.argsort(distances)[:k]
-    print(f"The {k} closest images are:")
+    print(f"The {k} closest images to {img} are:")
     names, _ = load_descs()
     names = names[:number_of_caps_histogram]
     for i in closest_indices:
@@ -150,12 +162,7 @@ def train_and_save_model():
     save_model_kmeans(kmeans, file_kmeans)
 
 
-def safe_bow(kmeans_model):
-    save_bag_of_words(kmeans_model, file_bow)
-
-
 if __name__ == '__main__':
     # train_and_save_model()
-    #kmeans = load_model_kmeans(file_kmeans)
-    #safe_bow(kmeans)
+    # kmeans = load_model_kmeans(file_kmeans)
     main()
