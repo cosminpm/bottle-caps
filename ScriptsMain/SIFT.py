@@ -91,7 +91,8 @@ def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.nd
         cap_str = os.path.join(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster", name_img)
         kps_cap, dcps_cap = get_kps_and_dcps_from_json(cap_str)
 
-        # A match is a tuple which contains the matches, the path of the cap, the len of the photo cap and the len fo descriptors of the rectangle
+        # A match is a tuple which contains the matches, the path of the cap, the len of the photo cap and the len of
+        # descriptors of the rectangle
         match = (
             get_matches_after_matcher_sift(dcps_cap, dcp_rectangle), cap_str, len(dcps_cap), len(dcp_rectangle))
         matches.append(match)
@@ -225,7 +226,8 @@ def get_dict_all_matches(path_to_image: str) -> (list[dict], np.ndarray):
 
 def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[int, int, int, int]) -> dict:
     """
-    Creates the info of the json about one match, it focuses on getting the descriptors and keypoints and then getting the best match for that cap on the photo
+    Creates the info of the json about one match, it focuses on getting the descriptors and keypoints and then getting
+    the best match for that cap on the photo
 
     :param np.ndarray rectangle_image: Rectangle of the cap in the photo image
     :param tuple[int, int, int, int] pos_rectangle: Position of the rectangle in the original photo

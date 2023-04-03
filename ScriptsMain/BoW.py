@@ -4,7 +4,6 @@ import pickle
 
 import numpy as np
 from sklearn.cluster import KMeans
-
 from ScriptsMain.SIFT import get_dcp_and_kps
 from ScriptsMain.utils import read_img
 
@@ -76,7 +75,7 @@ def load_model_kmeans(filename):
     return model
 
 
-def save_bag_of_words(kmeans, filename_bow):
+def train_and_save_bag_of_words(kmeans, filename_bow):
     bags_of_words = []
 
     all_dcps = load_descs()[1][:number_of_caps_histogram]
@@ -89,6 +88,7 @@ def save_bag_of_words(kmeans, filename_bow):
     bags_of_words_list = [list(bow) for bow in bags_of_words]
     with open(filename_bow, 'w') as f:
         json.dump(bags_of_words_list, f)
+    return bags_of_words
 
 
 def load_bag_of_words(filename_bow):
@@ -104,7 +104,7 @@ def load_bag_of_words(filename_bow):
     return bags_of_words
 
 
-def save_histograms(bags_of_words, filename_histo):
+def train_and_save_histograms(bags_of_words, filename_histo):
     histograms = []
     for bag in bags_of_words:
         histogram = bag / np.sum(bags_of_words)
@@ -152,7 +152,6 @@ def main():
     names = names[:number_of_caps_histogram]
     for i in closest_indices:
         print(names[i])
-    print("LEN", len(distances))
 
 
 def train_and_save_model():
@@ -160,9 +159,15 @@ def train_and_save_model():
     _, descriptors = load_descs()[:number_of_caps]
     kmeans.fit(np.vstack(descriptors))
     save_model_kmeans(kmeans, file_kmeans)
+    return kmeans
+
+
+def train_all():
+    kmeans = train_and_save_model()
+    bow = train_and_save_bag_of_words(kmeans=kmeans, filename_bow=file_bow)
+    train_and_save_histograms(bags_of_words=bow, filename_histo=file_histo)
 
 
 if __name__ == '__main__':
-    # train_and_save_model()
-    # kmeans = load_model_kmeans(file_kmeans)
+    train_all()
     main()
