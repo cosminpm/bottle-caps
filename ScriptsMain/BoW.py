@@ -13,6 +13,9 @@ number_of_clusters = 150
 number_of_caps = 300
 number_of_caps_histogram = 500
 
+file_kmeans = os.path.join(script_path, "models-bow", "model.pkl")
+file_bow = os.path.join(script_path, "models-bow", "bow.json")
+
 
 def load_descs():
     """
@@ -72,12 +75,7 @@ def load_model_kmeans(filename):
     return model
 
 
-def main():
-    # Step 2: Cluster the descriptors into visual words using K-means clustering
-    file_kmeans = os.path.join(script_path, "models-bow\model.pkl")
-    kmeans = load_model_kmeans(file_kmeans)
-
-    # Step 3: Assign each descriptor to its nearest visual word
+def save_bag_of_words(kmeans, filename_bow):
     bags_of_words = []
 
     all_dcps = load_descs()[1][:number_of_caps_histogram]
@@ -87,7 +85,32 @@ def main():
         for label in labels:
             bag_of_words[label] += 1
         bags_of_words.append(bag_of_words)
+    bags_of_words_list = [list(bow) for bow in bags_of_words]
+    with open(filename_bow, 'w') as f:
 
+        json.dump(bags_of_words_list, f)
+
+
+def load_bag_of_words(filename_bow):
+    """
+    Load bags of words from a JSON file.
+    Args:
+        filename: Name of the file.
+    Returns:
+        List of bags of words.
+    """
+    with open(filename_bow, 'r') as f:
+        bags_of_words = json.load(f)
+    return bags_of_words
+
+
+def main():
+    # Step 2: Cluster the descriptors into visual words using K-means clustering
+
+    kmeans = load_model_kmeans(file_kmeans)
+
+    # Step 3: Assign each descriptor to its nearest visual word
+    bags_of_words = load_bag_of_words(filename_bow=file_bow)
     # Step 4: Represent each image as a histogram of visual words
     histograms = []
     for bag_of_words in bags_of_words:
@@ -124,10 +147,15 @@ def train_and_save_model():
     kmeans = KMeans(n_clusters=number_of_clusters, n_init=10)
     _, descriptors = load_descs()[:number_of_caps]
     kmeans.fit(np.vstack(descriptors))
-    file_kmeans = os.path.join(script_path, "models-bow", "model.pkl")
     save_model_kmeans(kmeans, file_kmeans)
+
+
+def safe_bow(kmeans_model):
+    save_bag_of_words(kmeans_model, file_bow)
 
 
 if __name__ == '__main__':
     # train_and_save_model()
+    #kmeans = load_model_kmeans(file_kmeans)
+    #safe_bow(kmeans)
     main()
