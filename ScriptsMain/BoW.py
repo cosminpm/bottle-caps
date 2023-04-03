@@ -8,9 +8,10 @@ import numpy as np
 from ScriptsMain.SIFT import get_dcp_and_kps
 from ScriptsMain.utils import read_img
 
+script_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 def load_descs():
-    script_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     json_folder_path = os.path.join(script_path, "database\cluster")
     descs = []
     names = []
@@ -25,7 +26,7 @@ def load_descs():
 
 
 def train_kmeans():
-    descriptors = load_descs()[:100]
+    _, descriptors = load_descs()[:100]
     kmeans = KMeans(n_clusters=500, n_init=10)
     kmeans.fit(np.vstack(descriptors))
     return kmeans
@@ -43,13 +44,11 @@ def load_model(filename):
 
 
 def main():
-    # Step 1: Extract SIFT descriptors from a sample of your changing database
     names, descriptors = load_descs()
-    descriptors = descriptors[:100]
     names = names[:100]
     # Step 2: Cluster the descriptors into visual words using K-means clustering
-    kmeans = KMeans(n_clusters=500, n_init=10)
-    kmeans.fit(np.vstack(descriptors))
+    file_kmeans = os.path.join(script_path, "models-bow\model.pkl")
+    kmeans = load_model(file_kmeans)
 
     # Step 3: Assign each descriptor to its nearest visual word
     bags_of_words = []
@@ -70,7 +69,6 @@ def main():
 
     # Step 5: Compare a new SIFT descriptor to the histograms of visual words for all images in the changing database
 
-    script_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     img = os.path.join(script_path, r"database\test-images\test-i-have\6.png")
 
     _, new_descriptor = get_dcp_and_kps(read_img(img))  # replace with a new SIFT descriptor
@@ -93,5 +91,12 @@ def main():
     print("LEN", len(distances))
 
 
+def train_and_safe_model():
+    kmeans = train_kmeans()
+    file_kmeans = os.path.join(script_path, "models-bow\model.pkl")
+    save_model(kmeans, file_kmeans)
+
+
 if __name__ == '__main__':
+    #train_and_safe_model()
     main()
