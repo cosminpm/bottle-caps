@@ -5,12 +5,12 @@ from typing import Optional, Any
 import cv2
 import numpy as np
 
+from ScriptsMain.BoW import apply_BOW_with_dcp
 from ScriptsMain.HTC import hough_transform_circle
 from ScriptsMain.blobs import get_avg_size_all_blobs
-from ScriptsMain.utils import resize_image, rgb_to_bgr, read_img
+from ScriptsMain.utils import resize_image, rgb_to_bgr, read_img, get_dcp_and_kps
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
-SIFT = cv2.SIFT_create()
 
 script_path = os.path.abspath(__file__)
 script_dir = os.path.dirname(script_path)
@@ -86,16 +86,17 @@ def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.nd
     """
     matches = []
 
-    entries = os.listdir(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster")
+    #entries = os.listdir(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster")
+    entries = apply_BOW_with_dcp(dcp_rectangle)
 
     for name_img in entries:
-        cap_str = os.path.join(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster", name_img)
-        kps_cap, dcps_cap = get_kps_and_dcps_from_json(cap_str)
+        #cap_str = os.path.join(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster", name_img)
+        kps_cap, dcps_cap = get_kps_and_dcps_from_json(name_img)
 
         # A match is a tuple which contains the matches, the path of the cap, the len of the photo cap and the len of
         # descriptors of the rectangle
         match = (
-            get_matches_after_matcher_sift(dcps_cap, dcp_rectangle), cap_str, len(dcps_cap), len(dcp_rectangle))
+            get_matches_after_matcher_sift(dcps_cap, dcp_rectangle), name_img, len(dcps_cap), len(dcp_rectangle))
         matches.append(match)
     return matches
 
@@ -149,14 +150,7 @@ def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list[tuple[i
     return cropped_images
 
 
-def get_dcp_and_kps(img: np.ndarray) -> tuple:
-    """
-    Detect and compute the descriptors and keypoints of the image
 
-    ":param np.ndarray img: The image to get descriptors and keypoints
-    :return: Returns a tuple with descriptors and keypoints
-    """
-    return SIFT.detectAndCompute(img, None)
 
 
 def get_matches_after_matcher_sift(cap_dcp: np.ndarray, rectangle_image: np.ndarray) -> list:
@@ -190,7 +184,6 @@ def preprocess_image_size(img: np.ndarray) -> np.ndarray:
     while size > max_size_img:
         resized = resize_image(resized, 0.66)
         height, width = resized.shape[:2]
-        print(height, width)
         size = height * width
     return resized
 
@@ -339,7 +332,7 @@ def apply_main_method_to_all_images(folder_photos: str) -> None:
 
 
 def main():
-    folder_photos = '../database/test-images/one-image'
+    folder_photos = '../database/test-images/test-i-have'
     apply_main_method_to_all_images(folder_photos=folder_photos)
 
 

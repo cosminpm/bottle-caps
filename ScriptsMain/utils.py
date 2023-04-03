@@ -3,6 +3,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+SIFT = cv2.SIFT_create()
+
 
 def get_name_from_path(path: str) -> str:
     return path.split("\\")[-1]
@@ -12,12 +14,23 @@ def resize_img_pix_with_name(cap_path, path_output, pix):
     cap_name = get_name_from_path(cap_path)
     lst_name_cap = cap_name.split(".")
     cap_name = lst_name_cap[0] + "_{}".format(str(pix)) + "." + lst_name_cap[-1]
-    output = resize_image_and_save(path_to_image=cap_path, width=pix, height=pix, where_save=path_output, name_output=cap_name)
+    output = resize_image_and_save(path_to_image=cap_path, width=pix, height=pix, where_save=path_output,
+                                   name_output=cap_name)
     return output
 
 
 def read_img(img_path: str) -> np.ndarray:
     return cv2.cvtColor(cv2.imread(img_path), 1)
+
+
+def get_dcp_and_kps(img: np.ndarray) -> tuple:
+    """
+    Detect and compute the descriptors and keypoints of the image
+
+    ":param np.ndarray img: The image to get descriptors and keypoints
+    :return: Returns a tuple with descriptors and keypoints
+    """
+    return SIFT.detectAndCompute(img, None)
 
 
 # -- Resizing --

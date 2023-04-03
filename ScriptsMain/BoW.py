@@ -4,13 +4,12 @@ import pickle
 
 import numpy as np
 from sklearn.cluster import KMeans
-from ScriptsMain.SIFT import get_dcp_and_kps
-from ScriptsMain.utils import read_img
+from ScriptsMain.utils import read_img, get_dcp_and_kps
 
 script_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-number_of_clusters = 150
-number_of_caps = 300
-number_of_caps_histogram = 500
+number_of_clusters = 500
+number_of_caps = 510
+number_of_caps_histogram = 510
 
 file_kmeans = os.path.join(script_path, "models-bow", "model.pkl")
 file_bow = os.path.join(script_path, "models-bow", "bow.json")
@@ -122,6 +121,7 @@ def load_histogram(filename_histo):
 
 
 def get_histogram(kmeans, descriptor):
+    descriptor = descriptor.astype('float')
     new_label = kmeans.predict(descriptor)
     new_histogram = np.zeros(number_of_clusters)
     new_histogram[new_label] += 1
@@ -129,29 +129,27 @@ def get_histogram(kmeans, descriptor):
     return new_histogram
 
 
-def apply_BOW(path_to_img: str):
+def apply_BOW_with_dcp(descriptor):
     kmeans = load_model_kmeans(file_kmeans)
     histograms = load_histogram(filename_histo=file_histo)
 
-    _, new_descriptor = get_dcp_and_kps(read_img(path_to_img))  # replace with a new SIFT descriptor
-    new_descriptor = new_descriptor.astype('float')
+    # _, new_descriptor = get_dcp_and_kps(read_img(path_to_img))  # replace with a new SIFT descriptor
+    # new_descriptor = new_descriptor.astype('float')
 
-    new_histogram = get_histogram(kmeans, new_descriptor)
+    new_histogram = get_histogram(kmeans, descriptor)
 
     distances = []
     for histogram in histograms:
         distance = np.linalg.norm(new_histogram - histogram)
         distances.append(distance)
 
-    k = 20  # Number of closest images to print
+    k = 10  # Number of closest images to print
     closest_indices = np.argsort(distances)[:k]
-    print(f"The {k} closest images to {path_to_img} are:")
     names, _ = load_descs()
-    names = names[:number_of_caps_histogram]
-    for i in closest_indices:
-        print(names[i])
+    names = [names[i] for i in closest_indices]
 
     return names
+
 
 def train_and_save_model():
     kmeans = KMeans(n_clusters=number_of_clusters, n_init=10)
@@ -168,5 +166,11 @@ def train_all():
 
 
 if __name__ == '__main__':
-    path_to_img = os.path.join(script_path, "database", "test-images", "test-i-have", "7.png")
-    apply_BOW(path_to_img=path_to_img)
+    #train_all()
+    path_to_img = os.path.join(script_path, "database", "test-images", "test-i-have", "8.png")
+
+    _, new_descriptor = get_dcp_and_kps(read_img(path_to_img))  # replace with a new SIFT descriptor
+    new_descriptor = new_descriptor.astype('float')
+
+    names = apply_BOW_with_dcp(descriptor=new_descriptor)
+    print(names)
