@@ -31,7 +31,7 @@ def load_descs():
         json_file_path = os.path.join(json_folder_path, json_file_name)
         with open(json_file_path, 'r') as f:
             data = json.load(f)
-            names.append(data['name'])
+            names.append(data['json_path'])
             descs.append(data['dcps'])
     return names, descs
 
@@ -129,13 +129,11 @@ def get_histogram(kmeans, descriptor):
     return new_histogram
 
 
-def main():
+def apply_BOW(path_to_img: str):
     kmeans = load_model_kmeans(file_kmeans)
     histograms = load_histogram(filename_histo=file_histo)
 
-    img = os.path.join(script_path, "database", "test-images", "test-i-have", "7.png")
-
-    _, new_descriptor = get_dcp_and_kps(read_img(img))  # replace with a new SIFT descriptor
+    _, new_descriptor = get_dcp_and_kps(read_img(path_to_img))  # replace with a new SIFT descriptor
     new_descriptor = new_descriptor.astype('float')
 
     new_histogram = get_histogram(kmeans, new_descriptor)
@@ -147,12 +145,13 @@ def main():
 
     k = 20  # Number of closest images to print
     closest_indices = np.argsort(distances)[:k]
-    print(f"The {k} closest images to {img} are:")
+    print(f"The {k} closest images to {path_to_img} are:")
     names, _ = load_descs()
     names = names[:number_of_caps_histogram]
     for i in closest_indices:
         print(names[i])
 
+    return names
 
 def train_and_save_model():
     kmeans = KMeans(n_clusters=number_of_clusters, n_init=10)
@@ -169,5 +168,5 @@ def train_all():
 
 
 if __name__ == '__main__':
-    train_all()
-    main()
+    path_to_img = os.path.join(script_path, "database", "test-images", "test-i-have", "7.png")
+    apply_BOW(path_to_img=path_to_img)

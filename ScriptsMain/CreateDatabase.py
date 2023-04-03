@@ -25,7 +25,7 @@ def crate_db_for_cap(cap_name: str, image_folder: str, result_folder: str):
     cap_result = os.path.join(result_folder, cap_name) + ".json"
 
     entry = {
-        "name": cap_name,
+        "name": cap_name + ".jpg",
         "path": cap_path,
         "json_path": cap_result,
         "json_name": cap_name + ".json",

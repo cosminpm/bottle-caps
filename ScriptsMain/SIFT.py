@@ -87,6 +87,7 @@ def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.nd
     matches = []
 
     entries = os.listdir(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster")
+
     for name_img in entries:
         cap_str = os.path.join(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster", name_img)
         kps_cap, dcps_cap = get_kps_and_dcps_from_json(cap_str)
