@@ -13,6 +13,7 @@ number_of_clusters = 150
 number_of_caps = 300
 number_of_caps_histogram = 500
 
+
 def load_descs():
     """
     Load the descriptors from JSON files.
@@ -47,7 +48,7 @@ def train_kmeans(descriptors, n_clusters=number_of_clusters, n_init=10):
     return kmeans
 
 
-def save_model(model, filename):
+def save_model_kmeans(model, filename):
     """
     Save trained model to a file.
     Args:
@@ -58,7 +59,7 @@ def save_model(model, filename):
         pickle.dump(model, f)
 
 
-def load_model(filename):
+def load_model_kmeans(filename):
     """
     Load trained model from a file.
     Args:
@@ -72,10 +73,9 @@ def load_model(filename):
 
 
 def main():
-
     # Step 2: Cluster the descriptors into visual words using K-means clustering
     file_kmeans = os.path.join(script_path, "models-bow\model.pkl")
-    kmeans = load_model(file_kmeans)
+    kmeans = load_model_kmeans(file_kmeans)
 
     # Step 3: Assign each descriptor to its nearest visual word
     bags_of_words = []
@@ -125,10 +125,9 @@ def train_and_save_model():
     _, descriptors = load_descs()[:number_of_caps]
     kmeans.fit(np.vstack(descriptors))
     file_kmeans = os.path.join(script_path, "models-bow", "model.pkl")
-    save_model(kmeans, file_kmeans)
-
+    save_model_kmeans(kmeans, file_kmeans)
 
 
 if __name__ == '__main__':
-    train_and_save_model()
+    # train_and_save_model()
     main()
