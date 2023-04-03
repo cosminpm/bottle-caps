@@ -34,7 +34,7 @@ def crate_db_for_cap(cap_name: str, image_folder: str, result_folder: str):
     }
 
     with open(cap_result, "w") as outfile:
-        print("Writing:{}".format(cap_result))
+        # print("Writing:{}".format(cap_result))
         json.dump(entry, outfile)
 
 

@@ -143,7 +143,7 @@ def apply_BOW_with_dcp(descriptor):
         distance = np.linalg.norm(new_histogram - histogram)
         distances.append(distance)
 
-    k = 10  # Number of closest images to print
+    k = 10
     closest_indices = np.argsort(distances)[:k]
     names, _ = load_descs()
     names = [names[i] for i in closest_indices]
@@ -173,4 +173,4 @@ if __name__ == '__main__':
     new_descriptor = new_descriptor.astype('float')
 
     names = apply_BOW_with_dcp(descriptor=new_descriptor)
-    print(names)
+    # print(names)

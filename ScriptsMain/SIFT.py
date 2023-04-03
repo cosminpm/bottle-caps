@@ -43,8 +43,8 @@ def calculate_success(new: [dict]) -> float:
     :param dict new: entry with the dictionary of the cap
     :return: returns the percentage of the success rate
     """
-    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.25
-    second_param = (new['num_matches'] / new['len_cap_dcp']) * 0.75
+    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.5
+    second_param = (new['num_matches'] / new['len_cap_dcp']) * 0.5
     result = first_param + second_param
     return result
 
@@ -86,17 +86,17 @@ def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.nd
     """
     matches = []
 
-    #entries = os.listdir(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster")
-    entries = apply_BOW_with_dcp(dcp_rectangle)
+    entries = os.listdir(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster")
+    #entries = apply_BOW_with_dcp(dcp_rectangle)
 
     for name_img in entries:
-        #cap_str = os.path.join(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster", name_img)
-        kps_cap, dcps_cap = get_kps_and_dcps_from_json(name_img)
+        cap_str = os.path.join(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster", name_img)
+        kps_cap, dcps_cap = get_kps_and_dcps_from_json(cap_str)
 
         # A match is a tuple which contains the matches, the path of the cap, the len of the photo cap and the len of
         # descriptors of the rectangle
         match = (
-            get_matches_after_matcher_sift(dcps_cap, dcp_rectangle), name_img, len(dcps_cap), len(dcp_rectangle))
+            get_matches_after_matcher_sift(dcps_cap, dcp_rectangle), cap_str, len(dcps_cap), len(dcp_rectangle))
         matches.append(match)
     return matches
 
@@ -233,7 +233,7 @@ def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[
     if dcp_rectangle is not None:
         best_match_json = get_best_match(dcp_rectangle)
         # Get the position of the rectangle
-        print(best_match_json)
+        # print(best_match_json)
         if best_match_json is not None and best_match_json['num_matches'] > 0:
             best_match_json['positions'] = {"x": pos_rectangle[0],
                                             "y": pos_rectangle[1],

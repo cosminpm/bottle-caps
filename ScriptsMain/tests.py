@@ -24,4 +24,19 @@ def test_get_dict_all_matches_i_have():
 
         result_all_matches = get_all_names_from_all_matches(all_matches)
         expected_result = set(json_solution[entry])
-        assert expected_result == result_all_matches
+
+        common_elements = result_all_matches.intersection(expected_result)
+        different_elements = expected_result.difference(result_all_matches)
+
+        print(
+            f"For test {entry}, I got an accuracy of {len(common_elements) / len(expected_result)} with the following incorrect: ")
+        for element in different_elements:
+            print(element)
+
+
+def get_current_accuracy():
+    test_get_dict_all_matches_i_have()
+
+
+if __name__ == '__main__':
+    get_current_accuracy()

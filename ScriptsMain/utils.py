@@ -46,7 +46,6 @@ def resize_image_and_save(path_to_image, width, height, where_save, name_output)
     output = os.path.join(where_save, name_output)
 
     cv2.imwrite(output, resized)
-    print(f'Resizing:{output}')
     return output
 
 
