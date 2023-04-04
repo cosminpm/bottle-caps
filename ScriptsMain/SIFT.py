@@ -43,8 +43,8 @@ def calculate_success(new: [dict]) -> float:
     :param dict new: entry with the dictionary of the cap
     :return: returns the percentage of the success rate
     """
-    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.5
-    second_param = (new['num_matches'] / new['len_cap_dcp']) * 0.5
+    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0
+    second_param = (new['num_matches'] / new['len_cap_dcp']) * 1.0
     result = first_param + second_param
     return result
 

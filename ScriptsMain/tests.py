@@ -29,9 +29,7 @@ def test_get_dict_all_matches_i_have():
         different_elements = expected_result.difference(result_all_matches)
 
         print(
-            f"For test {entry}, I got an accuracy of {len(common_elements) / len(expected_result)} with the following incorrect: ")
-        for element in different_elements:
-            print(element)
+            f"For test {entry}, I got an accuracy of {len(common_elements) / len(expected_result)}")
 
 
 def get_current_accuracy():

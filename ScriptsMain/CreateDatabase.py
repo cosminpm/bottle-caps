@@ -14,13 +14,13 @@ def crate_db_for_cap(cap_name: str, image_folder: str, result_folder: str):
     cap_img = cv2.imread(cap_path)
     cap_img = cv2.cvtColor(cap_img, cv2.COLOR_BGR2GRAY)
 
-    sift = cv2.SIFT_create(nfeatures=200)
+    sift = cv2.SIFT_create(nfeatures=500)
 
     kps, dcps = sift.detectAndCompute(cap_img, None)
 
     keypoints_list = [[kp.pt[0], kp.pt[1], kp.size, kp.angle, kp.response, kp.octave, kp.class_id] for kp in kps]
 
-    dcps = dcps.tolist()[:200]
+    dcps = dcps.tolist()[:500]
     cap_name = cap_name.split(".")[0]
     cap_result = os.path.join(result_folder, cap_name) + ".json"
 
