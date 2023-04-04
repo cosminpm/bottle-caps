@@ -43,8 +43,8 @@ def calculate_success(new: [dict]) -> float:
     :param dict new: entry with the dictionary of the cap
     :return: returns the percentage of the success rate
     """
-    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0
-    second_param = (new['num_matches'] / new['len_cap_dcp']) * 1.0
+    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.5
+    second_param = (new['num_matches'] / new['len_cap_dcp']) * 0.5
     result = first_param + second_param
     return result
 
@@ -87,7 +87,7 @@ def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.nd
     matches = []
 
     entries = os.listdir(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster")
-    #entries = apply_BOW_with_dcp(dcp_rectangle)
+    # entries = apply_BOW_with_dcp(dcp_rectangle)
 
     for name_img in entries:
         cap_str = os.path.join(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster", name_img)
@@ -148,9 +148,6 @@ def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list[tuple[i
         if len(cropped_image) > 0:
             cropped_images.append((cropped_image, (x, y, w, h)))
     return cropped_images
-
-
-
 
 
 def get_matches_after_matcher_sift(cap_dcp: np.ndarray, rectangle_image: np.ndarray) -> list:
@@ -240,6 +237,7 @@ def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[
                                             "w": pos_rectangle[2],
                                             "h": pos_rectangle[3]}
             best_match_json['name'] = get_name_from_json(best_match_json['path_file'])
+            print(best_match_json)
             return best_match_json
 
 
@@ -332,7 +330,7 @@ def apply_main_method_to_all_images(folder_photos: str) -> None:
 
 
 def main():
-    folder_photos = '../database/test-images/test-i-have'
+    folder_photos = '../database/test-images/one-image'
     apply_main_method_to_all_images(folder_photos=folder_photos)
 
 

@@ -14,27 +14,29 @@ def crate_db_for_cap(cap_name: str, image_folder: str, result_folder: str):
     cap_img = cv2.imread(cap_path)
     cap_img = cv2.cvtColor(cap_img, cv2.COLOR_BGR2GRAY)
 
-    sift = cv2.SIFT_create(nfeatures=500)
+    sift = cv2.SIFT_create(nfeatures=200)
 
     kps, dcps = sift.detectAndCompute(cap_img, None)
 
     keypoints_list = [[kp.pt[0], kp.pt[1], kp.size, kp.angle, kp.response, kp.octave, kp.class_id] for kp in kps]
 
-    dcps = dcps.tolist()[:500]
+    dcps = dcps.tolist()[:200]
     cap_name = cap_name.split(".")[0]
     cap_result = os.path.join(result_folder, cap_name) + ".json"
-
+    print(len(dcps))
     entry = {
         "name": cap_name + ".jpg",
         "path": cap_path,
         "json_path": cap_result,
         "json_name": cap_name + ".json",
+        "len_kps": len(kps),
+        "len_dcps": len(dcps),
         "kps": keypoints_list,
         "dcps": dcps
     }
 
     with open(cap_result, "w") as outfile:
-        # print("Writing:{}".format(cap_result))
+        print("Writing:{}".format(cap_result))
         json.dump(entry, outfile)
 
 
