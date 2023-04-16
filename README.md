@@ -44,7 +44,7 @@ The bottle caps database is in `<REPOSITORY_PATH>/database/caps-resized/`. If yo
 ## Example 
 
 Example of the SIFT script. Here you can see it has a lot of improvements points. All 4 caps should be detected as green as they are in the database. The first two work correctly but the two on the bottom are labeled incorrectly. Also speed should be improved. On the `ScriptsMain/note_tests/README.md` you can see some more notes about the tests.
-![img_1.png](img_1.png)
+![image](https://user-images.githubusercontent.com/51784809/232329262-603f6ff8-a1df-423a-bb16-22454085e084.png)
 
 ## Tasks - TO DO 
 
