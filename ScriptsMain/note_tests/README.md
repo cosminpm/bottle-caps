@@ -2,7 +2,7 @@
 
 - Test 1.jpg, I got an accuracy of 1.0
 
-- Test 2.jpg, I got an accuracy of 0.3333333333333333
+- Test 2.jpg, I got an accuracy of 0.33
 
 - Test 3.jpg, I got an accuracy of 0.4
 

@@ -28,7 +28,22 @@ Using the approximate radius determined from the blobs, a lower and upper bound 
 
 With the positions of the circles and their radii determined, the image was cropped and each crop was compared to an entry in the database using a comparison method. The best match was kept if it was a match or not.
 
-## TO DO 
+
+
+## How to Install and test
+Note: As currently this project is not finished I am not releasing an app yet, as I have to finish the algorithm and the Flutter app. Here are the steps on how to download the project and test the algorithm.
+
+1. Download this project and uncompress it. 
+2. You must have installed Python3 (I am using Python 3.10 it can work with other versions, but I recommend this one). You can install it from [here](https://www.python.org/downloads/).
+3. Download Pycharm, you can download it from [here](https://www.jetbrains.com/es-es/pycharm/download/#section=windows) _(Note: It could work without Pycharm and instead use the terminal, but I recommend using this configuration.)_
+4. Have this set up for the running configuration:
+![img.png](img.png)
+5. Run `<REPOSITORY_PATH>/ScriptsMain/SIFT.py`
+
+The bottle caps database is in `<REPOSITORY_PATH>/database/caps-resized/`. If you want to add more images there you have to run `<REPOSITORY_PATH>/ScriptsMain/CreateDatabase.py`. Then it will create the `.json` files in `<REPOSITORY_PATH>/database/cluster`. There is the real database.
+
+
+## Tasks - TO DO 
 
 The following tasks are currently under development or planned for the future:
 
