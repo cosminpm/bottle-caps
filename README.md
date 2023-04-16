@@ -28,8 +28,6 @@ Using the approximate radius determined from the blobs, a lower and upper bound 
 
 With the positions of the circles and their radii determined, the image was cropped and each crop was compared to an entry in the database using a comparison method. The best match was kept if it was a match or not.
 
-
-
 ## How to Install and test
 Note: As currently this project is not finished I am not releasing an app yet, as I have to finish the algorithm and the Flutter app. Here are the steps on how to download the project and test the algorithm.
 
@@ -43,13 +41,16 @@ Note: As currently this project is not finished I am not releasing an app yet, a
 The bottle caps database is in `<REPOSITORY_PATH>/database/caps-resized/`. If you want to add more images there you have to run `<REPOSITORY_PATH>/ScriptsMain/CreateDatabase.py`. Then it will create the `.json` files in `<REPOSITORY_PATH>/database/cluster`. There is the real database.
 
 
+## Example 
+
+Example of the SIFT script. Here you can see it has a lot of improvements points. All 4 caps should be detected as green as they are in the database. The first two work correctly but the two on the bottom are labeled incorrectly. Also speed should be improved. On the `ScriptsMain/note_tests/README.md` you can see some more notes about the tests.
+![img_1.png](img_1.png)
+
 ## Tasks - TO DO 
 
 The following tasks are currently under development or planned for the future:
 
 - Implement a tree structure for the database or use clustering to group images, reducing the algorithm from $O(n^2)$ to $O(nlogn)$ using trees or $O(nk)$ using clustering (where $k$ is the number of clusters).
-
 - Improve the match decision by using the maximum number of keypoints detected in an image. This will determine the threshold. If an image has low quality, fewer keypoints will be detected, and it would not make sense to maintain the threshold for a high-quality image.
-
 - Develop an Android and iOS app using Flutter (currently under development).
 - Deploy on AWS using a lambda function.
