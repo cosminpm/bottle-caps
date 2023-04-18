@@ -185,6 +185,23 @@ def preprocess_image_size(img: np.ndarray) -> np.ndarray:
     return resized
 
 
+def detect_caps(img):
+
+    # Preprocess image
+    img = preprocess_image_size(img)
+
+    _, avg_size = get_avg_size_all_blobs(img)
+    cropped_images = []
+    if avg_size != 0:
+        _, circles = hough_transform_circle(img, avg_size)
+        # Get the positions of the rectangles
+        rectangles = get_rectangles(circles)
+        # Crop the images from the rectangles
+        cropped_images = crop_image_into_rectangles(img, rectangles)
+        # Final dictionary which will contain all the positions and info from the cap
+    return cropped_images
+
+
 def get_dict_all_matches(path_to_image: str) -> (list[dict], np.ndarray):
     """
     This is one of the more important functions for this project, it creates the json for all the matches
@@ -193,25 +210,12 @@ def get_dict_all_matches(path_to_image: str) -> (list[dict], np.ndarray):
     :return: Returns a list of json with all the information about the match
     """
     img = read_img(path_to_image)
-
-    # Preprocess image
-    img = preprocess_image_size(img)
-
-    _, avg_size = get_avg_size_all_blobs(img)
+    cropped_images = detect_caps(img)
     caps_matches = []
+    for rectangle_image, pos_rectangle in cropped_images:
+        best_match_json = create_dict_for_one_match(rectangle_image=rectangle_image, pos_rectangle=pos_rectangle)
+        caps_matches.append(best_match_json)
 
-    if avg_size != 0:
-        _, circles = hough_transform_circle(img, avg_size)
-        # Get the positions of the rectangles
-        rectangles = get_rectangles(circles)
-        # Crop the images from the rectangles
-        cropped_images = crop_image_into_rectangles(img, rectangles)
-        # Final dictionary which will contain all the positions and info from the cap
-        caps_matches = []
-
-        for rectangle_image, pos_rectangle in cropped_images:
-            best_match_json = create_dict_for_one_match(rectangle_image=rectangle_image, pos_rectangle=pos_rectangle)
-            caps_matches.append(best_match_json)
     return caps_matches, img
 
 
