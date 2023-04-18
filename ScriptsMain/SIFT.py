@@ -278,9 +278,9 @@ def draw_match(img: np.ndarray, match: dict, color_name: tuple[int, int, int],
     x, y, w, h = match_pos['x'], match_pos['y'], match_pos['w'], match_pos['h']
     center = (x + int(w / 2), y + int(h / 2))
     radius = int(w / 2)
-    name = match['name'] + " " + "{:.2f}".format(match['success'])
+    img = cv2.circle(img, center, radius, color_circle, 4)
 
-    cv2.circle(img, center, radius, color_circle, 4)
+    name = match['name'] + " " + "{:.2f}".format(match['success'])
     img = cv2.rectangle(img, (x, int(y + h / 2) - 10), (x + w + 25, int(y + h / 2) + 15), (0, 0, 0), -1)
     cv2.putText(img, name.upper(), (x, int(y + h / 2)), cv2.FONT_HERSHEY_SIMPLEX, 1 * 0.33, color_name, 1,
                 cv2.LINE_AA)

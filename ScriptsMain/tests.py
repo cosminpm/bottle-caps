@@ -34,16 +34,44 @@ def test_get_dict_all_matches_i_have():
         print(f"For test {entry}, I got an accuracy of {len(common_elements) / len(expected_result)}")
 
 
-def get_hsv(path: str):
-    hsv_img = cv2.imread(path, cv2.COLOR_RGB2HSV)
-    # Calculate the average values for H, S, and V
-    h_avg = np.mean(hsv_img[:, :, 0])
-    s_avg = np.mean(hsv_img[:, :, 1])
-    v_avg = np.mean(hsv_img[:, :, 2])
+def read_hsv(path: str):
+    return cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2HSV)
 
-    print("Hue average: ", h_avg)
-    print("Saturation average: ", s_avg)
-    print("Value average: ", v_avg)
+
+def get_avg_hsv_values(path: str):
+    hsv_img = read_hsv(path)
+    height, width = hsv_img.shape[:2]
+    center = (width // 2, height // 2)
+    radius = min(center[0], center[1])
+
+    # Create a circular mask
+    mask = np.zeros((height, width), dtype=np.uint8)
+    cv2.circle(mask, center, radius, 255, -1)
+    hsv_circle = cv2.bitwise_and(hsv_img, hsv_img, mask=mask)
+
+    # Calculate the average HSV values over the circular region
+    avg_hsv = cv2.mean(hsv_circle, mask=mask)[:3]
+
+    # Convert the average HSV values to integers
+    avg_hsv = [int(x) for x in avg_hsv]
+    return avg_hsv
+
+
+def get_hsv(path: str):
+    avg_hsv = get_avg_hsv_values(path)
+
+    # Convert the average HSV values to BGR color space for display
+    bgr_color = cv2.cvtColor(np.array([[avg_hsv]], dtype=np.uint8), cv2.COLOR_HSV2BGR)[0][0]
+
+    # Create an image of the color using NumPy
+    color_image = np.zeros((100, 100, 3), dtype=np.uint8)
+    color_image[:, :] = bgr_color
+
+    # Display the color image using OpenCV
+    cv2.imshow('HSV Color', color_image)
+    cv2.waitKey(0)
+
+    print("Average HSV values:", avg_hsv)
 
 
 def get_current_accuracy():
@@ -51,4 +79,4 @@ def get_current_accuracy():
 
 
 if __name__ == '__main__':
-    get_hsv('../database/caps-resized/1-crown_200.jpg')
+    get_hsv('../database/caps-resized/cap-470_200.jpg')
