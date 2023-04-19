@@ -93,7 +93,7 @@ def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.nd
         cap_str = os.path.join(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster", name_img)
         kps_cap, dcps_cap = get_kps_and_dcps_from_json(cap_str)
 
-        # A match is a tuple which contains the matches, the path of the cap, the len of the photo cap and the len of
+        # A match is a tuple which contains the matches, the PATH of the cap, the len of the photo cap and the len of
         # descriptors of the rectangle
         match = (
             get_matches_after_matcher_sift(dcps_cap, dcp_rectangle), cap_str, len(dcps_cap), len(dcp_rectangle))
@@ -116,7 +116,7 @@ def get_kps_and_dcps_from_json(path: str) -> tuple:
     """
     Loads the descriptors and keypoints of the json to the correct format
 
-    :param str path: path of the cap and the json
+    :param str path: PATH of the cap and the json
     :return: returns a tuple which contains the keypoints and descriptors
     """
     with open(path, "r") as file:

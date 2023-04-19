@@ -89,60 +89,14 @@ def get_current_accuracy():
 
 
 
-def read_lab(path: str):
-    return cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2LAB)
-
-def get_avg_lab(lab_img):
-    height, width = lab_img.shape[:2]
-    center = (width // 2, height // 2)
-    radius = min(center[0], center[1])
-
-    # Create a circular mask
-    mask = np.zeros((height, width), dtype=np.uint8)
-    cv2.circle(mask, center, radius, 255, -1)
-    lab_circle = cv2.bitwise_and(lab_img, lab_img, mask=mask)
-
-    # Calculate the average LAB values over the circular region
-    avg = cv2.mean(lab_circle, mask=mask)[:3]
-
-    # Convert the average LAB values to integers
-    avg = [int(x) for x in avg]
-    return avg
 
 
-def get_lab_mean_from_path(path: str):
-    lab_image = read_lab(path)
-    avg = get_avg_lab(lab_image)
-
-    # Convert the average LAB values to BGR color space for display
-    bgr_color = cv2.cvtColor(np.array([[avg]], dtype=np.uint8), cv2.COLOR_LAB2BGR)[0][0]
-
-    # Create an image of the color using NumPy
-    color_image = np.zeros((100, 100, 3), dtype=np.uint8)
-    color_image[:, :] = bgr_color
-
-    # Display the color image using OpenCV
-    cv2.imshow('LAB Color', color_image)
-    cv2.waitKey(0)
-
-    print("Average LAB values:", avg)
 
 
-def get_avg_lab_from_picture(path_picture):
-    img = read_img(path_picture)
-    list_caps = detect_caps(img)
-    for cap in list_caps:
-        cap_array = cap[0]  # extract the NumPy array from the tuple
-        lab_image = cv2.cvtColor(cap_array.astype(np.uint8), cv2.COLOR_BGR2LAB)
-        avg = get_avg_lab(lab_image)
-        print(avg)
+
+
+
 
 
 if __name__ == '__main__':
-    get_lab_mean_from_path('../database/caps-resized/5-star_200.jpg')
-    get_lab_mean_from_path('../database/test-images/more-tests/9.png')
-
-    get_lab_mean_from_path('../database/my-caps-images/9-maze.jpg')
-    get_lab_mean_from_path('../database/test-images/more-tests/7.png')
-
-
+    pass
