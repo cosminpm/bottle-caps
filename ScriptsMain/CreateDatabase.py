@@ -4,7 +4,7 @@ import os
 import cv2
 from pathlib import Path
 
-from ScriptsMain.LABColor import get_avg_from_path
+from ScriptsMain.LABColor import get_avg_lab_from_path
 
 DEBUG_BLOB = False
 MY_CAPS_IMGS_FOLDER = r"database\caps-resized"
@@ -32,7 +32,7 @@ def crate_db_for_cap(cap_name: str, image_folder: str, result_folder: str):
     dcps = dcps.tolist()[:200]
     cap_name = cap_name.split(".")[0]
     cap_result = os.path.join(result_folder, cap_name) + ".json"
-    avg_lab = get_avg_from_path(cap_path)
+    avg_lab = get_avg_lab_from_path(cap_path)
     entry = {
         "name": cap_name + ".jpg",
         "path": cap_path,

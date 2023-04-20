@@ -1,4 +1,5 @@
-import bisect
+import json
+from bisect import bisect_left
 
 import cv2
 import numpy as np
@@ -11,10 +12,16 @@ CLUSTER_FOLDER = r"database\cluster"
 PATH = Path(os.getcwd())
 CAPS_FOLDER = os.path.join(PATH.parent.absolute(), MY_CAPS_IMGS_FOLDER)
 ENTRIES = os.listdir(CAPS_FOLDER)
+SORTED_CLUSTER_FILE = 'database\sorted_cluster.json'
+FULL_PATH_SORTED_CLUSTER_FILE = os.path.join(PATH.parent.absolute(), SORTED_CLUSTER_FILE)
 
 
 def read_lab(path: str):
     return cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2LAB)
+
+
+def read_lab_from_np(image_np: np.ndarray):
+    return cv2.cvtColor(image_np, cv2.COLOR_RGB2LAB)
 
 
 def get_avg_lab(lab_img):
@@ -35,32 +42,60 @@ def get_avg_lab(lab_img):
     return avg
 
 
-def get_avg_from_path(path: str):
+def get_avg_lab_from_np(img_np: np.ndarray):
+    lab_img = read_lab_from_np(img_np)
+    return get_avg_lab(lab_img=lab_img)
+
+
+def get_avg_lab_from_path(path: str):
     lab_img = read_lab(path)
     return get_avg_lab(lab_img=lab_img)
 
 
-import bisect
+def find_closest_matches(lst, new_tuple):
+    """
+    Finds the 10 closest matches to a new tuple in a sorted list of tuples.
+    """
+    MAX_DISTANCE = 10
+    index = bisect_left(lst, new_tuple)
+    matches = []
+    i = index - 1
+    j = index
+    while len(matches) < MAX_DISTANCE and (i >= 0 or j < len(lst)):
+        if i >= 0 and (j == len(lst) or abs(lst[i][0] - new_tuple[0]) + abs(lst[i][1] - new_tuple[1]) <= abs(
+                lst[j][0] - new_tuple[0]) + abs(lst[j][1] - new_tuple[1])):
+            matches.append(i)
+            i -= 1
+        else:
+            matches.append(j)
+            j += 1
+    return matches
 
 
+def find_closest_match_in_cluster_json(path: str, color_to_be_found: tuple) -> list[int]:
+    with open(path, "r") as file:
+        json_data = json.load(file)
+        lst = [(i['avg_lab'][1], i['avg_lab'][2]) for i in json_data]
+        best_matches = find_closest_matches(lst, color_to_be_found)
+        return [json_data[index] for index in best_matches]
 
-def find_closest_match(sorted_list, target):
-    MAX_DISTANCE = 1
-    left = bisect.bisect_left(sorted_list, target - MAX_DISTANCE)
-    right = bisect.bisect_right(sorted_list, target + MAX_DISTANCE)
-    print(sorted_list[left], sorted_list[right])
-    if left == len(sorted_list):
-        return sorted_list[left - 1]
-    elif right == 0:
-        return sorted_list[0] if target < sorted_list[0] else sorted_list[1]
-    elif sorted_list[left] - target < target - sorted_list[right - 1]:
-        return sorted_list[left]
-    else:
-        return sorted_list[right - 1]
 
+def display_lab_color(lab_color: tuple[int, int, int]):
+    # Create a single pixel image with the LAB color
+    lab_image = np.zeros((100, 100, 3), dtype=np.uint8)
+    lab_image[..., 0] = lab_color[0]  # L channel
+    lab_image[..., 1] = lab_color[1]  # a channel
+    lab_image[..., 2] = lab_color[2]  # b channel
+
+    # Convert the LAB image to RGB for display
+    rgb_image = cv2.cvtColor(lab_image, cv2.COLOR_LAB2BGR)
+
+    # Show the RGB image using OpenCV
+    cv2.imshow("LAB Color", rgb_image)
+    cv2.waitKey(0)
 
 
 if __name__ == '__main__':
-    lst = [-40, 1, 40, 56, 120, 11111,222222,333333333,44444444444,55555555555555555,66666666666666666666666666666 ]
-    a = find_closest_match(lst, -50)
-    print(a)
+    color = (110, 138)
+    best_match = find_closest_match_in_cluster_json(FULL_PATH_SORTED_CLUSTER_FILE, color)
+    print(best_match)

@@ -1,12 +1,13 @@
 import json
 import os
 from typing import Optional, Any
-
+from pathlib import Path
 import cv2
 import numpy as np
 
-from ScriptsMain.BoW import apply_BOW_with_dcp
 from ScriptsMain.HTC import hough_transform_circle
+from ScriptsMain.LABColor import read_lab_from_np, get_avg_lab_from_np, find_closest_match_in_cluster_json, \
+    display_lab_color
 from ScriptsMain.blobs import get_avg_size_all_blobs
 from ScriptsMain.utils import resize_image, rgb_to_bgr, read_img, get_dcp_and_kps
 
@@ -16,6 +17,11 @@ script_path = os.path.abspath(__file__)
 script_dir = os.path.dirname(script_path)
 file_path = os.path.join(script_dir, 'SIFT_variable.json')
 VARIABLES = json.load(open(file_path))
+
+# TODO: Add this to variables
+PATH = Path(os.getcwd())
+SORTED_CLUSTER_FILE = 'database\sorted_cluster.json'
+FULL_PATH_SORTED_CLUSTER_FILE = os.path.join(PATH.parent.absolute(), SORTED_CLUSTER_FILE)
 
 
 def get_rectangles(circles: list[tuple[int, int, int]]) -> list[tuple[int, int, int, int]]:
@@ -56,6 +62,7 @@ def get_best_match(dcp_rectangle: np.ndarray) -> Optional[dict]:
     :param  np.ndarray dcp_rectangle: Descriptors of the rectangle image
     :return: Returns a dictionary with all the information about the cap
     """
+
     matches = compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle)
     if matches is None:
         return None
@@ -87,7 +94,6 @@ def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.nd
     matches = []
 
     entries = os.listdir(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster")
-    # entries = apply_BOW_with_dcp(dcp_rectangle)
 
     for name_img in entries:
         cap_str = os.path.join(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster", name_img)
@@ -213,9 +219,17 @@ def get_dict_all_matches(path_to_image: str) -> (list[dict], np.ndarray):
     cropped_images = detect_caps(img)
     caps_matches = []
     for rectangle_image, pos_rectangle in cropped_images:
+        a = get_avg_lab_from_np(rectangle_image)
+        a = tuple(a)
+        a = (a[1],a[2])
+        b = find_closest_match_in_cluster_json(FULL_PATH_SORTED_CLUSTER_FILE, a)
+
+        print(a, b)
+        #display_lab_color(a)
+
         best_match_json = create_dict_for_one_match(rectangle_image=rectangle_image, pos_rectangle=pos_rectangle)
         caps_matches.append(best_match_json)
-
+        print("-----")
     return caps_matches, img
 
 
