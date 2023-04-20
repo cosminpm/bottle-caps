@@ -41,35 +41,40 @@ def get_rectangles(circles: list[tuple[int, int, int]]) -> list[tuple[int, int, 
     return rectangles
 
 
-# TODO: Improve here
-def calculate_success(new: [dict]) -> float:
+# TODO: Improve here and modify index to variable of max in LAB COLOR
+def calculate_success(new: [dict], index: int) -> float:
     """
     Calculates how successful was the cap match based on the descriptors and the len of the matches
 
     :param dict new: entry with the dictionary of the cap
     :return: returns the percentage of the success rate
     """
-    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.5
-    second_param = (new['num_matches'] / new['len_cap_dcp']) * 0.5
-    result = first_param + second_param
+    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.25
+    second_param = (new['num_matches'] / new['len_cap_dcp']) * 0.25
+    third_param = (50 - index) / 50 * 0.5
+    print(third_param)
+
+    result = first_param + second_param + third_param
     return result
 
 
-def get_best_match(dcp_rectangle: np.ndarray) -> Optional[dict]:
+def get_best_match(dcp_rectangle: np.ndarray, best_matches_lab: list) -> Optional[dict]:
     """
     Gets the best match based on the success rate from all the json matches
 
-    :param  np.ndarray dcp_rectangle: Descriptors of the rectangle image
+    :param np.ndarray dcp_rectangle: Descriptors of the rectangle image
+    :param list best_matches_lab: List of matches based on LAB path, avg_lab
     :return: Returns a dictionary with all the information about the cap
     """
 
-    matches = compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle)
+    matches = compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle, best_matches_lab)
     if matches is None:
         return None
     cap_file = {'num_matches': 0,
                 'path_file': None,
                 'success': 0}
 
+    index = 1
     for match in matches:
         new = {'num_matches': len(match[0]),
                'path_file': match[1],
@@ -77,32 +82,33 @@ def get_best_match(dcp_rectangle: np.ndarray) -> Optional[dict]:
                'len_rectangle_dcp': match[3]}
         # Important, here is how we define the success rate
 
-        new['success'] = calculate_success(new)
+        new['success'] = calculate_success(new, index)
         if new['success'] > cap_file['success']:
             cap_file = new
+        index += 1
     return cap_file
 
 
 # TODO: Improve here so the comparison is not with all the images
-def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.ndarray):
+def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.ndarray, best_matches_lab: list):
     """
     Compare the current image with the database and returns a list with the matches,name,and both descriptors
 
     :param np.ndarray dcp_rectangle: the descritpros of the rectangle
+    :param list best_matches_lab: list of matches based on LAB ["path":<PATH>, "avg_lab":<(1,2,3)>]
     :return: Returns all the matches of that image
     """
     matches = []
 
-    entries = os.listdir(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster")
+    entries = [entry['json_path'] for entry in best_matches_lab]
 
     for name_img in entries:
-        cap_str = os.path.join(r"C:\Users\cosmi\Desktop\BottleCaps\database\cluster", name_img)
-        kps_cap, dcps_cap = get_kps_and_dcps_from_json(cap_str)
+        kps_cap, dcps_cap = get_kps_and_dcps_from_json(name_img)
 
         # A match is a tuple which contains the matches, the PATH of the cap, the len of the photo cap and the len of
         # descriptors of the rectangle
         match = (
-            get_matches_after_matcher_sift(dcps_cap, dcp_rectangle), cap_str, len(dcps_cap), len(dcp_rectangle))
+            get_matches_after_matcher_sift(dcps_cap, dcp_rectangle), name_img, len(dcps_cap), len(dcp_rectangle))
         matches.append(match)
     return matches
 
@@ -192,7 +198,6 @@ def preprocess_image_size(img: np.ndarray) -> np.ndarray:
 
 
 def detect_caps(img):
-
     # Preprocess image
     img = preprocess_image_size(img)
 
@@ -208,6 +213,12 @@ def detect_caps(img):
     return cropped_images
 
 
+def get_best_lab_matches(rectangle_img: np.ndarray):
+    avg_lab_rct = tuple(get_avg_lab_from_np(rectangle_img))
+    avg_lab_rct = (avg_lab_rct[1], avg_lab_rct[2])
+    return find_closest_match_in_cluster_json(FULL_PATH_SORTED_CLUSTER_FILE, avg_lab_rct)
+
+
 def get_dict_all_matches(path_to_image: str) -> (list[dict], np.ndarray):
     """
     This is one of the more important functions for this project, it creates the json for all the matches
@@ -219,14 +230,6 @@ def get_dict_all_matches(path_to_image: str) -> (list[dict], np.ndarray):
     cropped_images = detect_caps(img)
     caps_matches = []
     for rectangle_image, pos_rectangle in cropped_images:
-        a = get_avg_lab_from_np(rectangle_image)
-        a = tuple(a)
-        a = (a[1],a[2])
-        b = find_closest_match_in_cluster_json(FULL_PATH_SORTED_CLUSTER_FILE, a)
-
-        print(a, b)
-        #display_lab_color(a)
-
         best_match_json = create_dict_for_one_match(rectangle_image=rectangle_image, pos_rectangle=pos_rectangle)
         caps_matches.append(best_match_json)
         print("-----")
@@ -246,9 +249,11 @@ def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[
 
     # Get the best possible match for each cap
     if dcp_rectangle is not None:
-        best_match_json = get_best_match(dcp_rectangle)
-        # Get the position of the rectangle
-        # print(best_match_json)
+
+        # TODO: Get best matches
+        best_matches_lab = get_best_lab_matches(rectangle_image)
+        best_match_json = get_best_match(dcp_rectangle, best_matches_lab)
+
         if best_match_json is not None and best_match_json['num_matches'] > 0:
             best_match_json['positions'] = {"x": pos_rectangle[0],
                                             "y": pos_rectangle[1],

@@ -82,7 +82,7 @@ def sort_database():
         path_to_db = os.path.join(BD_FOLDER, entry)
         with open(path_to_db, "r") as file:
             json_data = json.load(file)
-            one_cap_info = {'path': json_data['path'],
+            one_cap_info = {'json_path': json_data['json_path'],
                             'avg_lab': json_data['avg_lab']}
             json_data_sorted.append(one_cap_info)
     caps_sorted = sorted(json_data_sorted, key=lambda x: (x['avg_lab'][1], x['avg_lab'][2]))

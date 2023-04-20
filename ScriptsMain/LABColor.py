@@ -56,7 +56,7 @@ def find_closest_matches(lst, new_tuple):
     """
     Finds the 10 closest matches to a new tuple in a sorted list of tuples.
     """
-    MAX_DISTANCE = 10
+    MAX_DISTANCE = 50
     index = bisect_left(lst, new_tuple)
     matches = []
     i = index - 1
