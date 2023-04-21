@@ -93,4 +93,5 @@ def sort_database():
 
 
 if __name__ == '__main__':
+    create_database_caps()
     sort_database()

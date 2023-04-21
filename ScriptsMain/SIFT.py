@@ -6,8 +6,7 @@ import cv2
 import numpy as np
 
 from ScriptsMain.HTC import hough_transform_circle
-from ScriptsMain.LABColor import read_lab_from_np, get_avg_lab_from_np, find_closest_match_in_cluster_json, \
-    display_lab_color
+from ScriptsMain.LABColor import get_avg_lab_from_np, find_closest_match_in_cluster_json
 from ScriptsMain.blobs import get_avg_size_all_blobs
 from ScriptsMain.utils import resize_image, rgb_to_bgr, read_img, get_dcp_and_kps
 
@@ -15,8 +14,13 @@ MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 
 script_path = os.path.abspath(__file__)
 script_dir = os.path.dirname(script_path)
-file_path = os.path.join(script_dir, 'SIFT_variable.json')
-VARIABLES = json.load(open(file_path))
+file_path_sift = os.path.join(script_dir, 'SIFT_variable.json')
+
+file_path_lab = os.path.join(script_dir, 'LABColor_variables.json')
+VARIABLES_LAB = json.load(open(file_path_lab))
+VARIABLES_SIFT = json.load(open(file_path_sift))
+
+
 
 # TODO: Add this to variables
 PATH = Path(os.getcwd())
@@ -49,10 +53,9 @@ def calculate_success(new: [dict], index: int) -> float:
     :param dict new: entry with the dictionary of the cap
     :return: returns the percentage of the success rate
     """
-    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.25
-    second_param = (new['num_matches'] / new['len_cap_dcp']) * 0.25
-    third_param = (50 - index) / 50 * 0.5
-    print(third_param)
+    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.49
+    second_param = (new['num_matches'] / new['len_cap_dcp']) * 0.49
+    third_param = (VARIABLES_LAB['MAX_DISTANCE'] - index) / VARIABLES_LAB['MAX_DISTANCE'] * 0.02
 
     result = first_param + second_param + third_param
     return result
@@ -176,7 +179,7 @@ def get_matches_after_matcher_sift(cap_dcp: np.ndarray, rectangle_image: np.ndar
         else:
             cap_dcp = np.array(cap_dcp, dtype=np.float32)
     matches = MATCHER.match(cap_dcp, rectangle_image)
-    return sorted(matches, key=lambda x: x.distance)[:VARIABLES['MAX_MATCHES']]
+    return sorted(matches, key=lambda x: x.distance)[:VARIABLES_SIFT['MAX_MATCHES']]
 
 
 def preprocess_image_size(img: np.ndarray) -> np.ndarray:
@@ -188,7 +191,7 @@ def preprocess_image_size(img: np.ndarray) -> np.ndarray:
     """
     height, width = img.shape[:2]
     size = height * width
-    max_size_img = VARIABLES["MAX_WIDTH_IMAGE"] * VARIABLES["MAX_HEIGHT_IMAGE"]
+    max_size_img = VARIABLES_SIFT["MAX_WIDTH_IMAGE"] * VARIABLES_SIFT["MAX_HEIGHT_IMAGE"]
     resized = img
     while size > max_size_img:
         resized = resize_image(resized, 0.66)
@@ -215,7 +218,7 @@ def detect_caps(img):
 
 def get_best_lab_matches(rectangle_img: np.ndarray):
     avg_lab_rct = tuple(get_avg_lab_from_np(rectangle_img))
-    avg_lab_rct = (avg_lab_rct[1], avg_lab_rct[2])
+    print(avg_lab_rct)
     return find_closest_match_in_cluster_json(FULL_PATH_SORTED_CLUSTER_FILE, avg_lab_rct)
 
 
@@ -252,6 +255,7 @@ def create_dict_for_one_match(rectangle_image: np.ndarray, pos_rectangle: tuple[
 
         # TODO: Get best matches
         best_matches_lab = get_best_lab_matches(rectangle_image)
+        print(best_matches_lab)
         best_match_json = get_best_match(dcp_rectangle, best_matches_lab)
 
         if best_match_json is not None and best_match_json['num_matches'] > 0:
@@ -275,7 +279,7 @@ def filter_if_best_martch_is_good_enough_all_matches(all_caps_matches: list[dict
     bad_matches = []
     for match in all_caps_matches:
         if match is not None:
-            if match['success'] > VARIABLES['SUCCESS_MIN']:
+            if match['success'] > VARIABLES_SIFT['SUCCESS_MIN']:
                 good_matches.append(match)
             else:
                 bad_matches.append(match)

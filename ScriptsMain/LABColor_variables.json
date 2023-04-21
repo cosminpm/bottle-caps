@@ -1,0 +1,7 @@
+{
+  "MY_CAPS_IMGS_FOLDER": "database\\caps-resized",
+  "CLUSTER_FOLDER": "database\\cluster",
+  "SORTED_CLUSTER_FILE" : "database\\sorted_cluster.json",
+  "MAX_DISTANCE": 150
+
+}
