@@ -19,8 +19,12 @@ def resize_img_pix_with_name(cap_path, path_output, pix):
     return output
 
 
-def read_img(img_path: str) -> np.ndarray:
+def read_img_from_path(img_path: str) -> np.ndarray:
     return cv2.cvtColor(cv2.imread(img_path), 1)
+
+
+def read_img_numpy(img_np) -> np.ndarray:
+    return cv2.cvtColor(img_np, 1)
 
 
 def get_dcp_and_kps(img: np.ndarray) -> tuple:
@@ -41,7 +45,7 @@ def resize_image(src, factor):
 
 
 def resize_image_and_save(path_to_image, width, height, where_save, name_output):
-    src = read_img(path_to_image)
+    src = read_img_from_path(path_to_image)
     resized = cv2.resize(src, (width, height))
     output = os.path.join(where_save, name_output)
 

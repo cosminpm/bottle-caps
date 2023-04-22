@@ -1,9 +1,7 @@
 import json
 import os
 
-
 from ScriptsMain.SIFT import get_dict_all_matches, detect_caps
-
 
 
 def get_all_names_from_all_matches(all_matches: list[dict]):
@@ -30,15 +28,6 @@ def test_get_dict_all_matches_i_have():
         common_elements = result_all_matches.intersection(expected_result)
 
         print(f"For test {entry}, I got an accuracy of {len(common_elements) / len(expected_result)}")
-
-
-
-
-
-
-
-
-
 
 
 def get_current_accuracy():

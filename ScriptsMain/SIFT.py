@@ -8,7 +8,7 @@ import numpy as np
 from ScriptsMain.HTC import hough_transform_circle
 from ScriptsMain.LABColor import get_avg_lab_from_np, find_closest_match_in_cluster_json
 from ScriptsMain.blobs import get_avg_size_all_blobs
-from ScriptsMain.utils import resize_image, rgb_to_bgr, read_img, get_dcp_and_kps
+from ScriptsMain.utils import resize_image, rgb_to_bgr, read_img_from_path, get_dcp_and_kps
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 
@@ -51,6 +51,7 @@ def calculate_success(new: [dict], index: int) -> float:
     Calculates how successful was the cap match based on the descriptors and the len of the matches
 
     :param dict new: entry with the dictionary of the cap
+    :param int index: order index
     :return: returns the percentage of the success rate
     """
     first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.49
@@ -78,6 +79,7 @@ def get_best_match(dcp_rectangle: np.ndarray, best_matches_lab: list) -> Optiona
                 'success': 0}
 
     index = 1
+    result_matches = []
     for match in matches:
         new = {'num_matches': len(match[0]),
                'path_file': match[1],
@@ -86,13 +88,19 @@ def get_best_match(dcp_rectangle: np.ndarray, best_matches_lab: list) -> Optiona
         # Important, here is how we define the success rate
 
         new['success'] = calculate_success(new, index)
+        result_matches.append(new)
         if new['success'] > cap_file['success']:
             cap_file = new
         index += 1
+    result_matches = sorted(result_matches, key=lambda x: -x['success'])
+    print(result_matches)
+    a = [(i['path_file'], i['success']) for i in result_matches][:10]
+    for i in a:
+        print(i)
+
     return cap_file
 
 
-# TODO: Improve here so the comparison is not with all the images
 def compare_descriptors_rectangle_with_database_descriptors(dcp_rectangle: np.ndarray, best_matches_lab: list):
     """
     Compare the current image with the database and returns a list with the matches,name,and both descriptors
@@ -150,7 +158,8 @@ def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list[tuple[i
 
     :param np.ndarray photo_image: the original photo
     :param list[tuple[int, int, int, int]] rectangles: a list of tuples with the x,y and width and height position
-    :return: list[np.ndarray, tuple[int, int, int, int]] Returns a list of list which contains the cropped image and the position on where it was cropped
+    :return: list[np.ndarray, tuple[int, int, int, int]] Returns a list of list which contains the cropped image and the
+     position on where it was cropped
     """
     cropped_images = []
     for x, y, w, h in rectangles:
@@ -200,7 +209,7 @@ def preprocess_image_size(img: np.ndarray) -> np.ndarray:
     return resized
 
 
-def detect_caps(img):
+def detect_caps(img) -> list[(np.ndarray, list[int])]:
     # Preprocess image
     img = preprocess_image_size(img)
 
@@ -229,7 +238,7 @@ def get_dict_all_matches(path_to_image: str) -> (list[dict], np.ndarray):
     :param str path_to_image: Path to the image that is going to be analyzed
     :return: Returns a list of json with all the information about the match
     """
-    img = read_img(path_to_image)
+    img = read_img_from_path(path_to_image)
     cropped_images = detect_caps(img)
     caps_matches = []
     for rectangle_image, pos_rectangle in cropped_images:
@@ -318,7 +327,7 @@ def draw_matches_from_path(path_to_image: str, all_matches: list[dict]) -> None:
     :param str path_to_image:  Path of the image that is going to be drawn
     :param list[dict] all_matches: List of dict that contains the info about the matches
     """
-    img = read_img(path_to_image)
+    img = read_img_from_path(path_to_image)
     draw_matches(img=img, all_matches=all_matches)
 
 
