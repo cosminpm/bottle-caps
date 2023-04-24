@@ -1,26 +1,26 @@
-import numpy as np
-from flask import Flask, request, jsonify
-import cv2
+import json
 
 from ScriptsMain.SIFT import detect_caps
+from ScriptsMain.utils import read_img_from_path
+import argparse
 
-app = Flask(__name__)
 
-
-@app.route('/process_image', methods=['POST'])
-def process_image():
-    # Parse the image from the request
-    image_file = request.files['image']
-    image_data = image_file.read()
-    image_array = np.frombuffer(image_data, np.uint8)
-    image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+def process_image(path: str):
+    image = read_img_from_path(path)
 
     cropped_images = detect_caps(image)
-    result = [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
-    print(result)
-    # Return the JPEG file as a response with the correct MIME type
-    return jsonify(result)
+    return [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
 
 
 if __name__ == '__main__':
-    app.run()
+    # Define and parse command-line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--image-file', type=str, required=True,
+                        help='Path to input image file')
+    args = parser.parse_args()
+    result = process_image(args.image_file)
+
+    json_result = json.dumps(result)
+
+    with open("./result_detect_caps.json", 'w') as f:
+        json.dump(result, f)
