@@ -1,7 +1,7 @@
 import json
 
-from ScriptsMain.SIFT import detect_caps
-from ScriptsMain.utils import read_img_from_path
+from SIFT import detect_caps
+from utils import read_img_from_path
 import argparse
 
 

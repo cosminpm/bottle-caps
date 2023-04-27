@@ -1,11 +1,10 @@
-FROM python:3.9-slim-buster
+FROM python:3.9
 
-WORKDIR /app
-
-COPY requirements.txt ./
+COPY . ./
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 RUN pip install --no-cache-dir -r requirements.txt
-ENV PYTHONPATH=C:\Users\cosmi\Desktop\BottleCaps\ScriptsMain
 
-COPY . .
 
-ENTRYPOINT [ "python", "./ScriptsMain/DetectAPI.py" ]
+WORKDIR ./ScriptsMain
+ENTRYPOINT [ "python", "DetectAPI.py"]
+

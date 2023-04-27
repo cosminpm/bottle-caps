@@ -5,10 +5,10 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from ScriptsMain.HTC import hough_transform_circle
-from ScriptsMain.LABColor import get_avg_lab_from_np, find_closest_match_in_cluster_json
-from ScriptsMain.blobs import get_avg_size_all_blobs
-from ScriptsMain.utils import resize_image, rgb_to_bgr, read_img_from_path, get_dcp_and_kps
+from HTC import hough_transform_circle
+from LABColor import get_avg_lab_from_np, find_closest_match_in_cluster_json
+from blobs import get_avg_size_all_blobs
+from utils import resize_image, rgb_to_bgr, read_img_from_path, get_dcp_and_kps
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 
