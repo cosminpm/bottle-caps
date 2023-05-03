@@ -4,20 +4,9 @@ from math import sqrt
 
 import cv2
 import numpy as np
-import os
-from pathlib import Path
 
-script_path = os.path.abspath(__file__)
-script_dir = os.path.dirname(script_path)
-file_path = os.path.join(script_dir, 'LABColor_variables.json')
-VARIABLES = json.load(open(file_path))
-
-
-PATH = Path(os.getcwd())
-CAPS_FOLDER = os.path.join(PATH.parent.absolute(), VARIABLES['MY_CAPS_IMGS_FOLDER'])
-ENTRIES = os.listdir(CAPS_FOLDER)
-FULL_PATH_SORTED_CLUSTER_FILE = os.path.join(PATH.parent.absolute(), VARIABLES['SORTED_CLUSTER_FILE'])
-
+MAX_DISTANCE = 150
+FULL_PATH_SORTED_CLUSTER_FILE = r'C:\Users\cosmi\Desktop\BottleCaps\database\sorted_cluster.json'
 
 def read_lab(path: str):
     return cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2LAB)
@@ -67,7 +56,7 @@ def find_closest_matches(lst, new_tuple):
     """
     Finds the indices of the 10 closest matches to a new tuple in a sorted list of tuples.
     """
-    max_distance = VARIABLES['MAX_DISTANCE']
+    max_distance = MAX_DISTANCE
     heap = []
     for index, color_lst in enumerate(lst):
         diff = delta_e(color_lst, new_tuple)

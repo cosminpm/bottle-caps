@@ -1,24 +1,20 @@
 import json
+import sys
 
 from SIFT import detect_caps
-from utils import read_img_from_path
-import argparse
+from utils_fun import read_img_from_path
 
 
 def process_image(path: str):
     image = read_img_from_path(path)
-
     cropped_images = detect_caps(image)
     return [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
 
 
 if __name__ == '__main__':
-    # Define and parse command-line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--image-file', type=str, required=True,
-                        help='Path to input image file')
-    args = parser.parse_args()
-    result = process_image(args.image_file)
+    # C:\Users\cosmi\Desktop\BottleCaps\database\test-images\test-i-have\5.jpg
+    inFile = sys.argv[1]
+    result = process_image(inFile)
 
     json_result = json.dumps(result)
 

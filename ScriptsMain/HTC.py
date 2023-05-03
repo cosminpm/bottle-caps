@@ -1,12 +1,10 @@
-import json
-import os
+
 import cv2
 import numpy as np
 
-script_path = os.path.abspath(__file__)
-script_dir = os.path.dirname(script_path)
-file_path = os.path.join(script_dir, 'HTC_variables.json')
-VARIABLES = json.load(open(file_path))
+DEBUG_HOUGH_TRANSFORM = 0
+multiplier_left_max_radius = 0.8
+multiplier_right_max_radius = 1
 
 
 def combine_overlapping_circles(circles):
@@ -29,13 +27,13 @@ def hough_transform_circle(img: np.ndarray, max_radius: int) -> (np.ndarray, int
 
     circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 20,
                                param1=50, param2=18,
-                               minRadius=int(max_radius * VARIABLES['multiplier_left_max_radius']),
-                               maxRadius=int(max_radius * VARIABLES['multiplier_right_max_radius']))
+                               minRadius=int(max_radius * multiplier_left_max_radius),
+                               maxRadius=int(max_radius * multiplier_right_max_radius))
     circles = np.uint16(np.around(circles))
 
     circles = combine_overlapping_circles(circles)
 
-    if VARIABLES['DEBUG_HOUGH_TRANSFORM']:
+    if DEBUG_HOUGH_TRANSFORM:
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
         # Draw combined circles on image
         for (x, y, r) in circles:

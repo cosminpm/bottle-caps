@@ -8,21 +8,16 @@ import numpy as np
 from HTC import hough_transform_circle
 from LABColor import get_avg_lab_from_np, find_closest_match_in_cluster_json
 from blobs import get_avg_size_all_blobs
-from utils import resize_image, rgb_to_bgr, read_img_from_path, get_dcp_and_kps
+from utils_fun import resize_image, rgb_to_bgr, read_img_from_path, get_dcp_and_kps
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
+MY_CAPS_IMGS_FOLDER = "../database/cluster"
+MAX_MATCHES = 200
+SUCCESS_MIN = 0.30
+MAX_WIDTH_IMAGE = 1000
+MAX_HEIGHT_IMAGE = 1000
+MAX_DISTANCE = 150
 
-script_path = os.path.abspath(__file__)
-script_dir = os.path.dirname(script_path)
-file_path_sift = os.path.join(script_dir, 'SIFT_variable.json')
-
-file_path_lab = os.path.join(script_dir, 'LABColor_variables.json')
-VARIABLES_LAB = json.load(open(file_path_lab))
-VARIABLES_SIFT = json.load(open(file_path_sift))
-
-
-
-# TODO: Add this to variables
 PATH = Path(os.getcwd())
 SORTED_CLUSTER_FILE = 'database\sorted_cluster.json'
 FULL_PATH_SORTED_CLUSTER_FILE = os.path.join(PATH.parent.absolute(), SORTED_CLUSTER_FILE)
@@ -56,7 +51,7 @@ def calculate_success(new: [dict], index: int) -> float:
     """
     first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.49
     second_param = (new['num_matches'] / new['len_cap_dcp']) * 0.49
-    third_param = (VARIABLES_LAB['MAX_DISTANCE'] - index) / VARIABLES_LAB['MAX_DISTANCE'] * 0.02
+    third_param = (MAX_DISTANCE - index) / MAX_DISTANCE * 0.02
 
     result = first_param + second_param + third_param
     return result
@@ -188,7 +183,7 @@ def get_matches_after_matcher_sift(cap_dcp: np.ndarray, rectangle_image: np.ndar
         else:
             cap_dcp = np.array(cap_dcp, dtype=np.float32)
     matches = MATCHER.match(cap_dcp, rectangle_image)
-    return sorted(matches, key=lambda x: x.distance)[:VARIABLES_SIFT['MAX_MATCHES']]
+    return sorted(matches, key=lambda x: x.distance)[:MAX_MATCHES]
 
 
 def preprocess_image_size(img: np.ndarray) -> np.ndarray:
@@ -200,7 +195,7 @@ def preprocess_image_size(img: np.ndarray) -> np.ndarray:
     """
     height, width = img.shape[:2]
     size = height * width
-    max_size_img = VARIABLES_SIFT["MAX_WIDTH_IMAGE"] * VARIABLES_SIFT["MAX_HEIGHT_IMAGE"]
+    max_size_img = MAX_WIDTH_IMAGE * MAX_HEIGHT_IMAGE
     resized = img
     while size > max_size_img:
         resized = resize_image(resized, 0.66)
@@ -288,7 +283,7 @@ def filter_if_best_martch_is_good_enough_all_matches(all_caps_matches: list[dict
     bad_matches = []
     for match in all_caps_matches:
         if match is not None:
-            if match['success'] > VARIABLES_SIFT['SUCCESS_MIN']:
+            if match['success'] > SUCCESS_MIN:
                 good_matches.append(match)
             else:
                 bad_matches.append(match)

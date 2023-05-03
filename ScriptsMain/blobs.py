@@ -1,13 +1,14 @@
-import json
+
 import cv2
 import numpy as np
-import os
 
-script_path = os.path.abspath(__file__)
-script_dir = os.path.dirname(script_path)
-file_path = os.path.join(script_dir, 'blobs_variables.json')
 
-VARIABLES = json.load(open(file_path))
+DEBUG_BLOB = 0
+DEBUG_PREPROCESS_BLOBS = 0
+PREPO_number_of_levels = 3
+PREPO_convolution_size = 15
+percent_min_area_of_original = 0.01
+percent_max_area_of_original = 0.99
 
 
 def reduce_colors_images(image, number_of_levels):
@@ -25,9 +26,9 @@ def reduce_colors_images(image, number_of_levels):
 
 
 def preprocess_image_blobs(image):
-    img = cv2.GaussianBlur(image, (VARIABLES['PREPO_convolution_size'], VARIABLES['PREPO_convolution_size']), 0)
-    img = reduce_colors_images(img, VARIABLES['PREPO_number_of_levels'])
-    if VARIABLES['DEBUG_PREPROCESS_BLOBS']:
+    img = cv2.GaussianBlur(image, (PREPO_convolution_size, PREPO_convolution_size), 0)
+    img = reduce_colors_images(img, PREPO_number_of_levels)
+    if DEBUG_PREPROCESS_BLOBS:
         cv2.imshow("Preprocess img", img)
         cv2.waitKey(0)
     return img
@@ -40,8 +41,8 @@ def get_avg_size_all_blobs(img: np.ndarray):
     # Parameters of SimpleBlobDetector
     # For Area
     params.filterByArea = True
-    params.minArea = img.shape[0] * img.shape[1] * VARIABLES['percent_min_area_of_original']
-    params.maxArea = img.shape[0] * img.shape[1] * VARIABLES['percent_max_area_of_original']
+    params.minArea = img.shape[0] * img.shape[1] * percent_min_area_of_original
+    params.maxArea = img.shape[0] * img.shape[1] * percent_max_area_of_original
     params.filterByCircularity = False
     params.filterByConvexity = False
 
@@ -50,7 +51,7 @@ def get_avg_size_all_blobs(img: np.ndarray):
     keypoints = detector.detect(img)
     keypoints = remove_overlapping_blobs(kps=keypoints)
 
-    if VARIABLES['DEBUG_BLOB']:
+    if DEBUG_BLOB:
         img = cv2.drawKeypoints(img, keypoints, np.array([]), (0, 0, 255),
                                 cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
         cv2.imshow("Result", img)
