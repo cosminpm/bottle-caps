@@ -1,2 +1,0 @@
-docker build -t my-image .
-docker run -e MY_VARIABLE=my_value my_image

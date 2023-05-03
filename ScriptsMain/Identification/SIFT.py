@@ -5,17 +5,15 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from HTC import hough_transform_circle
-from LABColor import get_avg_lab_from_np, find_closest_match_in_cluster_json
-from blobs import get_avg_size_all_blobs
-from utils_fun import resize_image, rgb_to_bgr, read_img_from_path, get_dcp_and_kps
+from ScriptsMain.DatabaseScripts.LABColor import get_avg_lab_from_np, find_closest_match_in_cluster_json
+from ScriptsMain.Detection.DetectCaps import detect_caps
+from utilsFun import rgb_to_bgr, read_img_from_path, get_dcp_and_kps
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 MY_CAPS_IMGS_FOLDER = "../database/cluster"
 MAX_MATCHES = 200
 SUCCESS_MIN = 0.30
-MAX_WIDTH_IMAGE = 1000
-MAX_HEIGHT_IMAGE = 1000
+
 MAX_DISTANCE = 150
 
 PATH = Path(os.getcwd())
@@ -23,21 +21,7 @@ SORTED_CLUSTER_FILE = 'database\sorted_cluster.json'
 FULL_PATH_SORTED_CLUSTER_FILE = os.path.join(PATH.parent.absolute(), SORTED_CLUSTER_FILE)
 
 
-def get_rectangles(circles: list[tuple[int, int, int]]) -> list[tuple[int, int, int, int]]:
-    """
-    Based in the center of the circle and the ratio, transform it into a rectangle so the image can be cropped
 
-    :param list[tuple[nt,int,int]] circles: A list with tuples of the circles, x,y (center) and radius
-    :return: Returns the list of rectangles transforming into width and height
-    """
-    rectangles = []
-    for x, y, r in circles:
-        x1 = x - r
-        y1 = y - r
-        width = r * 2
-        height = r * 2
-        rectangles.append((x1, y1, width, height))
-    return rectangles
 
 
 # TODO: Improve here and modify index to variable of max in LAB COLOR
@@ -146,27 +130,7 @@ def get_kps_and_dcps_from_json(path: str) -> tuple:
     return keypoints, descriptors
 
 
-def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list[tuple[int, int, int, int]]) -> list[
-    tuple[Any, tuple[int, int, int, int]]]:
-    """
-    Crop the image based on the rectangles, if the position is negative put it to zero
 
-    :param np.ndarray photo_image: the original photo
-    :param list[tuple[int, int, int, int]] rectangles: a list of tuples with the x,y and width and height position
-    :return: list[np.ndarray, tuple[int, int, int, int]] Returns a list of list which contains the cropped image and the
-     position on where it was cropped
-    """
-    cropped_images = []
-    for x, y, w, h in rectangles:
-        # Sometimes we have to guarantee that rectangle size is greater than 0
-        if y < 0:
-            y = 0
-        if x < 0:
-            x = 0
-        cropped_image = photo_image[y:y + h, x:x + w]
-        if len(cropped_image) > 0:
-            cropped_images.append((cropped_image, (x, y, w, h)))
-    return cropped_images
 
 
 def get_matches_after_matcher_sift(cap_dcp: np.ndarray, rectangle_image: np.ndarray) -> list:
@@ -186,38 +150,10 @@ def get_matches_after_matcher_sift(cap_dcp: np.ndarray, rectangle_image: np.ndar
     return sorted(matches, key=lambda x: x.distance)[:MAX_MATCHES]
 
 
-def preprocess_image_size(img: np.ndarray) -> np.ndarray:
-    """
-    Preprocess the image for SIFT currently it resizes it
-
-    :param np.ndarray img: Original image, preprocess it for SIFT
-    :return: np.ndarray The image preprocessed for SIFT
-    """
-    height, width = img.shape[:2]
-    size = height * width
-    max_size_img = MAX_WIDTH_IMAGE * MAX_HEIGHT_IMAGE
-    resized = img
-    while size > max_size_img:
-        resized = resize_image(resized, 0.66)
-        height, width = resized.shape[:2]
-        size = height * width
-    return resized
 
 
-def detect_caps(img) -> list[(np.ndarray, list[int])]:
-    # Preprocess image
-    img = preprocess_image_size(img)
 
-    _, avg_size = get_avg_size_all_blobs(img)
-    cropped_images = []
-    if avg_size != 0:
-        _, circles = hough_transform_circle(img, avg_size)
-        # Get the positions of the rectangles
-        rectangles = get_rectangles(circles)
-        # Crop the images from the rectangles
-        cropped_images = crop_image_into_rectangles(img, rectangles)
-        # Final dictionary which will contain all the positions and info from the cap
-    return cropped_images
+
 
 
 def get_best_lab_matches(rectangle_img: np.ndarray):

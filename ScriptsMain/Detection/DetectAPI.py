@@ -1,8 +1,8 @@
 import json
 import sys
 
-from SIFT import detect_caps
-from utils_fun import read_img_from_path
+from ScriptsMain.Identification.SIFT import detect_caps
+from ScriptsMain.utilsFun import read_img_from_path
 
 
 def process_image(path: str):
@@ -18,5 +18,5 @@ if __name__ == '__main__':
 
     json_result = json.dumps(result)
 
-    with open("./result_detect_caps.json", 'w') as f:
+    with open("../result_detect_caps.json", 'w') as f:
         json.dump(result, f)
