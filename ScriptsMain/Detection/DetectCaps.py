@@ -1,12 +1,21 @@
 from typing import Any
+
+import cv2
 import numpy as np
 
-from ScriptsMain.Detection.HTC import hough_transform_circle
-from ScriptsMain.Detection.blobs import get_avg_size_all_blobs
-from ScriptsMain.utilsFun import resize_image
+from HTC import hough_transform_circle
+from blobs import get_avg_size_all_blobs
 
 MAX_WIDTH_IMAGE = 1000
 MAX_HEIGHT_IMAGE = 1000
+
+
+# -- Resizing --
+def resize_image(src, factor):
+    height, width = src.shape[:2]
+    new_size = (int(width * factor), int(height * factor))
+    return cv2.resize(src, new_size)
+
 
 def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list[tuple[int, int, int, int]]) -> list[
     tuple[Any, tuple[int, int, int, int]]]:

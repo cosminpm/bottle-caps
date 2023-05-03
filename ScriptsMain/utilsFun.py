@@ -37,12 +37,6 @@ def get_dcp_and_kps(img: np.ndarray) -> tuple:
     return SIFT.detectAndCompute(img, None)
 
 
-# -- Resizing --
-def resize_image(src, factor):
-    height, width = src.shape[:2]
-    new_size = (int(width * factor), int(height * factor))
-    return cv2.resize(src, new_size)
-
 
 def resize_image_and_save(path_to_image, width, height, where_save, name_output):
     src = read_img_from_path(path_to_image)
