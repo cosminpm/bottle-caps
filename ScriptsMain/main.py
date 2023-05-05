@@ -1,14 +1,17 @@
 import json
 import uvicorn
-from DetectCaps import detect_caps
-import ScriptsMain.utilsFun as utilsFun
+
 from fastapi import FastAPI, UploadFile, File
+from Detection.DetectCaps import detect_caps
+from UtilsFun.utilsFun import read_img_from_path
 
 app = FastAPI()
 
+# curl -X POST -F "file=@C:\Users\cosmi\Desktop\BottleCaps\database\test-images\test-i-have\5.jpg" http://127.1.0.2:8080/upload
+# C:\Users\cosmi\Desktop\BottleCaps\database\test-images\test-i-have\5.jpg
 
 def process_image(path: str):
-    image = utilsFun.read_img_from_path(path)
+    image = read_img_from_path(path)
     cropped_images = detect_caps(image)
     return [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
 
