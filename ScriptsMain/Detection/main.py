@@ -1,10 +1,10 @@
 import json
-import sys
-
-from DetectCaps import detect_caps
+import uvicorn
+from ScriptsMain.Detection.DetectCaps import detect_caps
 from ScriptsMain.utilsFun import read_img_from_path
+from fastapi import FastAPI, UploadFile, File
 
-sys.path.append('../ScriptsMain')
+app = FastAPI()
 
 
 def process_image(path: str):
@@ -12,19 +12,23 @@ def process_image(path: str):
     cropped_images = detect_caps(image)
     return [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
 
-def main():
-    # C:\Users\cosmi\Desktop\BottleCaps\database\test-images\test-i-have\5.jpg
-    inFile = sys.argv[1]
-    result = process_image(inFile)
+
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the file upload API!"}
+
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    contents = await file.read()
+    # Save the uploaded file to disk
+    with open(file.filename, "wb") as f:
+        f.write(contents)
+    # Process the saved file
+    result = process_image(file.filename)
     json_result = json.dumps(result)
-    with open("../result_detect_caps.json", 'w') as f:
-        json.dump(json_result, f)
+    return {"filename": file.filename, "result": json_result}
+
 
 if __name__ == '__main__':
-    from fastapi import FastAPI
-    app = FastAPI()
-    @app.get("/")
-    async def root():
-        return {"greeting": "Hello world"}
-
-
+    uvicorn.run(app, host="127.0.0.1", port=8080)
