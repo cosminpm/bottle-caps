@@ -6,7 +6,8 @@ import cv2
 import numpy as np
 
 MAX_DISTANCE = 150
-FULL_PATH_SORTED_CLUSTER_FILE = r'/database/sorted_cluster.json'
+FULL_PATH_SORTED_CLUSTER_FILE = r'ScriptsMain/`database/sorted_cluster.json'
+
 
 def read_lab(path: str):
     return cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2LAB)
@@ -95,7 +96,6 @@ def display_lab_color(lab_color: tuple[int, int, int]):
 
 
 if __name__ == '__main__':
-
     color = (190, 131, 157)
     best_match = find_closest_match_in_cluster_json(FULL_PATH_SORTED_CLUSTER_FILE, color)
     print(best_match)

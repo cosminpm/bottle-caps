@@ -1,14 +1,14 @@
 import json
 import uvicorn
-from ScriptsMain.Detection.DetectCaps import detect_caps
-from ScriptsMain.utilsFun import read_img_from_path
+from DetectCaps import detect_caps
+import ScriptsMain.utilsFun as utilsFun
 from fastapi import FastAPI, UploadFile, File
 
 app = FastAPI()
 
 
 def process_image(path: str):
-    image = read_img_from_path(path)
+    image = utilsFun.read_img_from_path(path)
     cropped_images = detect_caps(image)
     return [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
 
@@ -31,4 +31,4 @@ async def upload_file(file: UploadFile = File(...)):
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host="127.0.0.1", port=8080)
+    uvicorn.run(app, host="127.1.0.2", port=8080)

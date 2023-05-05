@@ -10,15 +10,15 @@ from ScriptsMain.Detection.DetectCaps import detect_caps
 from ScriptsMain.utilsFun import read_img_from_path, get_dcp_and_kps, rgb_to_bgr
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
-MY_CAPS_IMGS_FOLDER = "../database/cluster"
+MY_CAPS_IMGS_FOLDER = "ScriptsMain/database/cluster"
 MAX_MATCHES = 200
 SUCCESS_MIN = 0.30
 
 MAX_DISTANCE = 150
 
 PATH = Path(os.getcwd())
-SORTED_CLUSTER_FILE = 'database\sorted_cluster.json'
-FULL_PATH_SORTED_CLUSTER_FILE = os.path.join(PATH.parent.absolute(), SORTED_CLUSTER_FILE)
+SORTED_CLUSTER_FILE = 'BottleCaps\database\sorted_cluster.json'
+FULL_PATH_SORTED_CLUSTER_FILE = os.path.join(PATH.parent.parent.absolute(), SORTED_CLUSTER_FILE)
 
 
 
