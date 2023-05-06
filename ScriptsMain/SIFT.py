@@ -5,9 +5,9 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from ScriptsMain.LABColor import get_avg_lab_from_np, find_closest_match_in_cluster_json
-from ScriptsMain.DetectCaps import detect_caps
-from ScriptsMain.utilsFun import read_img_from_path, get_dcp_and_kps, rgb_to_bgr
+from LABColor import get_avg_lab_from_np, find_closest_match_in_cluster_json
+from DetectCaps import detect_caps
+from utilsFun import read_img_from_path, get_dcp_and_kps, rgb_to_bgr
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 MY_CAPS_IMGS_FOLDER = "ScriptsMain/database/cluster"
