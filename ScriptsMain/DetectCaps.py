@@ -3,8 +3,8 @@ from typing import Any
 import cv2
 import numpy as np
 
-from Detection.HTC import hough_transform_circle
-from Detection.blobs import get_avg_size_all_blobs
+from ScriptsMain.HTC import hough_transform_circle
+from ScriptsMain.blobs import get_avg_size_all_blobs
 
 MAX_WIDTH_IMAGE = 1000
 MAX_HEIGHT_IMAGE = 1000

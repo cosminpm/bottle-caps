@@ -2,8 +2,8 @@ import json
 import uvicorn
 
 from fastapi import FastAPI, UploadFile, File
-from Detection.DetectCaps import detect_caps
-from UtilsFun.utilsFun import read_img_from_path
+from ScriptsMain.DetectCaps import detect_caps
+from ScriptsMain.utilsFun import read_img_from_path
 
 app = FastAPI()
 

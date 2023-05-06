@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 
 MAX_DISTANCE = 150
-FULL_PATH_SORTED_CLUSTER_FILE = r'ScriptsMain/`database/sorted_cluster.json'
+FULL_PATH_SORTED_CLUSTER_FILE = r'ScriptsMain/database/sorted_cluster.json'
 
 
 def read_lab(path: str):

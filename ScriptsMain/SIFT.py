@@ -1,13 +1,13 @@
 import json
 import os
-from typing import Optional, Any
+from typing import Optional
 from pathlib import Path
 import cv2
 import numpy as np
 
-from ScriptsMain.DatabaseScripts.LABColor import get_avg_lab_from_np, find_closest_match_in_cluster_json
-from ScriptsMain.Detection.DetectCaps import detect_caps
-from ScriptsMain.UtilsFun import read_img_from_path, get_dcp_and_kps, rgb_to_bgr
+from ScriptsMain.LABColor import get_avg_lab_from_np, find_closest_match_in_cluster_json
+from ScriptsMain.DetectCaps import detect_caps
+from ScriptsMain.utilsFun import read_img_from_path, get_dcp_and_kps, rgb_to_bgr
 
 MATCHER = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
 MY_CAPS_IMGS_FOLDER = "ScriptsMain/database/cluster"
@@ -17,24 +17,21 @@ SUCCESS_MIN = 0.30
 MAX_DISTANCE = 150
 
 PATH = Path(os.getcwd())
-SORTED_CLUSTER_FILE = 'BottleCaps\database\sorted_cluster.json'
+SORTED_CLUSTER_FILE = 'Desktop\BottleCaps\database\sorted_cluster.json'
 FULL_PATH_SORTED_CLUSTER_FILE = os.path.join(PATH.parent.parent.absolute(), SORTED_CLUSTER_FILE)
 
 
-
-
-
 # TODO: Improve here and modify index to variable of max in LAB COLOR
-def calculate_success(new: [dict], index: int) -> float:
+def calculate_success(new_cap: dict, index: int) -> float:
     """
     Calculates how successful was the cap match based on the descriptors and the len of the matches
 
-    :param dict new: entry with the dictionary of the cap
+    :param dict new_cap: entry with the dictionary of the cap
     :param int index: order index
     :return: returns the percentage of the success rate
     """
-    first_param = (new['num_matches'] / new['len_rectangle_dcp']) * 0.49
-    second_param = (new['num_matches'] / new['len_cap_dcp']) * 0.49
+    first_param = (new_cap['num_matches'] / new_cap['len_rectangle_dcp']) * 0.49
+    second_param = (new_cap['num_matches'] / new_cap['len_cap_dcp']) * 0.49
     third_param = (MAX_DISTANCE - index) / MAX_DISTANCE * 0.02
 
     result = first_param + second_param + third_param
@@ -130,9 +127,6 @@ def get_kps_and_dcps_from_json(path: str) -> tuple:
     return keypoints, descriptors
 
 
-
-
-
 def get_matches_after_matcher_sift(cap_dcp: np.ndarray, rectangle_image: np.ndarray) -> list:
     """
     Compare descriptors of the cap image and the rectangle of the cap of the photo image
@@ -148,12 +142,6 @@ def get_matches_after_matcher_sift(cap_dcp: np.ndarray, rectangle_image: np.ndar
             cap_dcp = np.array(cap_dcp, dtype=np.float32)
     matches = MATCHER.match(cap_dcp, rectangle_image)
     return sorted(matches, key=lambda x: x.distance)[:MAX_MATCHES]
-
-
-
-
-
-
 
 
 def get_best_lab_matches(rectangle_img: np.ndarray):
@@ -297,7 +285,7 @@ def apply_main_method_to_all_images(folder_photos: str) -> None:
 
 
 def main():
-    folder_photos = '../database/test-images/one-image'
+    folder_photos = 'database/test-images/one-image'
     apply_main_method_to_all_images(folder_photos=folder_photos)
 
 

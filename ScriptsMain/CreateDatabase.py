@@ -4,7 +4,7 @@ import os
 import cv2
 from pathlib import Path
 
-from ScriptsMain.DatabaseScripts.LABColor import get_avg_lab_from_path
+from ScriptsMain.LABColor import get_avg_lab_from_path
 
 DEBUG_BLOB = False
 MY_CAPS_IMGS_FOLDER = r"database\caps-resized"
