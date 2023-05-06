@@ -5,8 +5,6 @@ from fastapi import FastAPI, UploadFile, File
 from DetectCaps import detect_caps
 from utilsFun import read_img_from_path
 
-app = FastAPI()
-
 # curl -X POST -F "file=@C:\Users\cosmi\Desktop\BottleCaps\database\test-images\test-i-have\5.jpg" http://127.1.0.2:8080/upload
 # C:\Users\cosmi\Desktop\BottleCaps\database\test-images\test-i-have\5.jpg
 
@@ -18,6 +16,13 @@ app = FastAPI()
 # Install command
 # apt-get update && apt-get install -y libopencv-dev && python ScriptsMain/main.py
 
+# Usefull
+# curl -X POST -F "file=@C:\Users\cosmi\Desktop\BottleCaps\database\test-images\test-i-have\5.jpg" https://bottlecaps-production.up.railway.app/upload
+
+
+app = FastAPI()
+
+ASGFAWEfg
 def process_image(path: str):
     image = read_img_from_path(path)
     cropped_images = detect_caps(image)
