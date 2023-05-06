@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List, Tuple
 
 import cv2
 import numpy as np
@@ -39,7 +39,7 @@ def crop_image_into_rectangles(photo_image, rectangles):
     return cropped_images
 
 
-def get_rectangles(circles: list[tuple[int, int, int]]) -> list[tuple[int, int, int, int]]:
+def get_rectangles(circles: List[Tuple[int, int, int]]) -> List[Tuple[int, int, int, int]]:
     """
     Based in the center of the circle and the ratio, transform it into a rectangle so the image can be cropped
 
@@ -74,7 +74,7 @@ def preprocess_image_size(img: np.ndarray) -> np.ndarray:
     return resized
 
 
-def detect_caps(img) -> list[(np.ndarray, list[int])]:
+def detect_caps(img) -> List[(np.ndarray, List[int])]:
     # Preprocess image
     img = preprocess_image_size(img)
 
