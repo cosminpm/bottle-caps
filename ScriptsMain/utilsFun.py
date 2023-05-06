@@ -1,5 +1,7 @@
 import os
 from pathlib import Path
+from typing import Tuple
+
 import cv2
 import numpy as np
 
@@ -27,7 +29,7 @@ def read_img_numpy(img_np) -> np.ndarray:
     return cv2.cvtColor(img_np, 1)
 
 
-def get_dcp_and_kps(img: np.ndarray) -> tuple:
+def get_dcp_and_kps(img: np.ndarray) -> Tuple:
     """
     Detect and compute the descriptors and keypoints of the image
 
@@ -35,7 +37,6 @@ def get_dcp_and_kps(img: np.ndarray) -> tuple:
     :return: Returns a tuple with descriptors and keypoints
     """
     return SIFT.detectAndCompute(img, None)
-
 
 
 def resize_image_and_save(path_to_image, width, height, where_save, name_output):
@@ -56,7 +57,7 @@ def resize_all_images(path, output, size):
 # -- Finish resize
 
 
-def rgb_to_bgr(r: int, g: int, b: int) -> tuple[int, int, int]:
+def rgb_to_bgr(r: int, g: int, b: int) -> Tuple:
     """
     Given a tuple of colors it returns the same tuple but changing the order, this is because OpenCV uses BGR instead of RGB
 
