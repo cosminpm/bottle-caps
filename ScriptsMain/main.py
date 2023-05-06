@@ -11,7 +11,7 @@ app = FastAPI()
 # C:\Users\cosmi\Desktop\BottleCaps\database\test-images\test-i-have\5.jpg
 
 # bottlecaps-production.up.railway.app
-# curl -X POST -F "file=@C:\Users\cosmi\Desktop\BottleCaps\database\test-images\test-i-have\5.jpg" bottlecaps-production.up.railway.app
+# curl -X POST -F "file=@C:\Users\cosmi\Desktop\BottleCaps\database\test-images\test-i-have\5.jpg" bottlecaps-production.up.railway.app/upload
 # RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
 
@@ -31,8 +31,6 @@ async def root():
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    contents = await file.read()
-
     result = process_image(file.filename)
     json_result = json.dumps(result)
     return {"filename": file.filename, "result": json_result}
