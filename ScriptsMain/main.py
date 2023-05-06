@@ -31,7 +31,8 @@ async def root():
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    # Process the saved file
+    contents = await file.read()
+
     result = process_image(file.filename)
     json_result = json.dumps(result)
     return {"filename": file.filename, "result": json_result}
