@@ -1,2 +1,0 @@
-[phases.setup]
-aptPkgs = ["...", "libgl1-mesa-glx","ffmpeg","libsm6","libxext6","libglu1-mesa-dev","libgl1"]
