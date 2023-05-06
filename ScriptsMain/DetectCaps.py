@@ -17,8 +17,7 @@ def resize_image(src, factor):
     return cv2.resize(src, new_size)
 
 
-def crop_image_into_rectangles(photo_image: np.ndarray, rectangles: list[tuple[int, int, int, int]]) -> list[
-    tuple[Any, tuple[int, int, int, int]]]:
+def crop_image_into_rectangles(photo_image, rectangles):
     """
     Crop the image based on the rectangles, if the position is negative put it to zero
 
