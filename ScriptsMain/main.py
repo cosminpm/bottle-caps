@@ -31,10 +31,6 @@ async def root():
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    contents = await file.read()
-    # Save the uploaded file to disk
-    with open(file.filename, "wb") as f:
-        f.write(contents)
     # Process the saved file
     result = process_image(file.filename)
     json_result = json.dumps(result)
