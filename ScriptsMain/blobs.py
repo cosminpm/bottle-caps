@@ -1,4 +1,3 @@
-
 import cv2
 import numpy as np
 
@@ -63,7 +62,7 @@ def get_avg_size_all_blobs(img: np.ndarray):
         return img, int(get_avg_size_blobs(keypoints) / 2)
 
 
-def get_avg_size_blobs(kps: list[cv2.KeyPoint]):
+def get_avg_size_blobs(kps: list):
     kps_size = [int(kp.size) for kp in kps]
     lst = sorted(kps_size)
     if len(lst) % 2 == 1:
@@ -77,7 +76,7 @@ def get_avg_size_blobs(kps: list[cv2.KeyPoint]):
     return result
 
 
-def remove_overlapping_blobs(kps: list[cv2.KeyPoint]):
+def remove_overlapping_blobs(kps: list):
     boxes = []
     for kp in kps:
         x, y = int(kp.pt[0]), int(kp.pt[1])
