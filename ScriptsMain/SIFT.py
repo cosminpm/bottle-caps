@@ -17,7 +17,7 @@ SUCCESS_MIN = 0.30
 MAX_DISTANCE = 150
 
 PATH = Path(os.getcwd())
-SORTED_CLUSTER_FILE = 'Desktop\BottleCaps\database\sorted_cluster.json'
+SORTED_CLUSTER_FILE = 'BottleCaps\database\sorted_cluster.json'
 FULL_PATH_SORTED_CLUSTER_FILE = os.path.join(PATH.parent.parent.absolute(), SORTED_CLUSTER_FILE)
 
 
@@ -285,7 +285,7 @@ def apply_main_method_to_all_images(folder_photos: str) -> None:
 
 
 def main():
-    folder_photos = 'database/test-images/one-image'
+    folder_photos = r'C:\Users\cosmi\Desktop\BottleCaps\database\test-images\one-image'
     apply_main_method_to_all_images(folder_photos=folder_photos)
 
 
