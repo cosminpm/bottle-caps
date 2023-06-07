@@ -285,7 +285,7 @@ def apply_main_method_to_all_images(folder_photos: str) -> None:
 
 
 def main():
-    folder_photos = r'C:\Users\cosmi\Desktop\BottleCaps\database\test-images\one-image'
+    folder_photos = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\database\test-images\one-image'
     apply_main_method_to_all_images(folder_photos=folder_photos)
 
 
