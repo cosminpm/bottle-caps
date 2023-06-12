@@ -1,19 +1,16 @@
 import json
 import math
 import pickle
-
+import shutil
+import os
 import numpy as np
 from PIL import Image
+
 from keras.applications import ResNet50
 from keras.preprocessing.image import ImageDataGenerator
 from keras.applications.resnet import preprocess_input
 from sklearn.neighbors import NearestNeighbors
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 from keras.models import load_model
-
-import shutil
-import os
 
 
 def create_training_folder():
@@ -37,6 +34,7 @@ def create_model():
     model = ResNet50(weights='imagenet', include_top=False, input_shape=(img_size, img_size, 3), pooling='max')
     model.compile()
     save_model(model=model, path=r'C:\Users\manolito\Repositories\GitHub\BottleCaps\model')
+
 
 def generate_vector_database(model):
     root_dir = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\training'
@@ -97,9 +95,11 @@ def load_neighbors():
         neighbors = pickle.load(file)
         return neighbors
 
+
 def get_model():
     path = r"C:\Users\manolito\Repositories\GitHub\BottleCaps\model"
     return load_model(path)
+
 
 def generate_all():
     create_model()
@@ -107,6 +107,7 @@ def generate_all():
     generate_vector_database(model=model)
     feature_list = open_feature_list()
     save_neighbours(feature_list=feature_list)
+
 
 def use_model():
     path = r"C:\Users\manolito\Repositories\GitHub\BottleCaps\model"
@@ -131,5 +132,4 @@ def use_model():
 
 
 if __name__ == '__main__':
-    #generate_all()
     use_model()
