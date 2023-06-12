@@ -1,4 +1,6 @@
+import json
 import math
+import pickle
 
 import numpy as np
 from PIL import Image
@@ -30,41 +32,86 @@ def save_model(model, path):
     model.save(path)
 
 
-def main():
-    max_neighbours = 10
+def create_model():
     img_size = 224
     model = ResNet50(weights='imagenet', include_top=False, input_shape=(img_size, img_size, 3), pooling='max')
-    batch_size = 64
+    model.compile()
+    save_model(model=model, path=r'C:\Users\manolito\Repositories\GitHub\BottleCaps\model')
 
+def generate_vector_database(model):
     root_dir = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\training'
-
+    batch_size = 64
     img_gen = ImageDataGenerator(preprocessing_function=preprocess_input)
-
     datagen = img_gen.flow_from_directory(root_dir,
-                                          target_size=(img_size, img_size),
+                                          target_size=(224, 224),
                                           batch_size=batch_size,
                                           class_mode=None,
                                           shuffle=False)
-
     num_images = len(datagen.filenames)
     num_epochs = int(math.ceil(num_images / batch_size))
 
     feature_list = model.predict_generator(datagen, num_epochs)
-    print("Num images   = ", len(datagen.classes))
-    print("Shape of feature_list = ", feature_list.shape)
+    save_feature_list(feature_list=feature_list)
+    save_datagen_files(filenames=datagen.filenames)
 
-    model.compile()
-    save_model(model=model, path=r'C:\Users\manolito\Repositories\GitHub\BottleCaps\model')
-    # similar_images(model, feature_list, datagen.filenames, max_neighbours)
 
+def save_datagen_files(filenames: list[str]):
+    json_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\datagen_filenames.json'
+    with open(json_path, 'w') as json_file:
+        json.dump(filenames, json_file)
+
+
+def save_neighbours(feature_list):
+    pkl_file = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\neighbors.pkl'
+
+    neighbors = NearestNeighbors(algorithm='ball_tree', metric='euclidean')
+    neighbors.fit(feature_list)
+    with open(pkl_file, 'wb') as file:
+        pickle.dump(neighbors, file)
+
+
+def open_datagen_files():
+    json_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\datagen_filenames.json'
+    with open(json_path, 'r') as json_file:
+        feature_list = np.array(json.load(json_file))
+        return feature_list
+
+
+def save_feature_list(feature_list):
+    json_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\vector_database.json'
+    with open(json_path, 'w') as json_file:
+        json.dump(feature_list.tolist(), json_file)
+
+
+def open_feature_list():
+    json_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\vector_database.json'
+    with open(json_path, 'r') as json_file:
+        feature_list = np.array(json.load(json_file))
+        return feature_list
+
+
+def load_neighbors():
+    # Load the NearestNeighbors object from a file
+    neigbors_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\\neighbors.pkl'
+    with open(neigbors_path, 'rb') as file:
+        neighbors = pickle.load(file)
+        return neighbors
+
+def get_model():
+    path = r"C:\Users\manolito\Repositories\GitHub\BottleCaps\model"
+    return load_model(path)
+
+def generate_all():
+    create_model()
+    model = get_model()
+    generate_vector_database(model=model)
+    feature_list = open_feature_list()
+    save_neighbours(feature_list=feature_list)
 
 def use_model():
     path = r"C:\Users\manolito\Repositories\GitHub\BottleCaps\model"
     img_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\9.jpg'
     max_neighbours = 10
-    img_size = 224
-    batch_size = 64
-
 
     model = load_model(path)
     img = Image.open(img_path)
@@ -73,65 +120,16 @@ def use_model():
     preprocessed_img = preprocess_input(resized_img[np.newaxis, ...])  # Preprocess the resized image
     query_feature = model.predict(preprocessed_img)
 
-    root_dir = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\training'
+    datagen_file_names = open_datagen_files()
+    neighbors = load_neighbors()
 
-    img_gen = ImageDataGenerator(preprocessing_function=preprocess_input)
-
-    datagen = img_gen.flow_from_directory(root_dir,
-                                          target_size=(224, 224),
-                                          batch_size=batch_size,
-                                          class_mode=None,
-                                          shuffle=False)
-
-    num_images = len(datagen.filenames)
-    num_epochs = int(math.ceil(num_images / batch_size))
-
-    feature_list = model.predict_generator(datagen, num_epochs)
-    print("Num images = ", len(datagen.classes))
-    print("Shape of feature_list = ", feature_list.shape)
-
-    neighbors = NearestNeighbors(algorithm='ball_tree', metric='euclidean')
-    neighbors.fit(feature_list)
     distances, indices = neighbors.kneighbors(query_feature, n_neighbors=max_neighbours)
 
-    most_similar_image = datagen.filenames[indices[0][0]]
+    most_similar_image = datagen_file_names[indices[0][0]]
     print("Most similar image:", most_similar_image)
-
-    # ...
-
-
-def similar_images(model, feature_list, filenames, max_neighbours):
-    plt.figure(figsize=(15, 10), facecolor='white')
-    plotnumber = 1
-
-    rows = 2  # Number of rows in the subplot grid
-    cols = 5  # Number of columns in the subplot grid
-
-    img_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\9.jpg'
-
-    neighbors = NearestNeighbors(algorithm='ball_tree', metric='euclidean')
-    neighbors.fit(feature_list)
-
-    query_feature = model.predict(preprocess_input(mpimg.imread(img_path))[np.newaxis, ...])
-    distances, indices = neighbors.kneighbors(query_feature, n_neighbors=max_neighbours)
-
-    plt.imshow(mpimg.imread(img_path), interpolation='lanczos')
-    plt.xlabel(img_path.split('.')[0] + '_Original Image', fontsize=20)
-    plt.show()
-    print('********* Predictions ***********')
-
-    for i in range(max_neighbours):
-        ax = plt.subplot(rows, cols, plotnumber)
-        plt.imshow(
-            mpimg.imread(r'C:\Users\manolito\Repositories\GitHub\BottleCaps\training\\' + filenames[indices[0][i]]),
-            interpolation='lanczos')
-        plotnumber += 1
-
-    plt.tight_layout()
-    plt.show()
+    print(indices)
 
 
 if __name__ == '__main__':
-    # create_training_folder()
-    # main()
+    #generate_all()
     use_model()
