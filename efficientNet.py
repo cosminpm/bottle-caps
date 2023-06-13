@@ -9,6 +9,7 @@ from PIL import Image
 from keras.applications import ResNet50
 from keras.preprocessing.image import ImageDataGenerator
 from keras.applications.resnet import preprocess_input
+from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
 from keras.models import load_model
 
@@ -49,9 +50,32 @@ def generate_vector_database(model):
     num_epochs = int(math.ceil(num_images / batch_size))
 
     feature_list = model.predict_generator(datagen, num_epochs)
-    save_feature_list(feature_list=feature_list)
-    save_datagen_files(filenames=datagen.filenames)
 
+    # Apply PCA to reduce the dimensionality of each feature vector
+    pca = PCA(n_components=64)
+    reduced_feature_list = pca.fit_transform(feature_list)
+
+
+    json_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\vector_database_pinecone.json'
+
+    json_object = {
+        "vectors": [],
+        "namespace": "bottle_caps"
+    }
+
+    for i in range(0, len(feature_list)):
+        cap_info = {
+            'id': datagen.filenames[i],
+            'values': reduced_feature_list[i].tolist()
+        }
+        json_object['vectors'].append(cap_info)
+
+    print(json_object)
+    with open(json_path, 'w') as json_file:
+        json.dump(json_object, json_file)
+
+    save_datagen_files(datagen.filenames)
+    save_feature_list(reduced_feature_list)
 
 def save_datagen_files(filenames: list[str]):
     json_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\datagen_filenames.json'
@@ -108,7 +132,6 @@ def generate_all():
     feature_list = open_feature_list()
     save_neighbours(feature_list=feature_list)
 
-
 def use_model():
     path = r"C:\Users\manolito\Repositories\GitHub\BottleCaps\model"
     img_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\9.jpg'
@@ -121,15 +144,17 @@ def use_model():
     preprocessed_img = preprocess_input(resized_img[np.newaxis, ...])  # Preprocess the resized image
     query_feature = model.predict(preprocessed_img)
 
-    datagen_file_names = open_datagen_files()
+    feature_list = open_feature_list()
     neighbors = load_neighbors()
 
     distances, indices = neighbors.kneighbors(query_feature, n_neighbors=max_neighbours)
 
-    most_similar_image = datagen_file_names[indices[0][0]]
+    most_similar_image = feature_list[indices[0][0]]
     print("Most similar image:", most_similar_image)
     print(indices)
 
 
+
 if __name__ == '__main__':
+    #generate_all()
     use_model()
