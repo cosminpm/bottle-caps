@@ -132,12 +132,10 @@ def generate_all():
     feature_list = open_feature_list()
     save_neighbours(feature_list=feature_list)
 
-from sklearn.decomposition import PCA
-
 def use_model():
     path = r"C:\Users\manolito\Repositories\GitHub\BottleCaps\model"
     img_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\9.jpg'
-    max_neighbours = 10
+    # max_neighbours = 10
 
     model = load_model(path)
     img = Image.open(img_path)
@@ -145,16 +143,18 @@ def use_model():
     resized_img = np.array(resized_img)
     preprocessed_img = preprocess_input(resized_img[np.newaxis, ...])  # Preprocess the resized image
     query_feature = model.predict(preprocessed_img)
-    query_feature = query_feature.flatten()
+    query_feature = query_feature[0][:64]
 
-    # Reshape the query_feature array to have 1 sample and multiple features
-    query_feature = query_feature.reshape(1, -1)
-
-    # Apply PCA to reduce dimensionality to length 64
-    pca = PCA(n_components=min(64, query_feature.shape[1]))
-    query_feature = pca.fit_transform(query_feature)
-
+    # Reshape the query_feature array to have multiple samples and multiple features
     print(query_feature)
+    json_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\query_feature_value.json'
+    with open(json_path, 'w') as json_file:
+        json.dump(query_feature.tolist(), json_file)
+
+
+    # return query_feature.flatten()
+
+
 
     #
     # feature_list = open_feature_list()
