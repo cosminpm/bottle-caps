@@ -132,6 +132,8 @@ def generate_all():
     feature_list = open_feature_list()
     save_neighbours(feature_list=feature_list)
 
+from sklearn.decomposition import PCA
+
 def use_model():
     path = r"C:\Users\manolito\Repositories\GitHub\BottleCaps\model"
     img_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\9.jpg'
@@ -143,18 +145,28 @@ def use_model():
     resized_img = np.array(resized_img)
     preprocessed_img = preprocess_input(resized_img[np.newaxis, ...])  # Preprocess the resized image
     query_feature = model.predict(preprocessed_img)
+    query_feature = query_feature.flatten()
 
-    feature_list = open_feature_list()
-    neighbors = load_neighbors()
+    # Reshape the query_feature array to have 1 sample and multiple features
+    query_feature = query_feature.reshape(1, -1)
 
-    distances, indices = neighbors.kneighbors(query_feature, n_neighbors=max_neighbours)
+    # Apply PCA to reduce dimensionality to length 64
+    pca = PCA(n_components=min(64, query_feature.shape[1]))
+    query_feature = pca.fit_transform(query_feature)
 
-    most_similar_image = feature_list[indices[0][0]]
-    print("Most similar image:", most_similar_image)
-    print(indices)
+    print(query_feature)
+
+    #
+    # feature_list = open_feature_list()
+    # neighbors = load_neighbors()
+    #
+    # distances, indices = neighbors.kneighbors(query_feature, n_neighbors=max_neighbours)
+    #
+    # most_similar_image = feature_list[indices[0][0]]
+    # print("Most similar image:", most_similar_image)
+    # print(indices)
 
 
 
 if __name__ == '__main__':
-    #generate_all()
     use_model()
