@@ -13,10 +13,12 @@ from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
 from keras.models import load_model
 
+PROJECT_PATH = os.getcwd()
+
 
 def create_training_folder():
-    path_all_images = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\database\caps-resized'
-    folder_create = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\training'
+    path_all_images = os.path.join(PROJECT_PATH, r'database\caps-resized')
+    folder_create = os.path.join(PROJECT_PATH, 'training')
 
     names_images = os.listdir(path=path_all_images)
     for name in names_images:
@@ -34,11 +36,11 @@ def create_model():
     img_size = 224
     model = ResNet50(weights='imagenet', include_top=False, input_shape=(img_size, img_size, 3), pooling='max')
     model.compile()
-    save_model(model=model, path=r'C:\Users\manolito\Repositories\GitHub\BottleCaps\model')
+    save_model(model=model, path=os.path.join(PROJECT_PATH, 'model'))
 
 
 def generate_vector_database(model):
-    root_dir = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\training'
+    root_dir = os.path.join(PROJECT_PATH, 'training')
     batch_size = 64
     img_gen = ImageDataGenerator(preprocessing_function=preprocess_input)
     datagen = img_gen.flow_from_directory(root_dir,
@@ -52,11 +54,10 @@ def generate_vector_database(model):
     feature_list = model.predict_generator(datagen, num_epochs)
 
     # Apply PCA to reduce the dimensionality of each feature vector
-    pca = PCA(n_components=64)
-    reduced_feature_list = pca.fit_transform(feature_list)
+    # pca = PCA(n_components=64)
+    # reduced_feature_list = pca.fit_transform(feature_list)
 
-
-    json_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\vector_database_pinecone.json'
+    json_path = os.path.join(PROJECT_PATH, 'vector_database_pinecone.json')
 
     json_object = {
         "vectors": [],
@@ -66,7 +67,7 @@ def generate_vector_database(model):
     for i in range(0, len(feature_list)):
         cap_info = {
             'id': datagen.filenames[i],
-            'values': reduced_feature_list[i].tolist()
+            'values': feature_list[i].tolist()
         }
         json_object['vectors'].append(cap_info)
 
@@ -75,16 +76,17 @@ def generate_vector_database(model):
         json.dump(json_object, json_file)
 
     save_datagen_files(datagen.filenames)
-    save_feature_list(reduced_feature_list)
+    save_feature_list(feature_list)
+
 
 def save_datagen_files(filenames: list[str]):
-    json_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\datagen_filenames.json'
+    json_path = os.path.join(PROJECT_PATH, 'datagen_filenames.json')
     with open(json_path, 'w') as json_file:
         json.dump(filenames, json_file)
 
 
 def save_neighbours(feature_list):
-    pkl_file = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\neighbors.pkl'
+    pkl_file = os.path.join(PROJECT_PATH, 'neighbors.pkl')
 
     neighbors = NearestNeighbors(algorithm='ball_tree', metric='euclidean')
     neighbors.fit(feature_list)
@@ -93,20 +95,20 @@ def save_neighbours(feature_list):
 
 
 def open_datagen_files():
-    json_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\datagen_filenames.json'
+    json_path = os.path.join(PROJECT_PATH, 'datagen_filenames.json')
     with open(json_path, 'r') as json_file:
         feature_list = np.array(json.load(json_file))
         return feature_list
 
 
 def save_feature_list(feature_list):
-    json_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\vector_database.json'
+    json_path = os.path.join(PROJECT_PATH, 'vector_database.json')
     with open(json_path, 'w') as json_file:
         json.dump(feature_list.tolist(), json_file)
 
 
 def open_feature_list():
-    json_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\vector_database.json'
+    json_path = os.path.join(PROJECT_PATH, 'vector_database.json')
     with open(json_path, 'r') as json_file:
         feature_list = np.array(json.load(json_file))
         return feature_list
@@ -114,14 +116,14 @@ def open_feature_list():
 
 def load_neighbors():
     # Load the NearestNeighbors object from a file
-    neigbors_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\\neighbors.pkl'
+    neigbors_path = os.path.join(PROJECT_PATH, 'neighbors.pkl')
     with open(neigbors_path, 'rb') as file:
         neighbors = pickle.load(file)
         return neighbors
 
 
 def get_model():
-    path = r"C:\Users\manolito\Repositories\GitHub\BottleCaps\model"
+    path = os.path.join(PROJECT_PATH, 'model')
     return load_model(path)
 
 
@@ -132,9 +134,10 @@ def generate_all():
     feature_list = open_feature_list()
     save_neighbours(feature_list=feature_list)
 
+
 def use_model():
-    path = r"C:\Users\manolito\Repositories\GitHub\BottleCaps\model"
-    img_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\9.jpg'
+    path = os.path.join(PROJECT_PATH, 'model')
+    img_path = os.path.join(PROJECT_PATH, '9.jpg')
     # max_neighbours = 10
 
     model = load_model(path)
@@ -143,18 +146,15 @@ def use_model():
     resized_img = np.array(resized_img)
     preprocessed_img = preprocess_input(resized_img[np.newaxis, ...])  # Preprocess the resized image
     query_feature = model.predict(preprocessed_img)
-    query_feature = query_feature[0][:64]
+    query_feature = query_feature[0]
 
     # Reshape the query_feature array to have multiple samples and multiple features
-    print(query_feature)
-    json_path = r'C:\Users\manolito\Repositories\GitHub\BottleCaps\query_feature_value.json'
+
+    json_path = os.path.join(PROJECT_PATH, 'query_feature_value.json')
     with open(json_path, 'w') as json_file:
         json.dump(query_feature.tolist(), json_file)
 
-
     # return query_feature.flatten()
-
-
 
     #
     # feature_list = open_feature_list()
@@ -167,6 +167,5 @@ def use_model():
     # print(indices)
 
 
-
 if __name__ == '__main__':
-    use_model()
+    generate_all()
