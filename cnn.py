@@ -1,17 +1,15 @@
 import json
 import math
-import pickle
-import shutil
 import os
+import shutil
+
+import pinecone
 import numpy as np
 from PIL import Image
-
 from keras.applications import ResNet50
-from keras.preprocessing.image import ImageDataGenerator
 from keras.applications.resnet import preprocess_input
-from sklearn.decomposition import PCA
-from sklearn.neighbors import NearestNeighbors
 from keras.models import load_model
+from keras.preprocessing.image import ImageDataGenerator
 
 PROJECT_PATH = os.getcwd()
 
@@ -26,10 +24,6 @@ def create_training_folder():
         folder_result = os.path.join(folder_create, folder_name)
         os.mkdir(folder_result)
         shutil.copy(os.path.join(path_all_images, name), os.path.join(folder_result))
-
-
-def save_model(model, path):
-    model.save(path)
 
 
 def create_model():
@@ -53,10 +47,6 @@ def generate_vector_database(model):
 
     feature_list = model.predict_generator(datagen, num_epochs)
 
-    # Apply PCA to reduce the dimensionality of each feature vector
-    # pca = PCA(n_components=64)
-    # reduced_feature_list = pca.fit_transform(feature_list)
-
     json_path = os.path.join(PROJECT_PATH, 'vector_database_pinecone.json')
 
     json_object = {
@@ -71,55 +61,12 @@ def generate_vector_database(model):
         }
         json_object['vectors'].append(cap_info)
 
-    print(json_object)
     with open(json_path, 'w') as json_file:
         json.dump(json_object, json_file)
 
-    save_datagen_files(datagen.filenames)
-    save_feature_list(feature_list)
 
-
-def save_datagen_files(filenames: list[str]):
-    json_path = os.path.join(PROJECT_PATH, 'datagen_filenames.json')
-    with open(json_path, 'w') as json_file:
-        json.dump(filenames, json_file)
-
-
-def save_neighbours(feature_list):
-    pkl_file = os.path.join(PROJECT_PATH, 'neighbors.pkl')
-
-    neighbors = NearestNeighbors(algorithm='ball_tree', metric='euclidean')
-    neighbors.fit(feature_list)
-    with open(pkl_file, 'wb') as file:
-        pickle.dump(neighbors, file)
-
-
-def open_datagen_files():
-    json_path = os.path.join(PROJECT_PATH, 'datagen_filenames.json')
-    with open(json_path, 'r') as json_file:
-        feature_list = np.array(json.load(json_file))
-        return feature_list
-
-
-def save_feature_list(feature_list):
-    json_path = os.path.join(PROJECT_PATH, 'vector_database.json')
-    with open(json_path, 'w') as json_file:
-        json.dump(feature_list.tolist(), json_file)
-
-
-def open_feature_list():
-    json_path = os.path.join(PROJECT_PATH, 'vector_database.json')
-    with open(json_path, 'r') as json_file:
-        feature_list = np.array(json.load(json_file))
-        return feature_list
-
-
-def load_neighbors():
-    # Load the NearestNeighbors object from a file
-    neigbors_path = os.path.join(PROJECT_PATH, 'neighbors.pkl')
-    with open(neigbors_path, 'rb') as file:
-        neighbors = pickle.load(file)
-        return neighbors
+def save_model(model, path):
+    model.save(path)
 
 
 def get_model():
@@ -131,14 +78,11 @@ def generate_all():
     create_model()
     model = get_model()
     generate_vector_database(model=model)
-    feature_list = open_feature_list()
-    save_neighbours(feature_list=feature_list)
 
 
 def use_model():
     path = os.path.join(PROJECT_PATH, 'model')
     img_path = os.path.join(PROJECT_PATH, '9.jpg')
-    # max_neighbours = 10
 
     model = load_model(path)
     img = Image.open(img_path)
@@ -148,24 +92,17 @@ def use_model():
     query_feature = model.predict(preprocessed_img)
     query_feature = query_feature[0]
 
-    # Reshape the query_feature array to have multiple samples and multiple features
-
     json_path = os.path.join(PROJECT_PATH, 'query_feature_value.json')
     with open(json_path, 'w') as json_file:
         json.dump(query_feature.tolist(), json_file)
 
-    # return query_feature.flatten()
 
-    #
-    # feature_list = open_feature_list()
-    # neighbors = load_neighbors()
-    #
-    # distances, indices = neighbors.kneighbors(query_feature, n_neighbors=max_neighbours)
-    #
-    # most_similar_image = feature_list[indices[0][0]]
-    # print("Most similar image:", most_similar_image)
-    # print(indices)
-
+def main():
+    pinecone.init(api_key=os.environ["API_KEY"], environment=os.environ["ENVIRONMENT"])
+    r = pinecone.list_indexes()
+    print(r)
 
 if __name__ == '__main__':
-    generate_all()
+    # generate_all()
+    # use_model()
+    main()
