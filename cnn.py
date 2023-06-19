@@ -98,9 +98,10 @@ def use_model():
 
 
 def main():
-    pinecone.init(api_key=os.environ["API_KEY"], environment=os.environ["ENVIRONMENT"])
-    r = pinecone.list_indexes()
-    print(r)
+    pinecone.init(api_key=os.environ["API_KEY"], environment=os.environ["ENV"])
+
+    active_indexes = pinecone.list_indexes()
+    print(active_indexes)
 
 if __name__ == '__main__':
     # generate_all()
