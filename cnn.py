@@ -2,7 +2,7 @@ import json
 import math
 import os
 import shutil
-from typing import List
+from typing import List, Dict, Any
 
 import pinecone
 import numpy as np
@@ -11,6 +11,9 @@ from keras.applications import ResNet50
 from keras.applications.resnet import preprocess_input
 from keras.models import load_model
 from keras.preprocessing.image import ImageDataGenerator
+
+from ScriptsMain.DetectCaps import detect_caps
+from ScriptsMain.utilsFun import read_img_from_path
 
 PROJECT_PATH = os.getcwd()
 
@@ -34,7 +37,7 @@ def create_model():
     save_model(model=model, path=os.path.join(PROJECT_PATH, 'model'))
 
 
-def generate_vector_database(model):
+def generate_vector_database(index: pinecone.Index, model):
     root_dir = os.path.join(PROJECT_PATH, 'training')
     batch_size = 64
     img_gen = ImageDataGenerator(preprocessing_function=preprocess_input)
@@ -60,10 +63,20 @@ def generate_vector_database(model):
             'id': datagen.filenames[i],
             'values': feature_list[i].tolist()
         }
+        upsert_to_pinecone(index=index, vector=cap_info)
         json_object['vectors'].append(cap_info)
 
     with open(json_path, 'w') as json_file:
         json.dump(json_object, json_file)
+
+
+def upsert_to_pinecone(index: pinecone.Index, vector):
+    index.upsert(
+        vectors=[
+            vector
+        ],
+        namespace='bottle_caps'
+    )
 
 
 def save_model(model, path):
@@ -75,33 +88,54 @@ def get_model():
     return load_model(path)
 
 
-def generate_all():
+def generate_all(index: pinecone.Index):
     create_model()
     model = get_model()
-    generate_vector_database(model=model)
+    generate_vector_database(index=index, model=model)
 
 
-def image_to_vector(model, img_path: str):
+def path_to_vector(model, img_path: str):
     img_path = os.path.join(PROJECT_PATH, img_path)
     img = Image.open(img_path)
-    resized_img = img.resize((224, 224))  # Resize the image to (224, 224)
-    resized_img = np.array(resized_img)
+    return image_to_vector(img, model)
+
+
+def image_to_vector(img, model):
+    resized_img = np.resize(img, (224, 224, 3))  # Resize the image to (224, 224)
     preprocessed_img = preprocess_input(resized_img[np.newaxis, ...])  # Preprocess the resized image
     query_feature = model.predict(preprocessed_img)
     return query_feature[0].tolist()
 
 
-def query_image_pinecone(model, img_path: str):
+def query_path_pinecone(model, img_path: str, index: pinecone.Index):
+    vector = path_to_vector(model, img_path)
+    return index.query(vector=[vector], top_k=15, namespace="bottle_caps")
+
+
+def query_img_pinecone(model, img, index: pinecone.Index):
+    vector = image_to_vector(model=model, img=img)
+    return index.query(vector=[vector], top_k=15, namespace="bottle_caps")
+
+
+def init_index_pinecone() -> pinecone.Index:
     pinecone.init(api_key=os.environ["API_KEY"], environment=os.environ["ENV"])
-    index = pinecone.Index(index_name='bottle-caps')
-    vector = image_to_vector(model, img_path)
-    return index.query(vector=[vector], top_k=10, namespace="bottle_caps")
+    return pinecone.Index(index_name='bottle-caps')
 
 
 def main():
+    index = init_index_pinecone()
     model = get_model()
-    query_image_pinecone(model, img_path='9.jpg')
+    # generate_all(index=index)
 
+    path = os.path.join(PROJECT_PATH, r'database/my-caps-images/8-fresh.jpg')
+    img = read_img_from_path(path)
+    cropped_caps = detect_caps(img)
+
+    # for img, rct in cropped_caps:
+    #     result = query_img_pinecone(model=model, img=img, index=index)
+    #     print(result)
+    result = query_path_pinecone(model=model, img_path=path, index=index)
+    print(result)
 
 if __name__ == '__main__':
     # generate_all()

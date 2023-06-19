@@ -6,10 +6,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
 from DetectCaps import detect_caps
-from utilsFun import  read_img_numpy
-
-### Uncomment when deploy
-###This is a test
+from utilsFun import  img_to_numpy
 
 app = FastAPI()
 
@@ -30,7 +27,7 @@ app.add_middleware(
 
 def process_image(file_contents: bytes):
     image = cv2.imdecode(np.frombuffer(file_contents, np.uint8), cv2.IMREAD_COLOR)
-    image = read_img_numpy(image)
+    image = img_to_numpy(image)
     cropped_images = detect_caps(image)
     return [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
 

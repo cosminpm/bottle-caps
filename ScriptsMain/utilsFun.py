@@ -25,7 +25,7 @@ def read_img_from_path(img_path: str) -> np.ndarray:
     return cv2.cvtColor(cv2.imread(img_path), 1)
 
 
-def read_img_numpy(img_np) -> np.ndarray:
+def img_to_numpy(img_np) -> np.ndarray:
     return cv2.cvtColor(img_np, 1)
 
 
