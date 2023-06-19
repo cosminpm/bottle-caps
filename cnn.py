@@ -2,6 +2,7 @@ import json
 import math
 import os
 import shutil
+from typing import List
 
 import pinecone
 import numpy as np
@@ -80,28 +81,27 @@ def generate_all():
     generate_vector_database(model=model)
 
 
-def use_model():
-    path = os.path.join(PROJECT_PATH, 'model')
-    img_path = os.path.join(PROJECT_PATH, '9.jpg')
-
-    model = load_model(path)
+def image_to_vector(model, img_path: str):
+    img_path = os.path.join(PROJECT_PATH, img_path)
     img = Image.open(img_path)
     resized_img = img.resize((224, 224))  # Resize the image to (224, 224)
     resized_img = np.array(resized_img)
     preprocessed_img = preprocess_input(resized_img[np.newaxis, ...])  # Preprocess the resized image
     query_feature = model.predict(preprocessed_img)
-    query_feature = query_feature[0]
+    return query_feature[0].tolist()
 
-    json_path = os.path.join(PROJECT_PATH, 'query_feature_value.json')
-    with open(json_path, 'w') as json_file:
-        json.dump(query_feature.tolist(), json_file)
+
+def query_image_pinecone(model, img_path: str):
+    pinecone.init(api_key=os.environ["API_KEY"], environment=os.environ["ENV"])
+    index = pinecone.Index(index_name='bottle-caps')
+    vector = image_to_vector(model, img_path)
+    return index.query(vector=[vector], top_k=10, namespace="bottle_caps")
 
 
 def main():
-    pinecone.init(api_key=os.environ["API_KEY"], environment=os.environ["ENV"])
+    model = get_model()
+    query_image_pinecone(model, img_path='9.jpg')
 
-    active_indexes = pinecone.list_indexes()
-    print(active_indexes)
 
 if __name__ == '__main__':
     # generate_all()
