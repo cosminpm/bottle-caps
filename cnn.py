@@ -2,18 +2,12 @@ import json
 import math
 import os
 import shutil
-from typing import List, Dict, Any
-
-import pinecone
-import numpy as np
-from PIL import Image
 from keras.applications import ResNet50
 from keras.applications.resnet import preprocess_input
 from keras.models import load_model
 from keras.preprocessing.image import ImageDataGenerator
 
 from Pinecone import PineconeContainer, image_to_vector
-from ScriptsMain.DetectCaps import detect_caps
 from ScriptsMain.utilsFun import read_img_from_path
 
 PROJECT_PATH = os.getcwd()
@@ -88,9 +82,8 @@ def generate_all(pinecone_container: PineconeContainer):
 def main():
     pinecone_container = PineconeContainer()
     model = get_model()
-    # generate_all(index=index)
 
-    path = os.path.join(PROJECT_PATH, r'database/my-caps-images/8-fresh.jpg')
+    path = os.path.join(PROJECT_PATH, r'database/test-images/one-image/7.png')
     img = read_img_from_path(path)
 
     vector = image_to_vector(img=img, model=model)
@@ -98,6 +91,8 @@ def main():
     print(result)
 
 if __name__ == '__main__':
-    # generate_all()
+    #pinecone_container = PineconeContainer()
+    #generate_all(pinecone_container)
     # use_model()
+
     main()
