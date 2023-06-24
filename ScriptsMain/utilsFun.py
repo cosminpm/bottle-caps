@@ -21,6 +21,24 @@ def resize_img_pix_with_name(cap_path, path_output, pix):
     return output
 
 
+
+def read_img_from_path_with_mask(img_path: str) -> np.ndarray:
+    image = cv2.imread(img_path)
+    height, width, _ = image.shape
+    size = min(width, height)  # Take the shortest size if the image is not square
+    center_x, center_y = width // 2, height // 2
+    radius = size // 2
+
+    # Create a mask with a circular region of interest (ROI) in the center
+    mask = np.zeros((height, width), dtype=np.uint8)
+    cv2.circle(mask, (center_x, center_y), radius, (255), thickness=-1)
+
+    # Apply the mask to the image
+    masked_image = cv2.bitwise_and(image, image, mask=mask)
+
+    return masked_image
+
+
 def read_img_from_path(img_path: str) -> np.ndarray:
     return cv2.cvtColor(cv2.imread(img_path), 1)
 
