@@ -2,13 +2,17 @@ import json
 import math
 import os
 import shutil
+from typing import Dict, List
 
 import keras
+import numpy as np
 from keras.applications import ResNet50
 from keras.applications.resnet import preprocess_input
 from keras.layers import Dense, Flatten
 from keras.models import load_model, Sequential
 from keras.preprocessing.image import ImageDataGenerator
+from matplotlib import pyplot as plt
+from PIL import Image
 
 from Pinecone import PineconeContainer, image_to_vector
 from ScriptsMain.utilsFun import read_img_from_path
@@ -101,20 +105,54 @@ def generate_all(pinecone_container: PineconeContainer):
     generate_vector_database(pinecone_container=pinecone_container, model=model)
 
 
+def show_similar_images(org_img: str, match_result: Dict):
+    images = [os.path.join(PROJECT_PATH, 'training', match['id']) for match in match_result['matches']]
+    values = ["{:.3f}".format(match['score']) for match in match_result['matches']]
+    show_images(images, org_img, values)
+
+
+# Auxiliary function so i can know what is the similarity
+def show_images(images, specific_image_path, values):
+    num_images = len(images) + 1  # Add 1 for the specific image
+    rows = int(np.ceil(np.sqrt(num_images)))
+    cols = int(np.ceil(num_images / rows))
+
+    fig, axes = plt.subplots(rows, cols)
+
+    # Display the specific image first
+    specific_image = Image.open(specific_image_path)
+    axes[0, 0].imshow(specific_image)
+    axes[0, 0].axis('off')
+
+    for i, ax in enumerate(axes.flatten()[1:]):
+        if i < num_images - 1:
+            image_path = images[i]
+            image = Image.open(image_path)
+            ax.imshow(image)
+            ax.axis('off')
+            ax.text(0.5, -0.2, values[i], ha='center', transform=ax.transAxes)
+        else:
+            ax.axis('off')
+
+    plt.tight_layout()
+    plt.show()
+
+
 def main():
     pinecone_container = PineconeContainer()
     model: keras.Sequential = get_model()
 
-    path = os.path.join(PROJECT_PATH, r'database/test-images/one-image/9.png')
+    path = os.path.join(PROJECT_PATH, r'database/test-images/one-image/7.png')
     img = read_img_from_path(path)
 
     vector = image_to_vector(img=img, model=model)
     result = pinecone_container.query_database(vector=vector)
     print(result)
+    show_similar_images(path, result)
 
 
 if __name__ == '__main__':
     # create_training_folder()
-    pinecone_container = PineconeContainer()
-    generate_all(pinecone_container)
+    # pinecone_container = PineconeContainer()
+    # generate_all(pinecone_container)
     main()
