@@ -71,23 +71,12 @@ def generate_vector_database(pinecone_container, model: keras.Sequential):
 
     feature_list = model.predict(datagen, steps=num_epochs)
 
-    json_path = os.path.join(PROJECT_PATH, 'vector_database_pinecone.json')
-
-    json_object = {
-        "vectors": [],
-        "namespace": "bottle_caps"
-    }
-
     for i in range(0, len(feature_list)):
         cap_info = {
             'id': datagen.filenames[i],
             'values': feature_list[i].tolist()
         }
         pinecone_container.upsert_to_pinecone(vector=cap_info)
-        json_object['vectors'].append(cap_info)
-
-    with open(json_path, 'w') as json_file:
-        json.dump(json_object, json_file)
 
 
 def save_model(model, path):
@@ -142,12 +131,11 @@ def main():
     pinecone_container = PineconeContainer()
     model: keras.Sequential = get_model()
 
-    path = os.path.join(PROJECT_PATH, r'database/test-images/one-image/7.png')
+    path = os.path.join(PROJECT_PATH, r'database/test-images/one-image/10.jpg')
     img = read_img_from_path(path)
 
     vector = image_to_vector(img=img, model=model)
     result = pinecone_container.query_database(vector=vector)
-    print(result)
     show_similar_images(path, result)
 
 
