@@ -21,21 +21,50 @@ from ScriptsMain.utilsFun import read_img_from_path_with_mask
 PROJECT_PATH = os.getcwd()
 
 
+def create_img_training(name: str, folder_create: str, path_all_images: str):
+    folder_name = name.split('.')[0]
+    folder_result = os.path.join(folder_create, folder_name)
+
+    if not os.path.exists(folder_result):
+        # Create directory
+        os.mkdir(folder_result)
+        path_img = os.path.join(path_all_images, name)
+
+        # Create image with the mask
+        img = read_img_from_path_with_mask(path_img)
+        cv2.imwrite(os.path.join(folder_result, name), img)
+
+        # Data augmentation
+        datagen = ImageDataGenerator(
+            rotation_range=20,  # Rotate image randomly up to 20 degrees
+            width_shift_range=0.2,  # Shift the image horizontally by up to 20% of its width
+            height_shift_range=0.2,  # Shift the image vertically by up to 20% of its height
+            shear_range=0.2,  # Apply shear transformation with a maximum shear of 20 degrees
+            zoom_range=0.2,  # Zoom in or out on the image by up to 20%
+            horizontal_flip=True,  # Flip the image horizontally
+            vertical_flip=True  # Flip the image vertically
+        )
+
+        # Load the image and apply data augmentation
+        img = cv2.imread(os.path.join(folder_result, name))
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert image to RGB format
+        img = img.reshape((1,) + img.shape)  # Reshape to (1, height, width, channels)
+
+        # Generate augmented images
+        i = 0
+        for batch in datagen.flow(img, batch_size=1, save_to_dir=folder_result, save_prefix='aug', save_format='jpeg'):
+            i += 1
+            if i >= 5:  # Generate 5 augmented images
+                break
+
+
 def create_training_folder():
     path_all_images = os.path.join(PROJECT_PATH, r'database\caps-resized')
     folder_create = os.path.join(PROJECT_PATH, 'training')
 
     names_images = os.listdir(path=path_all_images)
     for name in names_images:
-        folder_name = name.split('.')[0]
-        folder_result = os.path.join(folder_create, folder_name)
-
-        if not os.path.exists(folder_result):
-            os.mkdir(folder_result)
-
-            path_img = os.path.join(path_all_images, name)
-            img = read_img_from_path_with_mask(path_img)
-            cv2.imwrite(os.path.join(folder_result, name), img)
+        create_img_training(name=name, folder_create=folder_create, path_all_images=path_all_images)
 
 
 def create_model():
@@ -96,7 +125,7 @@ def get_model() -> keras.Sequential:
 def generate_all(pinecone_container: PineconeContainer):
     model = create_model()
     path_model = os.path.join(PROJECT_PATH, 'model')
-    save_model(model= model, path=path_model)
+    save_model(model=model, path=path_model)
     model = get_model()
     generate_vector_database(pinecone_container=pinecone_container, model=model)
 
@@ -149,6 +178,6 @@ def main():
 
 if __name__ == '__main__':
     #create_training_folder()
-    #pinecone_container = PineconeContainer()
-    #generate_all(pinecone_container)
+    pinecone_container = PineconeContainer()
+    generate_all(pinecone_container)
     main()
