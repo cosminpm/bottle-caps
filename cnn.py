@@ -60,27 +60,18 @@ def create_model():
 
 def generate_vector_database(pinecone_container, model: keras.Sequential):
     root_dir = os.path.join(PROJECT_PATH, 'training')
-    batch_size = 64
-    img_gen = ImageDataGenerator(
-        preprocessing_function=preprocess_input,
-    )
-    datagen = img_gen.flow_from_directory(root_dir,
-                                          target_size=(224, 224),
-                                          batch_size=batch_size,
-                                          class_mode=None,
-                                          shuffle=False)
-
-    num_images = len(datagen.filepaths)
-    num_epochs = int(math.ceil(num_images / batch_size))
-
-    feature_list = model.predict(datagen, steps=num_epochs)
-
-    for i in range(len(feature_list)):
-        cap_info = {
-            'id': datagen.filenames[i],
-            'values': feature_list[i].tolist()
-        }
-        pinecone_container.upsert_to_pinecone(vector=cap_info)
+    folders = os.listdir(root_dir)
+    for folder in folders:
+        folder = os.path.join(root_dir, folder)
+        for file in os.listdir(folder):
+            path = os.path.join(folder, file)
+            img = read_img_from_path_with_mask(path)
+            vector = image_to_vector(img=img, model= model)
+            cap_info = {
+                'id': file,
+                'values':vector
+            }
+            pinecone_container.upsert_to_pinecone(vector=cap_info)
 
 
 def save_model(model, path):
@@ -101,7 +92,7 @@ def generate_all(pinecone_container: PineconeContainer):
 
 
 def show_similar_images(org_img: str, match_result: Dict):
-    images = [os.path.join(PROJECT_PATH, 'training', match['id']) for match in match_result['matches']]
+    images = [os.path.join(PROJECT_PATH, 'training', match['id'].split('.')[0], match['id']) for match in match_result['matches']]
     values = ["{:.3f}".format(match['score']) for match in match_result['matches']]
     show_images(images, org_img, values)
 
@@ -135,18 +126,16 @@ def main():
     pinecone_container = PineconeContainer()
     model: keras.Sequential = get_model()
 
-    path = r'C:\Users\cosmi\Desktop\BottleCaps\database\caps-resized\cap-391_100.jpg'
+    path = r'C:\Users\cosmi\Desktop\BottleCaps\database\caps-resized\cap-399_100.jpg'
     img = read_img_from_path_with_mask(path)
-    img = preprocess_input(img)
     vector = image_to_vector(img=img, model=model)
-    vector = preprocess_input(vector)
     result = pinecone_container.query_database(vector=vector)
-
+    print(result)
     show_similar_images(path, result)
 
 
 if __name__ == '__main__':
-    #create_training_folder()
+    # create_training_folder()
     #pinecone_container = PineconeContainer()
     #generate_all(pinecone_container)
     main()
