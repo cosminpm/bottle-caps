@@ -1,4 +1,3 @@
-import math
 import os
 from typing import Dict
 
@@ -6,10 +5,8 @@ import cv2
 import keras
 import numpy as np
 from keras.applications import ResNet50
-from keras.applications.resnet import preprocess_input
 from keras.layers import Dense, Flatten
 from keras.models import load_model, Sequential
-from keras.preprocessing.image import ImageDataGenerator
 from matplotlib import pyplot as plt
 from PIL import Image
 import tensorflow as tf

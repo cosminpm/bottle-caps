@@ -6,7 +6,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
 from DetectCaps import detect_caps
-from utilsFun import  img_to_numpy
+from utilsFun import img_to_numpy
 
 app = FastAPI()
 
