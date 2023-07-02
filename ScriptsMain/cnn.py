@@ -1,5 +1,4 @@
 import os
-from typing import Dict
 
 import cv2
 import keras
@@ -7,8 +6,6 @@ import numpy as np
 from keras.applications import ResNet50
 from keras.layers import Dense, Flatten
 from keras.models import load_model, Sequential
-from matplotlib import pyplot as plt
-from PIL import Image
 import tensorflow as tf
 
 from ScriptsMain.Pinecone import PineconeContainer, image_to_vector
@@ -39,15 +36,10 @@ def create_training_folder():
 
 def create_model():
     img_size = 224
-
     model = Sequential()
-
     base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(img_size, img_size, 3), pooling='max')
-
     model.add(base_model)
-
     model.add(Flatten())
-
     model.add(Dense(256, activation='relu'))  # Add fully connected layers
 
     model.compile('adam', loss=tf.losses.CategoricalCrossentropy(), metrics=['accuracy'])
@@ -88,60 +80,8 @@ def generate_all(pinecone_container: PineconeContainer):
     generate_vector_database(pinecone_container=pinecone_container, model=model)
 
 
-def show_similar_images(org_img: str, match_result: Dict):
-    images = [os.path.join(PROJECT_PATH, 'training', match['id'].split('.')[0], match['id']) for match in
-              match_result['matches']]
-    values = ["{:.3f}".format(match['score']) for match in match_result['matches']]
-    show_images(images, org_img, values)
-
-
-def show_images(images, specific_image_path, values):
-    num_images = len(images) + 1
-    rows = int(np.ceil(np.sqrt(num_images)))
-    cols = int(np.ceil(num_images / rows))
-
-    fig, axes = plt.subplots(rows, cols)
-
-    specific_image = Image.open(specific_image_path)
-    axes[0, 0].imshow(specific_image)
-    axes[0, 0].axis('off')
-
-    for i, ax in enumerate(axes.flatten()[1:]):
-        if i < num_images - 1:
-            image_path = images[i]
-            image = Image.open(image_path)
-            ax.imshow(image)
-            ax.axis('off')
-            ax.text(0.5, -0.2, values[i], ha='center', transform=ax.transAxes)
-        else:
-            ax.axis('off')
-
-    plt.tight_layout()
-    plt.show()
-
-
 def identify_cap(cap: np.ndarray, pinecone_container: PineconeContainer, model: keras.Sequential):
     img = read_img_with_mask(cap)
     vector = image_to_vector(img=img, model=model)
     result = pinecone_container.query_database(vector=vector)
     return result
-
-
-def main():
-    pinecone_container = PineconeContainer()
-    model: keras.Sequential = get_model()
-
-    path = r'database/test-images/one-image/7.png'
-    cap_path = os.path.join(PROJECT_PATH, path)
-
-    img = read_img_from_path_with_mask(cap_path)
-    vector = image_to_vector(img=img, model=model)
-    result = pinecone_container.query_database(vector=vector)
-    # show_similar_images(cap_path, result)
-
-
-if __name__ == '__main__':
-    # create_training_folder()
-    # pinecone_container = PineconeContainer()
-    # generate_all(pinecone_container)
-    main()
