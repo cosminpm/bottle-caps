@@ -66,10 +66,10 @@ def generate_vector_database(pinecone_container, model: keras.Sequential):
         for file in os.listdir(folder):
             path = os.path.join(folder, file)
             img = read_img_from_path_with_mask(path)
-            vector = image_to_vector(img=img, model= model)
+            vector = image_to_vector(img=img, model=model)
             cap_info = {
                 'id': file,
-                'values':vector
+                'values': vector
             }
             pinecone_container.upsert_to_pinecone(vector=cap_info)
 
@@ -92,7 +92,8 @@ def generate_all(pinecone_container: PineconeContainer):
 
 
 def show_similar_images(org_img: str, match_result: Dict):
-    images = [os.path.join(PROJECT_PATH, 'training', match['id'].split('.')[0], match['id']) for match in match_result['matches']]
+    images = [os.path.join(PROJECT_PATH, 'training', match['id'].split('.')[0], match['id']) for match in
+              match_result['matches']]
     values = ["{:.3f}".format(match['score']) for match in match_result['matches']]
     show_images(images, org_img, values)
 
@@ -126,16 +127,15 @@ def main():
     pinecone_container = PineconeContainer()
     model: keras.Sequential = get_model()
 
-    path = r'C:\Users\cosmi\Desktop\BottleCaps\database\caps-resized\cap-399_100.jpg'
+    path = r'C:\Users\cosmi\Desktop\BottleCaps\database\test-images\one-image\7.png'
     img = read_img_from_path_with_mask(path)
     vector = image_to_vector(img=img, model=model)
     result = pinecone_container.query_database(vector=vector)
-    print(result)
     show_similar_images(path, result)
 
 
 if __name__ == '__main__':
     # create_training_folder()
-    #pinecone_container = PineconeContainer()
-    #generate_all(pinecone_container)
+    # pinecone_container = PineconeContainer()
+    # generate_all(pinecone_container)
     main()
