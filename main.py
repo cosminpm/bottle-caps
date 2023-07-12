@@ -13,8 +13,6 @@ from ScriptsMain.Pinecone import PineconeContainer
 from ScriptsMain.UtilsFun import img_to_numpy
 from ScriptsMain.cnn import identify_cap, get_model
 
-
-
 app = FastAPI()
 pinecone_container = PineconeContainer()
 model: keras.Sequential = get_model()

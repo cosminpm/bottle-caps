@@ -85,3 +85,7 @@ def identify_cap(cap: np.ndarray, pinecone_container: PineconeContainer, model: 
     vector = image_to_vector(img=img, model=model)
     result = pinecone_container.query_database(vector=vector)
     return result
+
+if __name__ == '__main__':
+    pinecone_container = PineconeContainer()
+    generate_all(pinecone_container=pinecone_container)

@@ -31,5 +31,4 @@ class PineconeContainer:
         )
 
     def parse_result_query(self, result_query):
-        #TODO convert to vector type to float
         return result_query['matches']
