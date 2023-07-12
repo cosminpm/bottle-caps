@@ -12,6 +12,7 @@ from ScriptsMain.DetectCaps import detect_caps
 from ScriptsMain.Pinecone import PineconeContainer
 from ScriptsMain.UtilsFun import img_to_numpy
 from ScriptsMain.cnn import identify_cap, get_model
+from fastapi.responses import JSONResponse
 
 app = FastAPI()
 pinecone_container = PineconeContainer()
@@ -53,7 +54,10 @@ async def root():
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     result = process_image(await file.read())
-    return {"filename": file.filename, "result": json.dumps(result)}
+    print(result)
+    print(result['positions'])
+    print(type(result['positions']))
+    return JSONResponse(content={"filename": file.filename, "result": result['positions']})
 
 
 if __name__ == '__main__':

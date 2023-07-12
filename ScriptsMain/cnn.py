@@ -11,8 +11,8 @@ import tensorflow as tf
 from ScriptsMain.Pinecone import PineconeContainer, image_to_vector
 from ScriptsMain.UtilsFun import read_img_from_path_with_mask, read_img_with_mask
 
-PROJECT_PATH = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-
+# PROJECT_PATH = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+PROJECT_PATH = os.getcwd()
 
 def create_img_training(name: str, folder_create: str, path_all_images: str):
     folder_name = os.path.splitext(name)[0]
@@ -87,5 +87,6 @@ def identify_cap(cap: np.ndarray, pinecone_container: PineconeContainer, model: 
     return result
 
 if __name__ == '__main__':
+    #create_training_folder()
     pinecone_container = PineconeContainer()
     generate_all(pinecone_container=pinecone_container)
