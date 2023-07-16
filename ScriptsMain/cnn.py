@@ -80,10 +80,10 @@ def generate_all(pinecone_container: PineconeContainer):
     generate_vector_database(pinecone_container=pinecone_container, model=model)
 
 
-def identify_cap(cap: np.ndarray, pinecone_container: PineconeContainer, model: keras.Sequential):
+def identify_cap(cap: np.ndarray, pinecone_con: PineconeContainer, model: keras.Sequential):
     img = read_img_with_mask(cap)
     vector = image_to_vector(img=img, model=model)
-    result = pinecone_container.query_database(vector=vector)
+    result = pinecone_con.query_database(vector=vector)
     return result
 
 if __name__ == '__main__':
