@@ -14,6 +14,7 @@ from ScriptsMain.UtilsFun import read_img_from_path_with_mask, read_img_with_mas
 # PROJECT_PATH = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 PROJECT_PATH = os.getcwd()
 
+
 def create_img_training(name: str, folder_create: str, path_all_images: str):
     folder_name = os.path.splitext(name)[0]
     folder_result = os.path.join(folder_create, folder_name)
@@ -84,9 +85,10 @@ def identify_cap(cap: np.ndarray, pinecone_con: PineconeContainer, model: keras.
     img = read_img_with_mask(cap)
     vector = image_to_vector(img=img, model=model)
     result = pinecone_con.query_database(vector=vector)
-    return result
+    return [cap.to_dict() for cap in result]
+
 
 if __name__ == '__main__':
-    #create_training_folder()
+    # create_training_folder()
     pinecone_container = PineconeContainer()
     generate_all(pinecone_container=pinecone_container)

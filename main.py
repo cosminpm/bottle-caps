@@ -44,15 +44,64 @@ def process_image(file_contents: bytes):
     result = {'positions': positions, 'caps_identified': caps_identified}
     return result
 
-@app.get("/")
-async def root():
-    return {"message": "Welcome to the file upload API!"}
-
 
 @app.post("/detect_and_identify")
 async def upload_file(file: UploadFile = File(...)):
     result = process_image(await file.read())
-    return JSONResponse(content={"filename": file.filename, "result": result['positions']})
+    return JSONResponse(
+        content={"filename": file.filename,
+                 "positions": result['positions'],
+                 "caps": result['caps_identified']}
+    )
+
+
+@app.post("/detect")
+async def detect(file: UploadFile = File(...)):
+    image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
+    image = img_to_numpy(image)
+    cropped_images = detect_caps(image)
+    positions = [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
+    return positions
+
+
+@app.post("/identify")
+async def identify(file: UploadFile = File(...)):
+    image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
+    cap_identified = identify_cap(cap=np.array(image), model=model, pinecone_con=pinecone_container)
+    return JSONResponse(cap_identified)
+
+@app.post("/detect")
+async def detect(file: UploadFile = File(...)):
+    image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
+    image = img_to_numpy(image)
+    cropped_images = detect_caps(image)
+    positions = [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
+    return positions
+
+
+@app.post("/identify")
+async def identify(file: UploadFile = File(...)):
+    image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
+    cap_identified = identify_cap(cap=np.array(image), model=model, pinecone_con=pinecone_container)
+    cap_identified = [cap.to_dict() for cap in cap_identified]
+    return JSONResponse(cap_identified)
+
+
+@app.post("/detect")
+async def detect(file: UploadFile = File(...)):
+    image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
+    image = img_to_numpy(image)
+    cropped_images = detect_caps(image)
+    positions = [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
+    return positions
+
+
+@app.post("/identify")
+async def identify(file: UploadFile = File(...)):
+    image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
+    cap_identified = identify_cap(cap=np.array(image), model=model, pinecone_con=pinecone_container)
+    cap_identified = [cap.to_dict() for cap in cap_identified]
+    return JSONResponse(cap_identified)
 
 
 @app.post("/detect")
