@@ -4,8 +4,6 @@ from typing import List
 import firebase_admin
 from firebase_admin import credentials, storage
 import os
-from fastapi.responses import StreamingResponse, FileResponse
-import io
 
 BETA_TESTER = {
     "id": "BetaTester"
@@ -25,7 +23,6 @@ def tester_upload_images_into_bottle_caps(folder_local: str):
             firebase_container.bottle_caps_folder,
             i]
         )
-        print(full_path_remote)
         firebase_container.upload_image(path_local=full_path_local, path_remote=full_path_remote)
 
 
@@ -47,7 +44,7 @@ class Firebase:
         blob = self.bucket.blob(path_query)
         expiration_time = datetime.datetime.utcnow() + datetime.timedelta(seconds=EXPIRATION_SECONDS)
 
-        path = blob.generate_signed_url(expiration=expiration_time)
+        path = blob.public_url
         return path
 
     @staticmethod

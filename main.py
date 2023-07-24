@@ -46,7 +46,7 @@ def process_image(file_contents: bytes):
     print(caps_identified)
     for possible_values in caps_identified:
         for value in possible_values:
-            value['image'] = firebase.get_image(f'users/BetaTester/bottle_caps/{value["id"]}')
+            value['image_url'] = firebase.get_image(f'users/BetaTester/bottle_caps/{value["id"]}')
 
     print(result)
     return result

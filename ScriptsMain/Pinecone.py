@@ -19,7 +19,7 @@ class PineconeContainer:
         self.index = pinecone.Index(index_name='bottle-caps')
 
     def query_database(self, vector):
-        result = self.index.query(vector=[vector], top_k=3, namespace="bottle_caps")
+        result = self.index.query(vector=[vector], top_k=4, namespace="bottle_caps")
         return self.parse_result_query(result)
 
     def upsert_to_pinecone(self, vector):
