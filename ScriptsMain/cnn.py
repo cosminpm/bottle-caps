@@ -49,7 +49,7 @@ def create_model():
 
 
 def generate_vector_database(pinecone_container, model: keras.Sequential):
-    root_dir = os.path.join(os.path.dirname(PROJECT_PATH), 'training')
+    root_dir = os.path.join(PROJECT_PATH, 'training')
     folders = os.listdir(root_dir)
     for folder in folders:
         folder = os.path.join(root_dir, folder)

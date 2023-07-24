@@ -49,4 +49,4 @@ coverage.xml
 /database/*
 /training/*
 img_1.png
-bottlecaps-keys.json
+ScriptsMain/bottlecaps-keys.json

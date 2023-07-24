@@ -1,5 +1,3 @@
-import json
-
 import cv2
 import keras
 import numpy as np
@@ -8,6 +6,7 @@ import uvicorn
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
+from ScriptsMain.Firebase import Firebase
 from ScriptsMain.DetectCaps import detect_caps
 from ScriptsMain.Pinecone import PineconeContainer
 from ScriptsMain.UtilsFun import img_to_numpy
@@ -15,8 +14,9 @@ from ScriptsMain.cnn import identify_cap, get_model
 from fastapi.responses import JSONResponse
 
 app = FastAPI()
-pinecone_container = PineconeContainer()
+pinecone_container:PineconeContainer = PineconeContainer()
 model: keras.Sequential = get_model()
+firebase = Firebase()
 
 origins = [
     "*",
@@ -41,7 +41,14 @@ def process_image(file_contents: bytes):
     for cap in cropped_images:
         caps_identified.append(identify_cap(cap=np.array(cap[0]), model=model, pinecone_con=pinecone_container))
     positions = [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
+
     result = {'positions': positions, 'caps_identified': caps_identified}
+    print(caps_identified)
+    for possible_values in caps_identified:
+        for value in possible_values:
+            value['image'] = firebase.get_image(f'users/BetaTester/bottle_caps/{value["id"]}')
+
+    print(result)
     return result
 
 
