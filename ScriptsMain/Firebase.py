@@ -10,6 +10,7 @@ BETA_TESTER = {
 }
 EXPIRATION_SECONDS = 3600
 
+
 def tester_upload_images_into_bottle_caps(folder_local: str):
     firebase_container = Firebase()
     folder_path = folder_local
@@ -31,7 +32,6 @@ class Firebase:
         cred = credentials.Certificate('./ScriptsMain/bottlecaps-keys.json')
         firebase_admin.initialize_app(cred)
         self.bucket = storage.bucket("bottlecaps-85ba4.appspot.com")
-
         self.users_folder = "users"
         self.bottle_caps_folder = "bottle_caps"
         self.uploaded_images_folder = "uploaded_images"
@@ -42,9 +42,7 @@ class Firebase:
 
     def get_image(self, path_query: str):
         blob = self.bucket.blob(path_query)
-        expiration_time = datetime.datetime.utcnow() + datetime.timedelta(seconds=EXPIRATION_SECONDS)
-
-        path = blob.public_url
+        path = blob.generate_signed_url(expiration=datetime.timedelta(minutes=15), method="GET")
         return path
 
     @staticmethod
