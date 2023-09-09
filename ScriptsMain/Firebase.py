@@ -8,7 +8,6 @@ import os
 BETA_TESTER = {
     "id": "BetaTester"
 }
-EXPIRATION_SECONDS = 3600
 
 
 def tester_upload_images_into_bottle_caps(folder_local: str):

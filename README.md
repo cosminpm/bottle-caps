@@ -12,7 +12,7 @@ The following is an explanation of how the code works. The actual code will not 
 
 ### Creation of the database
 
-The database is created using json, each file of the database has descriptors, keypoints and name among other iformation. The numebr of keypoints and descriptors is limited to a variable.
+**TODO: Complete as the database now is a mix of Firebase with Pineconne**
 
 ### Blobs detection
 
@@ -24,9 +24,9 @@ Initially, I attempted to use Hough Transform Circles directly, but it resulted 
 
 Using the approximate radius determined from the blobs, a lower and upper bound was established. Preprocessing was then applied before Hough Transform Circles was used to determine the positions of all circles.
 
-### Scale-Invariant Feature Transform
+### CNN
 
-With the positions of the circles and their radii determined, the image was cropped and each crop was compared to an entry in the database using a comparison method. The best match was kept if it was a match or not.
+**TODO: Complete has currently using CNN model**
 
 ## How to Install and test
 Note: As currently this project is not finished I am not releasing an app yet, as I have to finish the algorithm and the Flutter app. Here are the steps on how to download the project and test the algorithm.
