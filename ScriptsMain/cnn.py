@@ -1,4 +1,5 @@
 import os
+from typing import Dict
 
 import cv2
 import keras
@@ -48,6 +49,17 @@ def create_model():
     return model
 
 
+def transform_imag_to_pinecone_format(img:np.ndarray, file: str, model: keras.Sequential, metadata=None):
+    if metadata is None:
+        metadata = {}
+    vector = image_to_vector(img=img, model=model)
+    cap_info = {
+        'id': file,
+        'values': vector
+    }
+    return cap_info
+
+
 def generate_vector_database(pinecone_container, model: keras.Sequential):
     root_dir = os.path.join(PROJECT_PATH, 'training')
     folders = os.listdir(root_dir)
@@ -89,6 +101,6 @@ def identify_cap(cap: np.ndarray, pinecone_con: PineconeContainer, model: keras.
 
 
 if __name__ == '__main__':
-    # create_training_folder()
+    create_training_folder()
     pinecone_container = PineconeContainer()
     generate_all(pinecone_container=pinecone_container)

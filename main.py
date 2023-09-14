@@ -79,5 +79,16 @@ async def identify(file: UploadFile = File(...)):
     return JSONResponse(cap_identified)
 
 
+@app.put("/add_to_database")
+async def add_to_database(file: UploadFile = File(...)):
+    result = process_image(await file.read())
+    print(result)
+    return JSONResponse(
+        content={"filename": file.filename,
+                 "positions": result['positions'],
+                 "caps": result['caps_identified']}
+    )
+
+
 if __name__ == '__main__':
     uvicorn.run(app, host="localhost", port=8080)
