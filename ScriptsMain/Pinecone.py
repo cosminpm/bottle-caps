@@ -1,4 +1,6 @@
 import os
+from typing import Dict
+
 import pinecone
 from keras.applications.resnet import preprocess_input
 import numpy as np
@@ -22,14 +24,22 @@ class PineconeContainer:
         result = self.index.query(vector=[vector], top_k=5, namespace="bottle_caps")
         return self.parse_result_query(result)
 
-    def upsert_to_pinecone(self, vector):
+    def query_with_metadata(self, metadata: Dict):
+        return self.index.query(
+            vector=[0.1] * 256,
+            filter=metadata,
+            top_k=5,
+            include_metadata=True,
+            namespace='bottle_caps'
+        )
+
+    def upsert_to_pinecone(self, cap_info):
         self.index.upsert(
             vectors=[
-                vector
+                cap_info
             ],
             namespace='bottle_caps'
         )
 
     def parse_result_query(self, result_query):
         return result_query['matches']
-

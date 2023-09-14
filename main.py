@@ -1,3 +1,5 @@
+from typing import Optional
+
 import cv2
 import keras
 import numpy as np
@@ -10,11 +12,11 @@ from ScriptsMain.Firebase import Firebase
 from ScriptsMain.DetectCaps import detect_caps
 from ScriptsMain.Pinecone import PineconeContainer
 from ScriptsMain.UtilsFun import img_to_numpy
-from ScriptsMain.cnn import identify_cap, get_model
+from ScriptsMain.cnn import identify_cap, get_model, transform_imag_to_pinecone_format
 from fastapi.responses import JSONResponse
 
 app = FastAPI()
-pinecone_container:PineconeContainer = PineconeContainer()
+pinecone_container: PineconeContainer = PineconeContainer()
 model: keras.Sequential = get_model()
 firebase = Firebase()
 
@@ -80,14 +82,22 @@ async def identify(file: UploadFile = File(...)):
 
 
 @app.put("/add_to_database")
-async def add_to_database(file: UploadFile = File(...)):
-    result = process_image(await file.read())
-    print(result)
-    return JSONResponse(
-        content={"filename": file.filename,
-                 "positions": result['positions'],
-                 "caps": result['caps_identified']}
-    )
+async def add_to_database(user_id: str, file: UploadFile = File(...), name: Optional[str] = "",
+                          description: Optional[str] = ""):
+    print('aaaaaa')
+    image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
+    image = img_to_numpy(image)
+
+    metadata = {
+        'name': name,
+        'description': description,
+        'user_id': user_id
+    }
+
+    cap_info = transform_imag_to_pinecone_format(model=model, img=image, metadata=metadata)
+    pinecone_container.upsert_to_pinecone(cap_info=cap_info)
+    print(cap_info)
+    return JSONResponse(cap_info)
 
 
 if __name__ == '__main__':

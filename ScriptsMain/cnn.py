@@ -1,6 +1,7 @@
 import os
 from typing import Dict
 
+import uuid
 import cv2
 import keras
 import numpy as np
@@ -49,14 +50,16 @@ def create_model():
     return model
 
 
-def transform_imag_to_pinecone_format(img:np.ndarray, file: str, model: keras.Sequential, metadata=None):
-    if metadata is None:
-        metadata = {}
+def transform_imag_to_pinecone_format(img: np.ndarray, model: keras.Sequential, metadata):
+    img = read_img_with_mask(img)
     vector = image_to_vector(img=img, model=model)
+
     cap_info = {
-        'id': file,
-        'values': vector
+        'id': str(uuid.uuid4()),
+        'values': vector,
+        'metadata': metadata
     }
+
     return cap_info
 
 
@@ -73,7 +76,7 @@ def generate_vector_database(pinecone_container, model: keras.Sequential):
                 'id': file,
                 'values': vector
             }
-            pinecone_container.upsert_to_pinecone(vector=cap_info)
+            pinecone_container.upsert_to_pinecone(cap_info=cap_info)
 
 
 def save_model(model, path):
