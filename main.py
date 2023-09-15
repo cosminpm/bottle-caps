@@ -100,5 +100,22 @@ async def add_to_database(user_id: str, file: UploadFile = File(...), name: Opti
     return JSONResponse(cap_info)
 
 
+
+from pydantic import BaseModel
+
+class TestSimpleRequest(BaseModel):
+    field_potato: str
+
+@app.put("/test_simple")
+async def test_simple(request_data: TestSimpleRequest):
+    field_potato = request_data.field_potato
+
+    info = {
+        'field_potato': field_potato,
+        'potato': 'afwhjkfkawh'
+    }
+    return JSONResponse(info)
+
+
 if __name__ == '__main__':
     uvicorn.run(app, host="localhost", port=8080)
