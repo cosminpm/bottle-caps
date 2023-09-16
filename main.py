@@ -5,9 +5,10 @@ import keras
 import numpy as np
 import uvicorn
 
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
+from BackendModels.Cap import CapModel
 from ScriptsMain.Firebase import Firebase
 from ScriptsMain.DetectCaps import detect_caps
 from ScriptsMain.Pinecone import PineconeContainer
@@ -82,39 +83,22 @@ async def identify(file: UploadFile = File(...)):
 
 
 @app.put("/add_to_database")
-async def add_to_database(user_id: str, file: UploadFile = File(...), name: Optional[str] = "",
-                          description: Optional[str] = ""):
-    print('aaaaaa')
+async def add_to_database(
+        cap: CapModel = Depends(),
+        file: UploadFile = File(...),
+):
     image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
     image = img_to_numpy(image)
 
     metadata = {
-        'name': name,
-        'description': description,
-        'user_id': user_id
+        'name': cap.name,
+        'description': cap.description,
+        'user_id': cap.user_id
     }
 
     cap_info = transform_imag_to_pinecone_format(model=model, img=image, metadata=metadata)
     pinecone_container.upsert_to_pinecone(cap_info=cap_info)
-    print(cap_info)
     return JSONResponse(cap_info)
-
-
-
-from pydantic import BaseModel
-
-class TestSimpleRequest(BaseModel):
-    field_potato: str
-
-@app.put("/test_simple")
-async def test_simple(request_data: TestSimpleRequest):
-    field_potato = request_data.field_potato
-
-    info = {
-        'field_potato': field_potato,
-        'potato': 'afwhjkfkawh'
-    }
-    return JSONResponse(info)
 
 
 if __name__ == '__main__':
