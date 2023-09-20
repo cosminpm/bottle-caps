@@ -5,7 +5,7 @@ import keras
 import numpy as np
 import uvicorn
 
-from fastapi import FastAPI, UploadFile, File, Form, Depends
+from fastapi import FastAPI, UploadFile, File, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from BackendModels.Cap import CapModel
@@ -36,28 +36,28 @@ app.add_middleware(
 )
 
 
-def process_image(file_contents: bytes):
+def process_image(file_contents: bytes, user_id: str):
     image = cv2.imdecode(np.frombuffer(file_contents, np.uint8), cv2.IMREAD_COLOR)
     image = img_to_numpy(image)
     cropped_images = detect_caps(image)
     caps_identified = []
     for cap in cropped_images:
-        caps_identified.append(identify_cap(cap=np.array(cap[0]), model=model, pinecone_con=pinecone_container))
+        caps_identified.append(identify_cap(cap=np.array(cap[0]), model=model, pinecone_con=pinecone_container, user_id=user_id))
     positions = [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
 
     result = {'positions': positions, 'caps_identified': caps_identified}
     print(caps_identified)
     for possible_values in caps_identified:
         for value in possible_values:
-            value['image_url'] = firebase.get_image(f'users/BetaTester/bottle_caps/{value["id"]}')
+            value['image_url'] = firebase.get_image(f'users/{user_id}/bottle_caps/{value["metadata"]["name"]}.jpg')
 
     print(result)
     return result
 
 
 @app.post("/detect_and_identify")
-async def upload_file(file: UploadFile = File(...)):
-    result = process_image(await file.read())
+async def upload_file(user_id: str, file: UploadFile = File(...)):
+    result = process_image(await file.read(), user_id=user_id)
     return JSONResponse(
         content={"filename": file.filename,
                  "positions": result['positions'],
@@ -75,9 +75,9 @@ async def detect(file: UploadFile = File(...)):
 
 
 @app.post("/identify")
-async def identify(file: UploadFile = File(...)):
+async def identify( user_id: str, file: UploadFile = File(...)):
     image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
-    cap_identified = identify_cap(cap=np.array(image), model=model, pinecone_con=pinecone_container)
+    cap_identified = identify_cap(cap=np.array(image), model=model, pinecone_con=pinecone_container, user_id=user_id)
     cap_identified = [cap.to_dict() for cap in cap_identified]
     return JSONResponse(cap_identified)
 
@@ -99,6 +99,7 @@ async def add_to_database(
     cap_info = transform_imag_to_pinecone_format(model=model, img=image, metadata=metadata)
     pinecone_container.upsert_to_pinecone(cap_info=cap_info)
     return JSONResponse(cap_info)
+
 
 
 if __name__ == '__main__':

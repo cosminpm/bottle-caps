@@ -10,22 +10,6 @@ BETA_TESTER = {
 }
 
 
-def tester_upload_images_into_bottle_caps(folder_local: str):
-    firebase_container = Firebase()
-    folder_path = folder_local
-    my_images = os.listdir(folder_path)
-
-    for i in my_images:
-        full_path_local = os.path.join(folder_path, i)
-        full_path_remote = firebase_container.join_path_remote([
-            firebase_container.users_folder,
-            BETA_TESTER["id"],
-            firebase_container.bottle_caps_folder,
-            i]
-        )
-        firebase_container.upload_image(path_local=full_path_local, path_remote=full_path_remote)
-
-
 class Firebase:
     def __init__(self):
         cred = credentials.Certificate('./ScriptsMain/bottlecaps-keys.json')
