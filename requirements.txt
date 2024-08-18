@@ -3,7 +3,7 @@ opencv-python==4.10.0.84
 firebase-admin==6.5.0
 keras==3.5.0
 pinecone==5.0.1
-numpy==2.0.1
 fastapi==0.112.1
 uvicorn==0.30.6
 tensorflow==2.17.0
+numpy==1.26.4

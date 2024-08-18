@@ -1,10 +1,9 @@
-from typing import List
 
 import cv2
 import numpy as np
 
-from app.services.detect.htc import hough_transform_circle
 from app.services.detect.blobs import get_avg_size_all_blobs
+from app.services.detect.htc import hough_transform_circle
 
 MAX_WIDTH_IMAGE = 1000
 MAX_HEIGHT_IMAGE = 1000
@@ -18,8 +17,7 @@ def resize_image(src, factor):
 
 
 def crop_image_into_rectangles(photo_image, rectangles):
-    """
-    Crop the image based on the rectangles, if the position is negative put it to zero
+    """Crop the image based on the rectangles, if the position is negative put it to zero
 
     :param np.ndarray photo_image: the original photo
     :param list[tuple[int, int, int, int]] rectangles: a list of tuples with the x,y and width and height position
@@ -29,19 +27,16 @@ def crop_image_into_rectangles(photo_image, rectangles):
     cropped_images = []
     for x, y, w, h in rectangles:
         # Sometimes we have to guarantee that rectangle size is greater than 0
-        if y < 0:
-            y = 0
-        if x < 0:
-            x = 0
-        cropped_image = photo_image[y:y + h, x:x + w]
+        y = max(y, 0)
+        x = max(x, 0)
+        cropped_image = photo_image[y : y + h, x : x + w]
         if len(cropped_image) > 0:
             cropped_images.append((cropped_image, (x, y, w, h)))
     return cropped_images
 
 
-def get_rectangles(circles: List) -> List:
-    """
-    Based in the center of the circle and the ratio, transform it into a rectangle so the image can be cropped
+def get_rectangles(circles: list) -> list:
+    """Based in the center of the circle and the ratio, transform it into a rectangle so the image can be cropped
 
     :param list[tuple[nt,int,int]] circles: A list with tuples of the circles, x,y (center) and radius
     :return: Returns the list of rectangles transforming into width and height
@@ -57,8 +52,7 @@ def get_rectangles(circles: List) -> List:
 
 
 def preprocess_image_size(img: np.ndarray) -> np.ndarray:
-    """
-    Preprocess the image for SIFT currently it resizes it
+    """Preprocess the image for SIFT currently it resizes it
 
     :param np.ndarray img: Original image, preprocess it for SIFT
     :return: np.ndarray The image preprocessed for SIFT
@@ -74,7 +68,7 @@ def preprocess_image_size(img: np.ndarray) -> np.ndarray:
     return resized
 
 
-def detect_caps(img) -> List:
+def detect_caps(img) -> list:
     # Preprocess image
     img = preprocess_image_size(img)
 

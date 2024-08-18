@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from typing import Tuple
 
 import cv2
 import numpy as np
@@ -15,9 +14,14 @@ def get_name_from_path(path: str) -> str:
 def resize_img_pix_with_name(cap_path, path_output, pix):
     cap_name = get_name_from_path(cap_path)
     lst_name_cap = cap_name.split(".")
-    cap_name = lst_name_cap[0] + "_{}".format(str(pix)) + "." + lst_name_cap[-1]
-    output = resize_image_and_save(path_to_image=cap_path, width=pix, height=pix, where_save=path_output,
-                                   name_output=cap_name)
+    cap_name = lst_name_cap[0] + f"_{pix!s}" + "." + lst_name_cap[-1]
+    output = resize_image_and_save(
+        path_to_image=cap_path,
+        width=pix,
+        height=pix,
+        where_save=path_output,
+        name_output=cap_name,
+    )
     return output
 
 
@@ -54,9 +58,8 @@ def img_to_numpy(img_np) -> np.ndarray:
     return cv2.cvtColor(img_np, 1)
 
 
-def get_dcp_and_kps(img: np.ndarray) -> Tuple:
-    """
-    Detect and compute the descriptors and keypoints of the image
+def get_dcp_and_kps(img: np.ndarray) -> tuple:
+    """Detect and compute the descriptors and keypoints of the image
 
     ":param np.ndarray img: The image to get descriptors and keypoints
     :return: Returns a tuple with descriptors and keypoints
@@ -82,9 +85,8 @@ def resize_all_images(path, output, size):
 # -- Finish resize
 
 
-def rgb_to_bgr(r: int, g: int, b: int) -> Tuple:
-    """
-    Given a tuple of colors it returns the same tuple but changing the order, this is because OpenCV uses BGR instead of RGB
+def rgb_to_bgr(r: int, g: int, b: int) -> tuple:
+    """Given a tuple of colors it returns the same tuple but changing the order, this is because OpenCV uses BGR instead of RGB
 
     :param int r: value from 0 to 255 to represent red
     :param int g: int r: value from 0 to 255 to represent green
@@ -96,13 +98,13 @@ def rgb_to_bgr(r: int, g: int, b: int) -> Tuple:
 
 def main():
     cwd = Path(os.getcwd())
-    path_1 = os.path.join(cwd.parent.absolute(), r'database\1000-caps-s3-images')
-    path_2 = os.path.join(cwd.parent.absolute(), r'database\my-caps-images')
-    output = os.path.join(cwd.parent.absolute(), r'database\caps-resized')
+    path_1 = os.path.join(cwd.parent.absolute(), r"database\1000-caps-s3-images")
+    path_2 = os.path.join(cwd.parent.absolute(), r"database\my-caps-images")
+    output = os.path.join(cwd.parent.absolute(), r"database\caps-resized")
 
     resize_all_images(path=path_1, output=output, size=150)
     resize_all_images(path=path_2, output=output, size=150)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

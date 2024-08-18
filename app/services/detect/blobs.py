@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 
-
 DEBUG_BLOB = 0
 DEBUG_PREPROCESS_BLOBS = 0
 PREPO_number_of_levels = 3
@@ -51,15 +50,19 @@ def get_avg_size_all_blobs(img: np.ndarray):
     keypoints = remove_overlapping_blobs(kps=keypoints)
 
     if DEBUG_BLOB:
-        img = cv2.drawKeypoints(img, keypoints, np.array([]), (0, 0, 255),
-                                cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        img = cv2.drawKeypoints(
+            img,
+            keypoints,
+            np.array([]),
+            (0, 0, 255),
+            cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS,
+        )
         cv2.imshow("Result", img)
         cv2.waitKey(0)
 
     if len(keypoints) == 0:
         return img, 0
-    else:
-        return img, int(get_avg_size_blobs(keypoints) / 2)
+    return img, int(get_avg_size_blobs(keypoints) / 2)
 
 
 def get_avg_size_blobs(kps: list):
@@ -89,8 +92,13 @@ def remove_overlapping_blobs(kps: list):
     for i, box in enumerate(boxes):
         if overlapping[i]:
             continue
-        for j, other_box in enumerate(boxes[i + 1:]):
-            if box[0] < other_box[2] and box[2] > other_box[0] and box[1] < other_box[3] and box[3] > other_box[1]:
+        for j, other_box in enumerate(boxes[i + 1 :]):
+            if (
+                box[0] < other_box[2]
+                and box[2] > other_box[0]
+                and box[1] < other_box[3]
+                and box[3] > other_box[1]
+            ):
                 overlapping[i + j + 1] = True
 
     # Keep only the non-overlapping blobs
