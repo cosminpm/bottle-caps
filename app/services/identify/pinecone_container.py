@@ -1,7 +1,8 @@
 import os
 
 import numpy as np
-import pinecone
+from pinecone import Pinecone
+
 from keras.src.applications.resnet import preprocess_input
 
 
@@ -16,10 +17,8 @@ def image_to_vector(img, model):
 
 class PineconeContainer:
     def __init__(self):
-        self.api_key = os.environ["API_KEY"]
-        self.env = os.environ["ENV"]
-        pinecone.init(api_key=self.api_key, environment=self.env)
-        self.index = pinecone.Index(index_name="bottle-caps")
+        self.pc = Pinecone(api_key=os.environ["API_KEY"], environment=os.environ["ENV"])
+        self.index = self.pc.Index(name="bottle-caps")
 
     def query_database(self, vector):
         result = self.index.query(vector=[vector], top_k=5, namespace="bottle_caps")

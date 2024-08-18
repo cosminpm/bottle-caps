@@ -14,7 +14,7 @@ from app.services.identify.cnn import (
     identify_cap,
     transform_imag_to_pinecone_format,
 )
-from app.services.identify.manager import PineconeContainer
+from app.services.identify.pinecone_container import PineconeContainer
 from app.shared.utils import img_to_numpy
 
 load_dotenv()
@@ -37,7 +37,7 @@ app.add_middleware(
 )
 
 
-def process_image(file_contents: bytes, user_id: str):
+def process_image(file_contents: bytes, user_id: str) -> dict:
     image = cv2.imdecode(np.frombuffer(file_contents, np.uint8), cv2.IMREAD_COLOR)
     image = img_to_numpy(image)
     cropped_images = detect_caps(image)
@@ -53,8 +53,7 @@ def process_image(file_contents: bytes, user_id: str):
         )
     positions = [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
 
-    result = {"positions": positions, "caps_identified": caps_identified}
-    return result
+    return {"positions": positions, "caps_identified": caps_identified}
 
 
 @app.post("/detect_and_identify")

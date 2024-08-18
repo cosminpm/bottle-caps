@@ -10,10 +10,9 @@ from keras.src.applications.resnet import ResNet50
 from keras.src.layers import Dense, Flatten
 from keras.src.saving import load_model
 
-from app.services.identify.manager import PineconeContainer, image_to_vector
+from app.services.identify.pinecone_container import PineconeContainer, image_to_vector
 from app.shared.utils import read_img_from_path_with_mask, read_img_with_mask
 
-# PROJECT_PATH = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 PROJECT_PATH = os.getcwd()
 
 

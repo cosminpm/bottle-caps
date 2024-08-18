@@ -3,7 +3,7 @@
 
 # Define the FastAPI app module and command
 APP_MODULE := app.main:app
-UVICORN_COMMAND := uvicorn $(APP_MODULE) --reload --use-colors
+UVICORN_COMMAND := uvicorn $(APP_MODULE)
 
 # Run the FastAPI app using uvicorn
 run:
