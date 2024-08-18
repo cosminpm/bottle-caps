@@ -1,9 +1,8 @@
 import os
 
 import numpy as np
-from pinecone import Pinecone
-
 from keras.src.applications.resnet import preprocess_input
+from pinecone import Pinecone
 
 
 def image_to_vector(img, model):

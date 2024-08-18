@@ -97,10 +97,10 @@ def generate_model(pinecone_container: PineconeContainer):
 
 
 def identify_cap(
-        cap: np.ndarray,
-        pinecone_con: PineconeContainer,
-        model: keras.Sequential,
-        user_id: str,
+    cap: np.ndarray,
+    pinecone_con: PineconeContainer,
+    model: keras.Sequential,
+    user_id: str,
 ):
     img = read_img_with_mask(cap)
     vector = image_to_vector(img=img, model=model)
