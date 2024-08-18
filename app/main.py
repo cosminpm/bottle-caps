@@ -2,6 +2,7 @@ import cv2
 import keras
 import numpy as np
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -16,6 +17,7 @@ from app.services.identify.cnn import (
 from app.services.identify.manager import PineconeContainer
 from app.shared.utils import img_to_numpy
 
+load_dotenv()
 app = FastAPI()
 pinecone_container: PineconeContainer = PineconeContainer()
 model: keras.Sequential = get_model()
