@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 
 from app.schemas.cap import CapModel
 from app.services.detect.manager import detect_caps
-from app.services.identify.cnn import (
+from scripts.generate_model import (
     get_model,
     identify_cap,
     transform_imag_to_pinecone_format,

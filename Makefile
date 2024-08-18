@@ -3,13 +3,14 @@
 
 # Define the FastAPI app module and command
 APP_MODULE := app.main:app
-UVICORN_COMMAND := uvicorn $(APP_MODULE)
+UVICORN_COMMAND := uvicorn $(APP_MODULE) --use-colors
 
 # Run the FastAPI app using uvicorn
 run:
 	@$(UVICORN_COMMAND)
 
-
+generate:
+	@python -m scripts.generate_model
 
 # Install dependencies from the requirements file
 install:
