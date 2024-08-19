@@ -84,14 +84,29 @@ def save_model(model, path):
 
 
 def get_model() -> keras.Sequential:
-    path = os.path.join(PROJECT_PATH, "model.keras")
+    """Get the model.
+
+    Returns
+    -------
+        The keras model.
+
+    """
+    path = str(Path(PROJECT_PATH) / "model.keras")
     return load_model(path)
 
 
-def generate_model(pinecone_container: PineconeContainer):
+def generate_model(pinecone_container: PineconeContainer) -> None:
+    """Generate the model where we are going to save the bottle caps and the model used to identify.
+
+    Args:
+    ----
+        pinecone_container: The pinecone container.
+
+
+    """
     model = create_model()
-    path_model = os.path.join(PROJECT_PATH, "model.keras")
-    save_model(model=model, path=path_model)
+    path_model: str = str(Path(PROJECT_PATH) / "model.keras")
+    model.save(path_model)
     model = get_model()
     generate_vector_database(pinecone_container=pinecone_container, model=model)
 
@@ -100,12 +115,23 @@ def identify_cap(
     cap: np.ndarray,
     pinecone_con: PineconeContainer,
     model: keras.Sequential,
-    user_id: str,
 ):
+    """Identify a cap from the Pinecone database.
+
+    Args:
+    ----
+        cap: The cap.
+        pinecone_con: The Pinecone conection.
+        model: The Keras model.
+
+    Returns:
+    -------
+        The cap model with all the information.
+
+    """
     img = read_img_with_mask(cap)
     vector = image_to_vector(img=img, model=model)
-    metadata = {"user_id": {"$eq": user_id}}
-    result = pinecone_con.query_with_metadata(vector=vector, metadata=metadata)
+    result = pinecone_con.query_with_metadata(vector=vector)
     return [cap.to_dict() for cap in result]
 
 

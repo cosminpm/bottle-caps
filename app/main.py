@@ -3,18 +3,16 @@ import keras
 import numpy as np
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.schemas.cap import CapModel
 from app.services.detect.manager import detect_caps
 from app.services.identify.pinecone_container import PineconeContainer
 from app.shared.utils import img_to_numpy
 from scripts.generate_model import (
     get_model,
     identify_cap,
-    transform_imag_to_pinecone_format,
 )
 
 load_dotenv()
@@ -37,28 +35,49 @@ app.add_middleware(
 )
 
 
-def process_image(file_contents: bytes, user_id: str) -> dict:
+def post_detect_and_identify(file_contents: bytes) -> dict:
+    """Detect and indentify a bottle cap.
+
+    Args:
+    ----
+        file_contents: The raw content.
+
+    Returns:
+    -------
+        A dictionary containing all the necessary information.
+
+    """
     image = cv2.imdecode(np.frombuffer(file_contents, np.uint8), cv2.IMREAD_COLOR)
     image = img_to_numpy(image)
     cropped_images = detect_caps(image)
-    caps_identified = []
-    for cap in cropped_images:
-        caps_identified.append(
-            identify_cap(
-                cap=np.array(cap[0]),
-                model=model,
-                pinecone_con=pinecone_container,
-                user_id=user_id,
-            )
+    caps_identified = [
+        identify_cap(
+            cap=np.array(cap[0]),
+            model=model,
+            pinecone_con=pinecone_container,
         )
+        for cap in cropped_images
+    ]
+
     positions = [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
 
     return {"positions": positions, "caps_identified": caps_identified}
 
 
 @app.post("/detect_and_identify")
-async def upload_file(user_id: str, file: UploadFile = File(...)):
-    result = process_image(await file.read(), user_id=user_id)
+async def detect_and_identify(file: UploadFile = File(...)):
+    """Detect and identify an image containing multiple bottle caps.
+
+    Args:
+    ----
+        file:  The file we are going to process.
+
+    Returns:
+    -------
+        A json response containing the main information.
+
+    """
+    result = post_detect_and_identify(await file.read())
     return JSONResponse(
         content={
             "filename": file.filename,
@@ -69,44 +88,45 @@ async def upload_file(user_id: str, file: UploadFile = File(...)):
 
 
 @app.post("/detect")
-async def detect(file: UploadFile = File(...)):
+async def detect(file: UploadFile = File(...)) -> list:
+    """Detect bottle caps in an image.
+
+    Args:
+    ----
+        file: The file we are going to detect the images.
+
+    Returns:
+    -------
+        The list of positions were the caps where detected.
+
+    """
     image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
     image = img_to_numpy(image)
     cropped_images = detect_caps(image)
-    positions = [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
-    return positions
+    return [tuple(int(v) for v in rct) for (img, rct) in cropped_images]
 
 
 @app.post("/identify")
-async def identify(user_id: str, file: UploadFile = File(...)):
+async def identify(file: UploadFile = File(...)):
+    """Identify the bottle cap of an image.
+
+    Args:
+    ----
+        file: The file we are going to identify in an image.
+
+    Returns:
+    -------
+        The result of the identification of the bottle cap in a dictionary.
+
+    """
     image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
     cap_identified = identify_cap(
         cap=np.array(image),
         model=model,
         pinecone_con=pinecone_container,
-        user_id=user_id,
     )
     cap_identified = [cap.to_dict() for cap in cap_identified]
     return JSONResponse(cap_identified)
-
-
-@app.put("/add_to_database")
-async def add_to_database(
-    cap: CapModel = Depends(),
-    file: UploadFile = File(...),
-):
-    image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
-    image = img_to_numpy(image)
-
-    metadata = {
-        "name": cap.name,
-        "description": cap.description,
-        "user_id": cap.user_id,
-    }
-
-    cap_info = transform_imag_to_pinecone_format(model=model, img=image, metadata=metadata)
-    pinecone_container.upsert_to_pinecone(cap_info=cap_info)
-    return JSONResponse(cap_info)
 
 
 if __name__ == "__main__":
