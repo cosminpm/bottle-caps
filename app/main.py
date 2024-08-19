@@ -3,7 +3,7 @@ import keras
 import numpy as np
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -65,7 +65,7 @@ def post_detect_and_identify(file_contents: bytes) -> dict:
 
 
 @app.post("/detect_and_identify")
-async def detect_and_identify(file: UploadFile = File(...)):
+async def detect_and_identify(file: UploadFile):
     """Detect and identify an image containing multiple bottle caps.
 
     Args:
@@ -88,7 +88,7 @@ async def detect_and_identify(file: UploadFile = File(...)):
 
 
 @app.post("/detect")
-async def detect(file: UploadFile = File(...)) -> list:
+async def detect(file: UploadFile) -> list:
     """Detect bottle caps in an image.
 
     Args:
@@ -107,7 +107,7 @@ async def detect(file: UploadFile = File(...)) -> list:
 
 
 @app.post("/identify")
-async def identify(file: UploadFile = File(...)):
+async def identify(file: UploadFile):
     """Identify the bottle cap of an image.
 
     Args:

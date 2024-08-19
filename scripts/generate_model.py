@@ -13,9 +13,9 @@ from keras.src.layers import Dense, Flatten
 from keras.src.saving import load_model
 
 from app.services.identify.pinecone_container import PineconeContainer, image_to_vector
-from app.shared.utils import read_img_from_path_with_mask, read_img_with_mask
+from app.shared.utils import _read_img_from_path_with_mask, read_img_with_mask
 
-PROJECT_PATH = os.getcwd()
+PROJECT_PATH = Path.cwd()
 load_dotenv()
 
 
@@ -29,14 +29,14 @@ def create_img_training(name: str, folder_create: str, path_all_images: str) -> 
         path_all_images: The full path.
 
     """
-    folder_name = os.path.splitext(name)[0]
-    folder_result = os.path.join(folder_create, folder_name)
+    folder_name = Path(name).stem
+    folder_result = Path(folder_create) / folder_name
 
-    if not os.path.exists(folder_result):
-        os.makedirs(folder_result)
-        path_img = str(Path(path_all_images) / name)
-        img = read_img_from_path_with_mask(path_img)
-        cv2.imwrite(str(Path(folder_result) / name), img)
+    if not folder_result.exists():
+        folder_result.mkdir(parents=True)
+        path_img = Path(path_all_images) / name
+        img = _read_img_from_path_with_mask(str(path_img))
+        cv2.imwrite(str(folder_result / name), img)
 
 
 def create_training_folder() -> None:
@@ -111,7 +111,7 @@ def generate_vector_database(
         folder_path = str(Path(root_dir) / folder)
         for file in os.listdir(folder_path):
             path = str(Path(folder_path) / file)
-            img = read_img_from_path_with_mask(path)
+            img = _read_img_from_path_with_mask(path)
             vector = image_to_vector(img=img, model=model)
             cap_info = {"id": file, "values": vector}
             pinecone_container.upsert_to_pinecone(cap_info=cap_info)

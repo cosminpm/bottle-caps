@@ -27,8 +27,5 @@ format:
 	@ruff check . --fix
 	@mypy --config-file "pyproject.toml"
 
-# Install all dependencies for mypy
-mypy_install:
-	@install lint mypy
 
 

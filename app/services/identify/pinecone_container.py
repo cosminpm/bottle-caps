@@ -2,10 +2,23 @@ import os
 
 import numpy as np
 from keras.src.applications.resnet import preprocess_input
+from numpy import ndarray
 from pinecone import Pinecone
 
 
-def image_to_vector(img, model):
+def image_to_vector(img: ndarray, model) -> list:
+    """Convert a imae into a vector.
+
+    Args:
+    ----
+        img: The numpy img
+        model: The keras model
+
+    Returns:
+    -------
+    The vector
+
+    """
     resized_img = np.resize(img, (224, 224, 3))  # Resize the image to (224, 224)
     preprocessed_img = preprocess_input(
         resized_img[np.newaxis, ...]
