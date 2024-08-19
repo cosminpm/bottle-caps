@@ -1,5 +1,5 @@
 import cv2
-import numpy as np
+from numpy import ndarray
 
 from app.services.detect.blobs import get_avg_size_all_blobs
 from app.services.detect.htc import hough_transform_circle
@@ -8,20 +8,36 @@ MAX_WIDTH_IMAGE = 1000
 MAX_HEIGHT_IMAGE = 1000
 
 
-# -- Resizing --
-def resize_image(src, factor):
+def resize_image(src: ndarray, factor: float) -> ndarray:
+    """Resize the image to a certain factor.
+
+    Args:
+    ----
+        src: The source image.
+        factor: The factor to resize.
+
+    Returns:
+    -------
+        The resized image.
+
+    """
     height, width = src.shape[:2]
     new_size = (int(width * factor), int(height * factor))
     return cv2.resize(src, new_size)
 
 
-def crop_image_into_rectangles(photo_image, rectangles):
-    """Crop the image based on the rectangles, if the position is negative put it to zero
+def crop_image_into_rectangles(photo_image: ndarray, rectangles: list) -> list[tuple]:
+    """Crop the image into rectangles of the different caps.
 
-    :param np.ndarray photo_image: the original photo
-    :param list[tuple[int, int, int, int]] rectangles: a list of tuples with the x,y and width and height position
-    :return: list[np.ndarray, tuple[int, int, int, int]] Returns a list of list which contains the cropped image and the
-     position on where it was cropped
+    Args:
+    ----
+        photo_image: The original image.
+        rectangles: The position of the rectangles.
+
+    Returns:
+    -------
+        A list with the rectangles, the image and their position.
+
     """
     cropped_images = []
     for x, y, w, h in rectangles:
@@ -35,10 +51,16 @@ def crop_image_into_rectangles(photo_image, rectangles):
 
 
 def get_rectangles(circles: list) -> list:
-    """Based in the center of the circle and the ratio, transform it into a rectangle so the image can be cropped
+    """Transform the circles given into rectangles.
 
-    :param list[tuple[nt,int,int]] circles: A list with tuples of the circles, x,y (center) and radius
-    :return: Returns the list of rectangles transforming into width and height
+    Args:
+    ----
+        circles: A list of the circles.
+
+    Returns:
+    -------
+        A list with the rectangles.
+
     """
     rectangles = []
     for x, y, r in circles:
@@ -50,34 +72,47 @@ def get_rectangles(circles: list) -> list:
     return rectangles
 
 
-def preprocess_image_size(img: np.ndarray) -> np.ndarray:
-    """Preprocess the image for SIFT currently it resizes it
+def preprocess_image_size(img: ndarray) -> ndarray:
+    """Resize the image to a specific maximum.
 
-    :param np.ndarray img: Original image, preprocess it for SIFT
-    :return: np.ndarray The image preprocessed for SIFT
+    Args:
+    ----
+        img: The original image.
+
+    Returns:
+    -------
+        The resulting resized image.
+
     """
     height, width = img.shape[:2]
     size = height * width
     max_size_img = MAX_WIDTH_IMAGE * MAX_HEIGHT_IMAGE
     resized = img
     while size > max_size_img:
-        resized = resize_image(resized, 0.66)
+        resized = resize_image(resized, 2 / 3)
         height, width = resized.shape[:2]
         size = height * width
     return resized
 
 
-def detect_caps(img) -> list:
-    # Preprocess image
+def detect_caps(img: ndarray) -> list:
+    """Detect the caps in the image.
+
+    Args:
+    ----
+        img: The original image.
+
+    Returns:
+    -------
+        A list with the detected caps.
+
+    """
     img = preprocess_image_size(img)
 
-    _, avg_size = get_avg_size_all_blobs(img)
+    avg_size = get_avg_size_all_blobs(img)
     cropped_images = []
     if avg_size != 0:
-        _, circles = hough_transform_circle(img, avg_size)
-        # Get the positions of the rectangles
+        circles = hough_transform_circle(img, avg_size)
         rectangles = get_rectangles(circles)
-        # Crop the images from the rectangles
         cropped_images = crop_image_into_rectangles(img, rectangles)
-        # Final dictionary which will contain all the positions and info from the cap
     return cropped_images

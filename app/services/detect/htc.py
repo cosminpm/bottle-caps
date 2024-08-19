@@ -1,12 +1,23 @@
 import cv2
 import numpy as np
+from numpy import uint16
 
-DEBUG_HOUGH_TRANSFORM = 0
 multiplier_left_max_radius = 0.8
 multiplier_right_max_radius = 1
 
 
-def combine_overlapping_circles(circles):
+def combine_overlapping_circles(circles: uint16) -> list[tuple[int, int, int]]:
+    """Combine all the overlapping circles.
+
+    Args:
+    ----
+        circles: The circles to combine.
+
+    Returns:
+    -------
+        A list with all the circles.
+
+    """
     circles = np.round(circles[0, :]).astype("int")
     combined_circles = []
     for x, y, r in circles:
@@ -20,7 +31,19 @@ def combine_overlapping_circles(circles):
     return combined_circles
 
 
-def hough_transform_circle(img: np.ndarray, max_radius: int) -> (np.ndarray, int):
+def hough_transform_circle(img: np.ndarray, max_radius: int) -> list[tuple[int, int, int]]:
+    """Return the final circles after HTC transformation.
+
+    Args:
+    ----
+        img: The image where we are going to find the circles.
+        max_radius: The maximum radius of a bottlecap.
+
+    Returns:
+    -------
+        A list with all the circles.
+
+    """
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img = cv2.GaussianBlur(img, (5, 5), 0)
 
@@ -34,16 +57,6 @@ def hough_transform_circle(img: np.ndarray, max_radius: int) -> (np.ndarray, int
         minRadius=int(max_radius * multiplier_left_max_radius),
         maxRadius=int(max_radius * multiplier_right_max_radius),
     )
-    circles = np.uint16(np.around(circles))
+    circles: uint16 = np.uint16(np.around(circles))
 
-    circles = combine_overlapping_circles(circles)
-
-    if DEBUG_HOUGH_TRANSFORM:
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-        # Draw combined circles on image
-        for x, y, r in circles:
-            cv2.circle(img, (x, y), r, (0, 255, 0), 4)
-        cv2.imshow("Hough-Transform-Debug", img)
-        cv2.waitKey(0)
-
-    return img, circles
+    return combine_overlapping_circles(circles)

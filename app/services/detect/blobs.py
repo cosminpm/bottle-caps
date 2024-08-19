@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
+from numpy import ndarray
 
-DEBUG_BLOB = 0
+DEBUG_BLOB = 1
 DEBUG_PREPROCESS_BLOBS = 0
 PREPO_number_of_levels = 3
 PREPO_convolution_size = 15
@@ -9,21 +10,43 @@ percent_min_area_of_original = 0.01
 percent_max_area_of_original = 0.99
 
 
-def reduce_colors_images(image, number_of_levels):
+def reduce_colors_images(image: ndarray, n_colors: int) -> ndarray:
+    """Reduce the number of colors to a specific number.
+
+    Args:
+    ----
+        image: The image we are going to reduce.
+        n_colors (int): The number of colors to reduce.
+
+    Returns:
+    -------
+    The reduced image.
+
+    """
     pixels = image.reshape((-1, 3)).astype(np.float32)
 
     # Perform k-means clustering
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-    flags = cv2.KMEANS_RANDOM_CENTERS
-    compactness, labels, centers = cv2.kmeans(pixels, number_of_levels, None, criteria, 10, flags)
+    flags: int = cv2.KMEANS_RANDOM_CENTERS
+    compactness, labels, centers = cv2.kmeans(pixels, n_colors, None, criteria, 10, flags)
 
     # Convert the labels back to an image
     quantized = centers[labels]
-    quantized = quantized.reshape(image.shape).astype(np.uint8)
-    return quantized
+    return quantized.reshape(image.shape).astype(np.uint8)
 
 
-def preprocess_image_blobs(image):
+def preprocess_image_blobs(image: ndarray) -> ndarray:
+    """Preprocess the image to make the detection of the blobls easier.
+
+    Args:
+    ----
+        image (ndarray): The image we are going to preprocess.
+
+    Returns:
+    -------
+        The preprocessed image.
+
+    """
     img = cv2.GaussianBlur(image, (PREPO_convolution_size, PREPO_convolution_size), 0)
     img = reduce_colors_images(img, PREPO_number_of_levels)
     if DEBUG_PREPROCESS_BLOBS:
@@ -32,7 +55,18 @@ def preprocess_image_blobs(image):
     return img
 
 
-def get_avg_size_all_blobs(img: np.ndarray):
+def get_avg_size_all_blobs(img: ndarray) -> int:
+    """Get the average size of the blobs.
+
+    Args:
+    ----
+        img: Image we are going to analyze.
+
+    Returns:
+    -------
+        The average size of the blobs.
+
+    """
     img = preprocess_image_blobs(img)
     params = cv2.SimpleBlobDetector_Params()
 
@@ -47,25 +81,14 @@ def get_avg_size_all_blobs(img: np.ndarray):
     detector = cv2.SimpleBlobDetector_create(params)
 
     keypoints = detector.detect(img)
-    keypoints = remove_overlapping_blobs(kps=keypoints)
-
-    if DEBUG_BLOB:
-        img = cv2.drawKeypoints(
-            img,
-            keypoints,
-            np.array([]),
-            (0, 0, 255),
-            cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS,
-        )
-        cv2.imshow("Result", img)
-        cv2.waitKey(0)
+    keypoints = _remove_overlapping_blobs(kps=keypoints)
 
     if len(keypoints) == 0:
-        return img, 0
-    return img, int(get_avg_size_blobs(keypoints) / 2)
+        return 0
+    return int(_get_avg_size_blobs(keypoints) / 2)
 
 
-def get_avg_size_blobs(kps: list):
+def _get_avg_size_blobs(kps: list):
     kps_size = [int(kp.size) for kp in kps]
     lst = sorted(kps_size)
     if len(lst) % 2 == 1:
@@ -79,7 +102,7 @@ def get_avg_size_blobs(kps: list):
     return result
 
 
-def remove_overlapping_blobs(kps: list):
+def _remove_overlapping_blobs(kps: list):
     boxes = []
     for kp in kps:
         x, y = int(kp.pt[0]), int(kp.pt[1])
