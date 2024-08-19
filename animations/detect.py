@@ -34,8 +34,11 @@ async def _detect_animation(file_path: Path, output_path: Path) -> None:
             center_x = x + w / 2
             center_y = y + h / 2
             radius = min(w, h) / 2
-            draw.ellipse([center_x - radius, center_y - radius, center_x + radius, center_y + radius],
-                         outline="yellow", width=10)
+            draw.ellipse(
+                [center_x - radius, center_y - radius, center_x + radius, center_y + radius],
+                outline="yellow",
+                width=10,
+            )
 
         img_np_frame = np.array(img_copy)
         ax.imshow(img_np_frame)

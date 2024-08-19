@@ -44,7 +44,7 @@ def crop_image_into_rectangles(photo_image: ndarray, rectangles: list) -> list[t
     for x, y, w, h in rectangles:
         y = max(y, 0)  # noqa: PLW2901
         x = max(x, 0)  # noqa: PLW2901
-        cropped_image = photo_image[y: y + h, x: x + w]
+        cropped_image = photo_image[y : y + h, x : x + w]
         if len(cropped_image) > 0:
             cropped_images.append((cropped_image, (x, y, w, h)))
     return cropped_images

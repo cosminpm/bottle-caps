@@ -27,5 +27,7 @@ def save_img(output_path: str, env_var_name: str = "SAVE_IMG"):
                 else:
                     logger.error("Result is not a NumPy array.")
             return result
+
         return wrapper
+
     return decorator
