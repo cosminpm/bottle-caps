@@ -66,21 +66,28 @@ def transform_imag_to_pinecone_format(img: np.ndarray, model: keras.Sequential, 
     return cap_info
 
 
-def generate_vector_database(pinecone_container, model: keras.Sequential):
+def generate_vector_database(pinecone_container: PineconeContainer, model: keras.Sequential):
+    """Create the vector database for pinecone connection.
+
+    Args:
+    ----
+        pinecone_container: The pinecone container.
+        model:
+
+    Returns:
+    -------
+
+    """
     root_dir = str(Path("database") / "training")
     folders = os.listdir(root_dir)
     for folder in folders:
-        folder = os.path.join(root_dir, folder)
-        for file in os.listdir(folder):
-            path = os.path.join(folder, file)
+        folder_path = str(Path(root_dir) / folder)
+        for file in os.listdir(folder_path):
+            path = str(Path(folder_path) / file)
             img = read_img_from_path_with_mask(path)
             vector = image_to_vector(img=img, model=model)
             cap_info = {"id": file, "values": vector}
             pinecone_container.upsert_to_pinecone(cap_info=cap_info)
-
-
-def save_model(model, path):
-    model.save(path)
 
 
 def get_model() -> keras.Sequential:
@@ -121,7 +128,7 @@ def identify_cap(
     Args:
     ----
         cap: The cap.
-        pinecone_con: The Pinecone conection.
+        pinecone_con: The Pinecone connection.
         model: The Keras model.
 
     Returns:
