@@ -13,7 +13,7 @@ from keras.src.layers import Dense, Flatten
 from keras.src.saving import load_model
 
 from app.services.identify.pinecone_container import PineconeContainer, image_to_vector
-from app.shared.utils import _read_img_from_path_with_mask, read_img_with_mask
+from app.shared.utils import _apply_mask, _read_img_from_path_with_mask
 
 PROJECT_PATH = Path.cwd()
 load_dotenv()
@@ -88,7 +88,7 @@ def transform_imag_to_pinecone_format(img: np.ndarray, model: keras.Sequential, 
         A dictionary with all the metadata information frpm pinecone.
 
     """
-    img = read_img_with_mask(img)
+    img = _apply_mask(img)
     vector = image_to_vector(img=img, model=model)
 
     return {"id": str(uuid.uuid4()), "values": vector, "metadata": metadata}
@@ -163,7 +163,7 @@ def identify_cap(
         The cap model with all the information.
 
     """
-    img = read_img_with_mask(cap)
+    img = _apply_mask(cap)
     vector = image_to_vector(img=img, model=model)
     result = pinecone_con.query_with_metadata(vector=vector)
     return [cap.to_dict() for cap in result]
