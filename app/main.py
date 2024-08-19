@@ -125,7 +125,6 @@ async def identify(file: UploadFile):
         model=model,
         pinecone_con=pinecone_container,
     )
-    cap_identified = [cap.to_dict() for cap in cap_identified]
     return JSONResponse(cap_identified)
 
 

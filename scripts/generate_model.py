@@ -165,7 +165,7 @@ def identify_cap(
     """
     img = _apply_mask(cap)
     vector = image_to_vector(img=img, model=model)
-    result = pinecone_con.query_with_metadata(vector=vector)
+    result = pinecone_con.query_database(vector=vector)
     return [cap.to_dict() for cap in result]
 
 
