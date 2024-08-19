@@ -19,18 +19,28 @@ PROJECT_PATH = os.getcwd()
 load_dotenv()
 
 
-def create_img_training(name: str, folder_create: str, path_all_images: str):
+def create_img_training(name: str, folder_create: str, path_all_images: str) -> None:
+    """Create the training image for the model.
+
+    Args:
+    ----
+        name: The name of the cap.
+        folder_create: Where to create the img.
+        path_all_images: The full path.
+
+    """
     folder_name = os.path.splitext(name)[0]
     folder_result = os.path.join(folder_create, folder_name)
 
     if not os.path.exists(folder_result):
         os.makedirs(folder_result)
-        path_img = os.path.join(path_all_images, name)
+        path_img = str(Path(path_all_images) / name)
         img = read_img_from_path_with_mask(path_img)
-        cv2.imwrite(os.path.join(folder_result, name), img)
+        cv2.imwrite(str(Path(folder_result) / name), img)
 
 
-def create_training_folder():
+def create_training_folder() -> None:
+    """Create the training folder that's going to be used to train the model."""
     path_all_images = str(Path("database") / "caps-resized")
     folder_create = str(Path("database") / "training")
 
@@ -39,7 +49,14 @@ def create_training_folder():
         create_img_training(name=name, folder_create=folder_create, path_all_images=path_all_images)
 
 
-def create_model():
+def create_model() -> Sequential:
+    """Create the Keras model that it's going to be used.
+
+    Returns
+    -------
+        A Keras model to indentify bottle caps.
+
+    """
     img_size = 224
     model = Sequential()
     base_model = ResNet50(
@@ -57,25 +74,35 @@ def create_model():
     return model
 
 
-def transform_imag_to_pinecone_format(img: np.ndarray, model: keras.Sequential, metadata):
+def transform_imag_to_pinecone_format(img: np.ndarray, model: keras.Sequential, metadata) -> dict:
+    """Transform an image to pinecone format, so we can upload it into the vector database.
+
+    Args:
+    ----
+        img: The image.
+        model: The keras model.
+        metadata: The medatada of the model.
+
+    Returns:
+    -------
+        A dictionary with all the metadata information frpm pinecone.
+
+    """
     img = read_img_with_mask(img)
     vector = image_to_vector(img=img, model=model)
 
-    cap_info = {"id": str(uuid.uuid4()), "values": vector, "metadata": metadata}
-
-    return cap_info
+    return {"id": str(uuid.uuid4()), "values": vector, "metadata": metadata}
 
 
-def generate_vector_database(pinecone_container: PineconeContainer, model: keras.Sequential):
+def generate_vector_database(
+    pinecone_container: PineconeContainer, model: keras.Sequential
+) -> None:
     """Create the vector database for pinecone connection.
 
     Args:
     ----
         pinecone_container: The pinecone container.
-        model:
-
-    Returns:
-    -------
+        model: The keras model
 
     """
     root_dir = str(Path("database") / "training")

@@ -76,7 +76,19 @@ def resize_image_and_save(path_to_image, width, height, where_save, name_output)
     return output
 
 
-def resize_all_images(path, output, size):
+def resize_all_images(path: str, output: str, size: int):
+    """Resize a list of images.
+
+    Args:
+    ----
+        path:
+        output:
+        size:
+
+    Returns:
+    -------
+
+    """
     files = os.listdir(path)
     for file in files:
         resize_img_pix_with_name(os.path.join(path, file), output, size)
