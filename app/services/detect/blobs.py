@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 from numpy import ndarray
 
+from app.shared.save_image_decorator import save_img
+
 DEBUG_BLOB = 1
 DEBUG_PREPROCESS_BLOBS = 0
 PREPO_number_of_levels = 3
@@ -9,7 +11,7 @@ PREPO_convolution_size = 15
 percent_min_area_of_original = 0.01
 percent_max_area_of_original = 0.99
 
-
+@save_img(output_path="animations/pp_1.png")
 def reduce_colors_images(image: ndarray, n_colors: int) -> ndarray:
     """Reduce the number of colors to a specific number.
 
@@ -35,8 +37,9 @@ def reduce_colors_images(image: ndarray, n_colors: int) -> ndarray:
     return quantized.reshape(image.shape).astype(np.uint8)
 
 
+@save_img(output_path="animations/pp_2.png")
 def preprocess_image_blobs(image: ndarray) -> ndarray:
-    """Preprocess the image to make the detection of the blobls easier.
+    """Preprocess the image to make the detection of the blobs easier.
 
     Args:
     ----
@@ -115,12 +118,12 @@ def _remove_overlapping_blobs(kps: list):
     for i, box in enumerate(boxes):
         if overlapping[i]:
             continue
-        for j, other_box in enumerate(boxes[i + 1 :]):
+        for j, other_box in enumerate(boxes[i + 1:]):
             if (
-                box[0] < other_box[2]
-                and box[2] > other_box[0]
-                and box[1] < other_box[3]
-                and box[3] > other_box[1]
+                    box[0] < other_box[2]
+                    and box[2] > other_box[0]
+                    and box[1] < other_box[3]
+                    and box[3] > other_box[1]
             ):
                 overlapping[i + j + 1] = True
 

@@ -3,6 +3,7 @@ from numpy import ndarray
 
 from app.services.detect.blobs import get_avg_size_all_blobs
 from app.services.detect.htc import hough_transform_circle
+from app.shared.save_image_decorator import save_img
 
 MAX_WIDTH_IMAGE = 1000
 MAX_HEIGHT_IMAGE = 1000
@@ -43,7 +44,7 @@ def crop_image_into_rectangles(photo_image: ndarray, rectangles: list) -> list[t
     for x, y, w, h in rectangles:
         y = max(y, 0)  # noqa: PLW2901
         x = max(x, 0)  # noqa: PLW2901
-        cropped_image = photo_image[y : y + h, x : x + w]
+        cropped_image = photo_image[y: y + h, x: x + w]
         if len(cropped_image) > 0:
             cropped_images.append((cropped_image, (x, y, w, h)))
     return cropped_images
@@ -71,6 +72,7 @@ def get_rectangles(circles: list) -> list:
     return rectangles
 
 
+@save_img(output_path="animations/pp_0.png")
 def preprocess_image_size(img: ndarray) -> ndarray:
     """Resize the image to a specific maximum.
 
