@@ -8,12 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.services.detect.manager import detect_caps
+from app.services.identify.manager import get_model, identify_cap
 from app.services.identify.pinecone_container import PineconeContainer
 from app.shared.utils import img_to_numpy
-from scripts.generate_model import (
-    get_model,
-    identify_cap,
-)
 
 load_dotenv()
 app = FastAPI()
@@ -107,7 +104,7 @@ async def detect(file: UploadFile) -> list:
 
 
 @app.post("/identify")
-async def identify(file: UploadFile):
+async def identify(file: UploadFile) -> list[dict]:
     """Identify the bottle cap of an image.
 
     Args:
@@ -120,12 +117,11 @@ async def identify(file: UploadFile):
 
     """
     image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
-    cap_identified = identify_cap(
+    return identify_cap(
         cap=np.array(image),
         model=model,
         pinecone_con=pinecone_container,
     )
-    return JSONResponse(cap_identified)
 
 
 if __name__ == "__main__":

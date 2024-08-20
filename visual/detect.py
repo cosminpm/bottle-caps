@@ -1,24 +1,19 @@
 import asyncio
-from io import BytesIO
 from pathlib import Path
 
-import aiofiles
 import matplotlib.pyplot as plt
 import numpy as np
-from fastapi import UploadFile
 from loguru import logger
 from matplotlib import animation
 from PIL import Image, ImageDraw
 
 from app.main import detect
+from app.shared.utils import upload_file
 
 
 async def _detect_animation(file_path: Path, output_path: Path) -> None:
-    async with aiofiles.open(file_path, mode="rb") as file:
-        file_contents = await file.read()
-        upload_file = UploadFile(filename=str(file_path), file=BytesIO(file_contents))
-
-    rectangles: list[tuple] = await detect(upload_file)
+    uploaded = await upload_file(file_path)
+    rectangles: list[tuple] = await detect(uploaded)
 
     image = Image.open(file_path)
     image_np = np.array(image)
@@ -65,6 +60,6 @@ async def process_directory(directory: Path, output_directory: Path) -> None:
 
 if __name__ == "__main__":
     input_directory = Path("database/test-images/test-i-have")
-    output_directory = Path("animations/gifs")
+    output_directory = Path("visual/result")
     output_directory.mkdir(parents=True, exist_ok=True)
     asyncio.run(process_directory(input_directory, output_directory))

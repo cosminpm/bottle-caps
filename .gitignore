@@ -19,4 +19,4 @@ __pycache__/
 # Sphinx docum
 /database/*
 /training/*
-animations/gifs/*
+visual/result/*

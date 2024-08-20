@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 from keras import Sequential
 from keras.src.applications.resnet import ResNet50
 from keras.src.layers import Dense, Flatten
-from keras.src.saving import load_model
 
+from app.services.identify.manager import get_model
 from app.services.identify.pinecone_container import PineconeContainer, image_to_vector
 from app.shared.utils import _apply_mask, _read_img_from_path_with_mask
 
@@ -117,18 +117,6 @@ def generate_vector_database(
             pinecone_container.upsert_to_pinecone(cap_info=cap_info)
 
 
-def get_model() -> keras.Sequential:
-    """Get the model.
-
-    Returns
-    -------
-        The keras model.
-
-    """
-    path = str(Path(PROJECT_PATH) / "app" / "models" / "model.keras")
-    return load_model(path)
-
-
 def generate_model(pinecone_container: PineconeContainer) -> None:
     """Generate the model where we are going to save the bottle caps and the model used to identify.
 
@@ -143,30 +131,6 @@ def generate_model(pinecone_container: PineconeContainer) -> None:
     model.save(path_model)
     model = get_model()
     generate_vector_database(pinecone_container=pinecone_container, model=model)
-
-
-def identify_cap(
-    cap: np.ndarray,
-    pinecone_con: PineconeContainer,
-    model: keras.Sequential,
-):
-    """Identify a cap from the Pinecone database.
-
-    Args:
-    ----
-        cap: The cap.
-        pinecone_con: The Pinecone connection.
-        model: The Keras model.
-
-    Returns:
-    -------
-        The cap model with all the information.
-
-    """
-    img = _apply_mask(cap)
-    vector = image_to_vector(img=img, model=model)
-    result = pinecone_con.query_database(vector=vector)
-    return [cap.to_dict() for cap in result]
 
 
 if __name__ == "__main__":

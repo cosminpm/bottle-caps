@@ -12,7 +12,7 @@ Below is an overview of how the code operates.
 
 ### Database Creation
 
-Currently there is a script that generates all the data and uploads it to Pinecone, the vector database used to compare the vector result from the model and the ones from the database: `scripts/generate_model.py`.
+Currently, there is a script that generates all the data and uploads it to Pinecone, the vector database used to compare the vector result from the model and the ones from the database: `scripts/generate_model.py`.
 
 ### Blob Detection
 
