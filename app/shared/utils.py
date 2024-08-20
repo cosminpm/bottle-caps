@@ -1,8 +1,11 @@
 import os
+from io import BytesIO
 from pathlib import Path
 
+import aiofiles
 import cv2
 import numpy as np
+from fastapi import UploadFile
 
 SIFT = cv2.SIFT_create()
 
@@ -111,3 +114,20 @@ def rgb_to_bgr(r: int, g: int, b: int) -> tuple:
 
     """
     return b, g, r
+
+
+async def upload_file(path: Path) -> UploadFile:
+    """Given a path to a file, mimic it as it was uploaded by the FastAPI framework.
+
+    Args:
+    ----
+        path (Path): Path to the file.
+
+    Returns:
+    -------
+    The uploaded file.
+
+    """
+    async with aiofiles.open(path, mode="rb") as file:
+        file_contents = await file.read()
+        return UploadFile(filename=str(path), file=BytesIO(file_contents))

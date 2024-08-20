@@ -8,12 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.services.detect.manager import detect_caps
+from app.services.identify.manager import get_model, identify_cap
 from app.services.identify.pinecone_container import PineconeContainer
 from app.shared.utils import img_to_numpy
-from scripts.generate_model import (
-    get_model,
-    identify_cap,
-)
 
 load_dotenv()
 app = FastAPI()
