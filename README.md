@@ -4,7 +4,7 @@ The idea of this project it's to have a machine learning app that will detect an
 
 ## Overview
 
-bottle-caps uses computer vision techniques, primarily based on OpenCV, to identify and match bottle caps. While the app currently operates locally, future plans include transitioning to cloud hosting. The app utilizes key OpenCV methods including **Simple Blob Detector**, **Hough Transform Circles**, and **Scale-Invariant Feature Transform (SIFT)**, each requiring specific preprocessing steps.
+bottle-caps uses computer vision techniques, primarily based on OpenCV, to identify and match bottle caps. While the app currently operates locally, future plans include transitioning to cloud hosting. The app utilizes key OpenCV methods including **Simple Blob Detector**, **Hough Transform Circles**, **ResNet5O**, each requiring specific preprocessing steps.
 
 ## Code Flow
 
