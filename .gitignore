@@ -2,46 +2,16 @@
 __pycache__/
 *.py[cod]
 .idea
-# C extensions
-*.so
 
+# Environment variables
 .env
-# Distribution / packaging
-bin/
-build/
-develop-eggs/
-dist/
-eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+*.DS_Store
+.mypy_cache/
 
 # Unit test / coverage reports
-.tox/
 .coverage
 .cache
-nosetests.xml
-coverage.xml
-
-# Translations
-*.mo
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
-
-# Rope
-.ropeproject
 
 # Django stuff:
 *.log
