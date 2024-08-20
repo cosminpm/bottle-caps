@@ -3,3 +3,4 @@ mypy==1.11.1 # Formatting
 pytest==8.3.2 # Tests
 pytest-asyncio==0.23.8 # Tests async
 aiofiles==24.1.0
+types-aiofiles==24.1.0.20240626
