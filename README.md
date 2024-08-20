@@ -4,7 +4,7 @@ The idea of this project it's to have a machine learning app that will detect an
 
 ## Overview
 
-bottle-caps uses computer vision techniques, primarily based on OpenCV, to identify and match bottle caps. While the app currently operates locally, future plans include transitioning to cloud hosting. The app utilizes key OpenCV methods including **Simple Blob Detector**, **Hough Transform Circles**, and **Scale-Invariant Feature Transform (SIFT)**, each requiring specific preprocessing steps.
+bottle-caps uses computer vision techniques, primarily based on OpenCV, to identify and match bottle caps. While the app currently operates locally, future plans include transitioning to cloud hosting. The app utilizes key OpenCV methods including **Simple Blob Detector**, **Hough Transform Circles**, **ResNet5O**, each requiring specific preprocessing steps.
 
 ## Code Flow
 
@@ -24,11 +24,22 @@ Initially, the _Hough Transform Circles_ method was used, but it resulted in mul
 
 Based on the approximate radius determined from the blobs, upper and lower bounds were set. Preprocessing was applied before using Hough Transform Circles to identify the positions of all circles in the image.
 
-### RESTNet
+### Resnet
 
-Currently using a RESTNet model to identify the caps, basically transform them in vector format and then saving them in Pinecone. It is a vector database great for comparing AI content.
+Currently using a resnet model to identify the caps, basically transform them in vector format and then saving them in Pinecone. It is a vector database great for comparing AI content.
 
-## Example
+## Examples
+
+### Detection
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f5c6f3d3-348b-421b-9fcc-b9d8bd5354fb" width="200" />
+  <img src="https://github.com/user-attachments/assets/c76a0694-b93e-405a-bb97-62de10ad9b26" width="200" />
+  <img src="https://github.com/user-attachments/assets/5cef7d52-1785-4f36-aaac-e2213f0271b0" width="200" />
+  <img src="https://github.com/user-attachments/assets/65d7d827-dc37-469c-8a43-fda371dde82b" width="200" />
+</p>
+
+### Full Example
 
 Below is an example output of the full model. The results show areas for improvement: while the first two caps are correctly identified, the bottom two are labeled incorrectly. Speed optimizations are also needed. For additional notes on testing, refer to `ScriptsMain/note_tests/README.md`.
 

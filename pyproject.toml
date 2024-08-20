@@ -1,6 +1,6 @@
 [tool.mypy]
 plugins = ["pydantic.mypy"]
-exclude=[".venv",  ".ruff_cache", ".mypy_cache", "tests", "integration_tests", "alembic"]
+exclude=[".venv",  ".ruff_cache", ".mypy_cache", "tests"]
 python_version = "3.11"
 no_implicit_optional = true
 strict_equality = true

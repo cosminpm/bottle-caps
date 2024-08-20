@@ -2,7 +2,8 @@ name: Lint and Type Check
 
 on:
   pull_request:
-    types: [opened]
+    branches:
+      - main
 
 jobs:
   lint-and-type-check:
