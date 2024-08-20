@@ -125,7 +125,7 @@ def get_model() -> keras.Sequential:
         The keras model.
 
     """
-    path = str(Path(PROJECT_PATH) / "model.keras")
+    path = str(Path(PROJECT_PATH) / "app" / "models" / "model.keras")
     return load_model(path)
 
 
@@ -139,7 +139,7 @@ def generate_model(pinecone_container: PineconeContainer) -> None:
 
     """
     model = create_model()
-    path_model: str = str(Path(PROJECT_PATH) / "model.keras")
+    path_model: str = str(Path(PROJECT_PATH) / "app" / "models" / "model.keras")
     model.save(path_model)
     model = get_model()
     generate_vector_database(pinecone_container=pinecone_container, model=model)
