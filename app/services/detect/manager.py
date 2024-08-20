@@ -3,6 +3,7 @@ from numpy import ndarray
 
 from app.services.detect.blobs import get_avg_size_all_blobs
 from app.services.detect.htc import hough_transform_circle
+from app.shared.save_image_decorator import save_img
 
 MAX_WIDTH_IMAGE = 1000
 MAX_HEIGHT_IMAGE = 1000
@@ -71,6 +72,7 @@ def get_rectangles(circles: list) -> list:
     return rectangles
 
 
+@save_img(output_path="animations/pp_0.png")
 def preprocess_image_size(img: ndarray) -> ndarray:
     """Resize the image to a specific maximum.
 

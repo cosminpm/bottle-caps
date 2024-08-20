@@ -49,5 +49,4 @@ coverage.xml
 # Sphinx docum
 /database/*
 /training/*
-img_1.png
-app/bottlecaps-keys.json
+animations/gifs/*
