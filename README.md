@@ -24,9 +24,9 @@ Initially, the _Hough Transform Circles_ method was used, but it resulted in mul
 
 Based on the approximate radius determined from the blobs, upper and lower bounds were set. Preprocessing was applied before using Hough Transform Circles to identify the positions of all circles in the image.
 
-### RESTNet
+### Resnet
 
-Currently using a RESTNet model to identify the caps, basically transform them in vector format and then saving them in Pinecone. It is a vector database great for comparing AI content.
+Currently using a resnet model to identify the caps, basically transform them in vector format and then saving them in Pinecone. It is a vector database great for comparing AI content.
 
 ## Examples
 
