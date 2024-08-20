@@ -14,7 +14,7 @@ def identify_cap(
     cap: ndarray,
     pinecone_con: PineconeContainer,
     model: keras.Sequential,
-):
+) -> list[dict]:
     """Identify a cap from the Pinecone database.
 
     Args:

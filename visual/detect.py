@@ -60,6 +60,6 @@ async def process_directory(directory: Path, output_directory: Path) -> None:
 
 if __name__ == "__main__":
     input_directory = Path("database/test-images/test-i-have")
-    output_directory = Path("animations/gifs")
+    output_directory = Path("visual/result")
     output_directory.mkdir(parents=True, exist_ok=True)
     asyncio.run(process_directory(input_directory, output_directory))
