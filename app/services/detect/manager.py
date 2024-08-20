@@ -3,7 +3,7 @@ from numpy import ndarray
 
 from app.services.detect.blobs import get_avg_size_all_blobs
 from app.services.detect.htc import hough_transform_circle
-from app.shared.save_image_decorator import save_img
+from app.shared.save_img_decorator import save_img
 
 MAX_WIDTH_IMAGE = 1000
 MAX_HEIGHT_IMAGE = 1000

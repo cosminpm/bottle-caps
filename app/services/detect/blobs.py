@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from numpy import ndarray
 
-from app.shared.save_image_decorator import save_img
+from app.shared.save_img_decorator import save_img
 
 DEBUG_BLOB = 1
 DEBUG_PREPROCESS_BLOBS = 0
