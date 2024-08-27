@@ -42,5 +42,6 @@ def validation():
     print(calc_retrieval_metrics_rr(rr, map_top_k=(3,), cmc_top_k=(1,)))
 
 
-training()
-validation()
+if __name__ == '__main__':
+    training()
+    validation()

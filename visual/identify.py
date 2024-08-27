@@ -72,7 +72,7 @@ async def main():  # noqa: D103
     file: UploadFile = await upload_file(Path("database") / "my-caps-images" / "9-maze.jpg")
     res = await identify(file)
 
-    folder_path = Path("database") / "caps-resized"
+    folder_path = Path("database") / "caps"
     additional_images = [
         (Image.open(folder_path / img_path["id"]).resize((100, 100)), img_path["score"])
         for img_path in res
