@@ -11,3 +11,9 @@ python-dotenv==1.0.1
 python-multipart==0.0.9
 loguru==0.7.2
 uvicorn==0.30.6
+aiofiles~=24.1.0
+pytest~=8.3.2
+matplotlib~=3.9.2
+pillow~=10.4.0
+torch~=2.1.1
+open-metric-learning==3.1.5

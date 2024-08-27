@@ -51,3 +51,6 @@ class PineconeContainer:
 
     def parse_result_query(self, result_query):
         return result_query["matches"]
+
+    def empty_index(self) -> None:
+        self.index.delete(delete_all=True, namespace="bottle_caps")
