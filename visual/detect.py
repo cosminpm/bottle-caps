@@ -3,12 +3,15 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from dotenv import load_dotenv
 from loguru import logger
 from matplotlib import animation
 from PIL import Image, ImageDraw
 
 from app.main import detect
 from app.shared.utils import upload_file
+
+load_dotenv()
 
 
 async def _detect_animation(file_path: Path, output_path: Path) -> None:
@@ -59,7 +62,7 @@ async def process_directory(directory: Path, output_directory: Path) -> None:
 
 
 if __name__ == "__main__":
-    input_directory = Path("database/test-images/test-i-have")
+    input_directory = Path("tests/services/full/images/")
     output_directory = Path("visual/result")
     output_directory.mkdir(parents=True, exist_ok=True)
     asyncio.run(process_directory(input_directory, output_directory))
