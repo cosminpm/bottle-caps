@@ -20,3 +20,6 @@ __pycache__/
 /database/*
 /training/*
 visual/result/*
+
+# links
+*.lnk

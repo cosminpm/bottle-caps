@@ -32,6 +32,8 @@ Currently using a resnet model to identify the caps, basically transform them in
 
 ### Detection
 
+In the following images you can see how the detect method works and a small animation using the `visual` module.
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/f5c6f3d3-348b-421b-9fcc-b9d8bd5354fb" width="200" />
   <img src="https://github.com/user-attachments/assets/c76a0694-b93e-405a-bb97-62de10ad9b26" width="200" />
