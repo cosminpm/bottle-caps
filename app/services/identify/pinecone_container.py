@@ -1,30 +1,6 @@
 import os
 
-import numpy as np
-from keras.src.applications.resnet import preprocess_input
-from numpy import ndarray
 from pinecone import Pinecone
-
-
-def image_to_vector(img: ndarray, model) -> list:
-    """Convert a imae into a vector.
-
-    Args:
-    ----
-        img: The numpy img
-        model: The keras model
-
-    Returns:
-    -------
-    The vector
-
-    """
-    resized_img = np.resize(img, (224, 224, 3))  # Resize the image to (224, 224)
-    preprocessed_img = preprocess_input(
-        resized_img[np.newaxis, ...]
-    )  # Preprocess the resized image
-    query_feature = model.predict(preprocessed_img)
-    return query_feature[0].tolist()
 
 
 class PineconeContainer:
@@ -46,8 +22,11 @@ class PineconeContainer:
         )
         return self.parse_result_query(result)
 
-    def upsert_to_pinecone(self, cap_info):
+    def upsert_one_pinecone(self, cap_info):
         self.index.upsert(vectors=[cap_info], namespace="bottle_caps")
+
+    def upsert_multiple_pinecone(self, vectors):
+        self.index.upsert(vectors=vectors, namespace="bottle_caps")
 
     def parse_result_query(self, result_query):
         return result_query["matches"]

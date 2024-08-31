@@ -9,7 +9,6 @@ from app.shared.utils import _read_img_from_path_with_mask
 
 def apply_modifications(img):
     """Apply modifications such as rotation and color adjustments to the image."""
-
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     hue_shift = np.random.randint(-10, 10)
     hsv[..., 0] = (hsv[..., 0] + hue_shift) % 180
@@ -36,7 +35,7 @@ def create_img_training(name: str, folder_create: str, path_all_images: str) -> 
 
     cv2.imwrite(str(folder_result / name), img)
 
-    for i in range(3):  # Create 3 variations
+    for i in range(3):
         modified_img = apply_modifications(img)
         modified_img_name = f"{folder_name}_mod_{i}.jpg"
         cv2.imwrite(str(folder_result / modified_img_name), modified_img)
@@ -52,5 +51,5 @@ def create_training_folder() -> None:
         create_img_training(name=name, folder_create=folder_create, path_all_images=path_all_images)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     create_training_folder()

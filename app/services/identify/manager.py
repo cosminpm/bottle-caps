@@ -1,10 +1,10 @@
 from pathlib import Path
+from typing import Any
 
-import keras
-from keras.src.saving import load_model
+import torch
 from numpy import ndarray
 
-from app.services.identify.pinecone_container import PineconeContainer, image_to_vector
+from app.services.identify.pinecone_container import PineconeContainer
 from app.shared.utils import _apply_mask
 
 PROJECT_PATH = Path.cwd()
@@ -13,7 +13,7 @@ PROJECT_PATH = Path.cwd()
 def identify_cap(
     cap: ndarray,
     pinecone_con: PineconeContainer,
-    model: keras.Sequential,
+    model,
 ) -> list[dict]:
     """Identify a cap from the Pinecone database.
 
@@ -33,8 +33,12 @@ def identify_cap(
     result = pinecone_con.query_database(vector=vector)
     return [cap.to_dict() for cap in result]
 
+def image_to_vector(img, model):
+    model.eval()
+    return torch.from_numpy(img).float()
 
-def get_model() -> keras.Sequential:
+
+def get_model() -> Any:
     """Get the model.
 
     Returns
@@ -42,5 +46,7 @@ def get_model() -> keras.Sequential:
         The keras model.
 
     """
-    path = str(Path(PROJECT_PATH) / "app" / "models" / "model.keras")
-    return load_model(path)
+    path = str(Path(PROJECT_PATH) / "app" / "models" / "trained_model.pth")
+    state_dict = torch.load(path)
+    model.load_state_dict(state_dict)
+    return model
