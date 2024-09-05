@@ -1,5 +1,9 @@
+import os
+from pathlib import Path
+
 import torch
 from dotenv import load_dotenv
+from loguru import logger
 from oml.models import ViTExtractor
 from oml.registry import get_transforms_for_pretrained
 from PIL import Image
@@ -10,6 +14,7 @@ model = ViTExtractor.from_pretrained("vits16_dino").to("cpu").eval()
 model.load_state_dict(torch.load('app/models/trained_model.pth'))
 
 transform, _ = get_transforms_for_pretrained("vits16_dino")
+load_dotenv()
 
 
 def get_embedding(image_path):
@@ -19,20 +24,25 @@ def get_embedding(image_path):
     with torch.no_grad():
         embedding = model(image)
 
-    return embedding
+    return embedding.tolist()[0]
 
 
-def test_one_vector():
-    # Example usage
+def one_vector():
     image_path = 'tests/services/identify/images/1.jpg'
-    embedding_vector = get_embedding(image_path)
-    # print(embedding_vector)
-    res = PineconeContainer().query_database(embedding_vector.tolist()[0])
+    vector = get_embedding(image_path)
+    res = PineconeContainer().query_database(vector)
     print(res)
 
 
 def upload_all_vectors():
+    folder = "database/caps"
+    imgs: list[str] = os.listdir(folder)
+    for img in imgs:
+        img_path = Path(str(folder)) / img
+        cap_info = {"id": str(img_path), "values": get_embedding(img_path)}
+        PineconeContainer().upsert_one_pinecone(cap_info)
+        logger.info(f"Uploaded {img_path} to pinecone")
 
 
 if __name__ == '__main__':
-    load_dotenv()
+    upload_all_vectors()
