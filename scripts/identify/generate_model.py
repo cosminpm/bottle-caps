@@ -63,7 +63,7 @@ def training():
         logger.info(criterion.last_logs)
 
     model_save_path = Path("app") / "models" / "trained_model.pth"
-    torch.save(model.state_dict(), model_save_path)
+    #torch.save(model.state_dict(), model_save_path)
     logger.info(f"Model saved to {model_save_path}")
 
 

@@ -2,6 +2,7 @@ import os
 
 from pinecone import Pinecone
 
+TOP_K = 200
 
 class PineconeContainer:
     def __init__(self):
@@ -9,14 +10,14 @@ class PineconeContainer:
         self.index = self.pc.Index(name="bottle-caps")
 
     def query_database(self, vector):
-        result = self.index.query(vector=[vector], top_k=5, namespace="bottle_caps")
+        result = self.index.query(vector=[vector], top_k=TOP_K, namespace="bottle_caps")
         return self.parse_result_query(result)
 
     def query_with_metadata(self, vector: list[float], metadata: dict):
         result = self.index.query(
             vector=vector,
             filter=metadata,
-            top_k=5,
+            top_k=TOP_K,
             include_metadata=True,
             namespace="bottle_caps",
         )
