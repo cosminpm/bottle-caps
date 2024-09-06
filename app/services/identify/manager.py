@@ -1,8 +1,8 @@
 from pathlib import Path
 
-import torch
+import numpy as np
+from keras.src.applications.nasnet import preprocess_input
 from numpy import ndarray
-from torch import nn
 
 from app.services.identify.pinecone_container import PineconeContainer
 from app.shared.utils import _apply_mask
@@ -11,9 +11,9 @@ PROJECT_PATH = Path.cwd()
 
 
 def identify_cap(
-        cap: ndarray,
-        pinecone_con: PineconeContainer,
-        model,
+    cap: ndarray,
+    pinecone_con: PineconeContainer,
+    model,
 ) -> list[dict]:
     """Identify a cap from the Pinecone database.
 
@@ -34,21 +34,20 @@ def identify_cap(
     return [cap.to_dict() for cap in result]
 
 
-def image_to_vector(img, model):
-    model.eval()
-    return torch.from_numpy(img).float()
+def image_to_vector(img: ndarray, model) -> list:
+    """Convert a imae into a vector.
 
+    Args:
+    ----
+        img: The numpy img
+        model: The keras model
 
-def get_oml_model() -> nn.Module:
-    """Load the OML model from a .pth file."""
-    path = str(Path(PROJECT_PATH) / "app" / "models" / "trained_model.pth")
-    state_dict = torch.load(path)
+    Returns:
+    -------
+    The vector
 
-    # Initialize your OML model (replace CustomOMLModel with your actual OML model class)
-    model = CustomOMLModel()
-    model.load_state_dict(state_dict)
-
-    # Set to evaluation mode (important to disable dropout/batchnorm during inference)
-    model.eval()
-
-    return model
+    """
+    resized_img = np.resize(img, (224, 224, 3))
+    preprocessed_img = preprocess_input(resized_img[np.newaxis, ...])
+    query_feature = model.predict(preprocessed_img)
+    return query_feature[0].tolist()

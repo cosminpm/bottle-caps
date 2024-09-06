@@ -1,73 +1,149 @@
-import csv
 import os
+import uuid
 from pathlib import Path
 
-import pandas as pd
+import cv2
+import keras
+import numpy as np
+import tensorflow as tf
 from dotenv import load_dotenv
-from loguru import logger
-from oml import datasets as d
-from oml.losses import TripletLossWithMiner
-from oml.miners import AllTripletsMiner
-from oml.models import ViTExtractor
-from oml.registry import get_transforms_for_pretrained
-from oml.samplers import BalanceSampler
-from torch.optim import Adam
-from torch.utils.data import DataLoader
-import torch
+from keras import Sequential
+from keras.src.applications.resnet import ResNet50
+from keras.src.layers import Dense, Flatten
+from keras.src.saving import load_model
 
+from app.services.identify.manager import image_to_vector
 from app.services.identify.pinecone_container import PineconeContainer
+from app.shared.utils import _apply_mask, _read_img_from_path_with_mask
 
+PROJECT_PATH = Path.cwd()
 load_dotenv()
-pinecone_container = PineconeContainer()
 
 
-def create_csv():
-    base_dir = Path("database") / "training"
-    output_csv = "training_data.csv"
+def create_img_training(name: str, folder_create: str, path_all_images: str) -> None:
+    """Create the training image for the model.
 
-    with open(output_csv, "w", newline="") as csvfile:
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(["path", "label"])
+    Args:
+    ----
+        name: The name of the cap.
+        folder_create: Where to create the img.
+        path_all_images: The full path.
 
-        counter = 0
-        for root, dirs, files in os.walk(base_dir):
-            for file in files:
-                # label = os.path.basename(root)
-                label = counter
-                image_path = os.path.join(root, file)
+    """
+    folder_name = Path(name).stem
+    folder_result = Path(folder_create) / folder_name
 
-                csvwriter.writerow([image_path, label])
-            counter += 1
-    logger.info(f"CSV file '{output_csv}' generated successfully.")
-
-
-def training():
-    train_csv_path: str = str(Path("scripts") / "training_data.csv")
-    df_train = pd.read_csv(train_csv_path)
-
-    model = ViTExtractor.from_pretrained("vits16_dino").to("cpu").train()
-    transform, _ = get_transforms_for_pretrained("vits16_dino")
-
-    train = d.ImageLabeledDataset(df_train, transform=transform)
-
-    optimizer = Adam(model.parameters(), lr=1e-4)
-    criterion = TripletLossWithMiner(0.1, AllTripletsMiner(), need_logs=True)
-    sampler = BalanceSampler(train.get_labels(), n_labels=2, n_instances=2)
-
-    for batch in DataLoader(train, batch_sampler=sampler):
-        embeddings = model(batch["input_tensors"])
-        loss = criterion(embeddings, batch["labels"])
-        loss.backward()
-        optimizer.step()
-        optimizer.zero_grad()
-        logger.info(criterion.last_logs)
-
-    model_save_path = Path("app") / "models" / "trained_model.pth"
-    #torch.save(model.state_dict(), model_save_path)
-    logger.info(f"Model saved to {model_save_path}")
+    if not folder_result.exists():
+        folder_result.mkdir(parents=True)
+        path_img = Path(path_all_images) / name
+        img = _read_img_from_path_with_mask(str(path_img))
+        cv2.imwrite(str(folder_result / name), img)
 
 
+def create_training_folder() -> None:
+    """Create the training folder that's going to be used to train the model."""
+    path_all_images = str(Path("database") / "caps-resized")
+    folder_create = str(Path("database") / "training")
+
+    names_images = os.listdir(path=path_all_images)
+    for name in names_images:
+        create_img_training(name=name, folder_create=folder_create, path_all_images=path_all_images)
+
+
+def create_model() -> Sequential:
+    """Create the Keras model that it's going to be used.
+
+    Returns
+    -------
+        A Keras model to indentify bottle caps.
+
+    """
+    img_size = 224
+    model = Sequential()
+    base_model = ResNet50(
+        weights="imagenet",
+        include_top=False,
+        input_shape=(img_size, img_size, 3),
+        pooling="max",
+    )
+    model.add(base_model)
+    model.add(Flatten())
+    model.add(Dense(256, activation="relu"))  # Add fully connected layers
+
+    model.compile("adam", loss=tf.losses.CategoricalCrossentropy(), metrics=["accuracy"])
+    model.summary()
+    return model
+
+
+def transform_imag_to_pinecone_format(img: np.ndarray, model: keras.Sequential, metadata) -> dict:
+    """Transform an image to pinecone format, so we can upload it into the vector database.
+
+    Args:
+    ----
+        img: The image.
+        model: The keras model.
+        metadata: The medatada of the model.
+
+    Returns:
+    -------
+        A dictionary with all the metadata information frpm pinecone.
+
+    """
+    img = _apply_mask(img)
+    vector = image_to_vector(img=img, model=model)
+
+    return {"id": str(uuid.uuid4()), "values": vector, "metadata": metadata}
+
+
+def generate_vector_database(
+    pinecone_container: PineconeContainer, model: keras.Sequential
+) -> None:
+    """Create the vector database for pinecone connection.
+
+    Args:
+    ----
+        pinecone_container: The pinecone container.
+        model: The keras model
+
+    """
+    root_dir = str(Path("database") / "caps")
+    folders = os.listdir(root_dir)
+    for folder in folders:
+        file_path: str = str(Path(root_dir) / folder)
+        img = _read_img_from_path_with_mask(file_path)
+        vector = image_to_vector(img=img, model=model)
+        cap_info = {"id": file_path, "values": vector}
+        pinecone_container.upsert_one_pinecone(cap_info=cap_info)
+
+
+def get_model() -> keras.Sequential:
+    """Get the model.
+
+    Returns
+    -------
+        The keras model.
+
+    """
+    path = str(Path(PROJECT_PATH) / "app" / "models" / "model.keras")
+    return load_model(path)
+
+
+def generate_model(pinecone_container: PineconeContainer) -> None:
+    """Generate the model where we are going to save the bottle caps and the model used to identify.
+
+    Args:
+    ----
+        pinecone_container: The pinecone container.
+
+
+    """
+    model = create_model()
+    path_model: str = str(Path(PROJECT_PATH) / "app" / "models" / "model.keras")
+    model.save(path_model)
+    model = get_model()
+    generate_vector_database(pinecone_container=pinecone_container, model=model)
 
 
 if __name__ == "__main__":
-    training()
+    pinecone_container = PineconeContainer()
+    generate_model(pinecone_container=pinecone_container)

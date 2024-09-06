@@ -4,6 +4,7 @@ from pinecone import Pinecone
 
 TOP_K = 200
 
+
 class PineconeContainer:
     def __init__(self):
         self.pc = Pinecone(api_key=os.environ["API_KEY"], environment=os.environ["ENV"])

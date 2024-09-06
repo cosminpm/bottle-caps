@@ -10,16 +10,15 @@ from app.shared.utils import _read_img_from_path_with_mask
 def apply_modifications(img):
     """Apply modifications such as rotation and color adjustments to the image."""
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    hue_shift = np.random.randint(-10, 10)
+    hue_shift = np.random.default_rng().integers(-10, 10)
     hsv[..., 0] = (hsv[..., 0] + hue_shift) % 180
     img_color_shifted = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
     rows, cols, _ = img.shape
-    angle = np.random.uniform(0, 360)
-    M = cv2.getRotationMatrix2D((cols / 2, rows / 2), angle, 1)
-    img_rotated = cv2.warpAffine(img_color_shifted, M, (cols, rows))
 
-    return img_rotated
+    angle = np.random.default_rng().uniform(0, 360)
+    matrix = cv2.getRotationMatrix2D((cols / 2, rows / 2), angle, 1)
+    return cv2.warpAffine(img_color_shifted, matrix, (cols, rows))
 
 
 def create_img_training(name: str, folder_create: str, path_all_images: str) -> None:
