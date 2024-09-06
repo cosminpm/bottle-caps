@@ -12,12 +12,12 @@ if TYPE_CHECKING:
     from fastapi import UploadFile
 
 
-async def create_composite(img_path: Path, result: list[tuple], output_path: Path) -> None:
+async def create_composite(img_path: Path, result: list[tuple], output_path: Path) -> None:  # noqa: D103
     main_image = Image.open(img_path)
     main_image = main_image.resize((300, 300))
 
     num_images = len(result)
-    grid_size = int(np.ceil(num_images ** 0.5))
+    grid_size = int(np.ceil(num_images**0.5))
 
     additional_image_size = 100
     # Composite canvas adjusts width and height dynamically based on grid
@@ -26,7 +26,9 @@ async def create_composite(img_path: Path, result: list[tuple], output_path: Pat
     composite_image = Image.new("RGB", (composite_width, composite_height), (255, 255, 255))
 
     # Centering the main image
-    main_image_x = (composite_width - main_image.width) // 2 - additional_image_size * grid_size // 2
+    main_image_x = (
+        composite_width - main_image.width
+    ) // 2 - additional_image_size * grid_size // 2
     composite_image.paste(main_image, (main_image_x, (composite_height - main_image.height) // 2))
 
     # Adjust offsets to center the additional images
@@ -68,13 +70,10 @@ async def main():  # noqa: D103
 
     folder_path = Path("database") / "caps"
     additional_images = [
-        (Image.open(folder_path / path["id"]).resize((100, 100)), path["score"])
-        for path in res
+        (Image.open(folder_path / path["id"]).resize((100, 100)), path["score"]) for path in res
     ]
     output_path = Path("visual") / "result" / "identify.jpg"
-    await create_composite(
-        img_path, additional_images, output_path
-    )
+    await create_composite(img_path, additional_images, output_path)
 
 
 if __name__ == "__main__":
