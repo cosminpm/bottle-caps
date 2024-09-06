@@ -41,6 +41,12 @@ In the following images you can see how the detect method works and a small anim
   <img src="https://github.com/user-attachments/assets/65d7d827-dc37-469c-8a43-fda371dde82b" width="200" />
 </p>
 
+### Identification
+Identification model using only a pretrained ResNet50
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/fe085892-0d36-4e2c-a0c3-02c309042f55" width="700" />
+</p>
+
 ### Full Example
 
 Below is an example output of the full model. The results show areas for improvement: while the first two caps are correctly identified, the bottom two are labeled incorrectly. Speed optimizations are also needed. For additional notes on testing, refer to `ScriptsMain/note_tests/README.md`.
