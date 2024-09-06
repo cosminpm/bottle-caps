@@ -2,7 +2,7 @@ import os
 
 from pinecone import Pinecone
 
-TOP_K = 200
+TOP_K = 50
 
 
 class PineconeContainer:
@@ -30,7 +30,8 @@ class PineconeContainer:
     def upsert_multiple_pinecone(self, vectors):
         self.index.upsert(vectors=vectors, namespace="bottle_caps")
 
-    def parse_result_query(self, result_query):
+    @staticmethod
+    def parse_result_query(result_query):
         return result_query["matches"]
 
     def empty_index(self) -> None:

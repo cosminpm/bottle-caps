@@ -108,11 +108,11 @@ def generate_vector_database(
     """
     root_dir = str(Path("database") / "caps")
     folders = os.listdir(root_dir)
-    for folder in folders:
-        file_path: str = str(Path(root_dir) / folder)
+    for img_path in folders:
+        file_path: str = str(Path(root_dir) / img_path)
         img = _read_img_from_path_with_mask(file_path)
         vector = image_to_vector(img=img, model=model)
-        cap_info = {"id": file_path, "values": vector}
+        cap_info = {"id": img_path, "values": vector}
         pinecone_container.upsert_one_pinecone(cap_info=cap_info)
 
 
@@ -146,4 +146,6 @@ def generate_model(pinecone_container: PineconeContainer) -> None:
 
 if __name__ == "__main__":
     pinecone_container = PineconeContainer()
-    generate_model(pinecone_container=pinecone_container)
+    pinecone_container.empty_index()
+    # enerate_model(pinecone_container=pinecone_container)
+    generate_vector_database(pinecone_container, get_model())
