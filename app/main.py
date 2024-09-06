@@ -50,6 +50,7 @@ def post_detect_and_identify(file_contents: bytes) -> dict:
     caps_identified = [
         identify_cap(
             cap=np.array(cap[0]),
+            image_vectorizer=image_vectorizer,
             pinecone_con=pinecone_container,
         )
         for cap in cropped_images

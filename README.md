@@ -46,3 +46,7 @@ In the following images you can see how the detect method works and a small anim
 Below is an example output of the full model. The results show areas for improvement: while the first two caps are correctly identified, the bottom two are labeled incorrectly. Speed optimizations are also needed. For additional notes on testing, refer to `ScriptsMain/note_tests/README.md`.
 
 ![image](https://user-images.githubusercontent.com/51784809/232329262-603f6ff8-a1df-423a-bb16-22454085e084.png)
+
+# Aditional notes
+
+- The code from the visual folder was written with ChatGPT as I did not want to dive too much into the creation of `.gif` myself.
