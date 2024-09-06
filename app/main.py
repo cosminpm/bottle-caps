@@ -11,12 +11,10 @@ from app.services.detect.manager import detect_caps
 from app.services.identify.manager import identify_cap
 from app.services.identify.pinecone_container import PineconeContainer
 from app.shared.utils import img_to_numpy
-from scripts.identify.generate_model import get_model
 
 load_dotenv()
 app = FastAPI()
 pinecone_container: PineconeContainer = PineconeContainer()
-model: keras.Sequential = get_model()
 
 origins = [
     "*",
@@ -120,7 +118,6 @@ async def identify(file: UploadFile) -> list[dict]:
     image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
     return identify_cap(
         cap=np.array(image),
-        model=model,
         pinecone_con=pinecone_container,
     )
 

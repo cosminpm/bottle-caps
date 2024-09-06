@@ -39,35 +39,3 @@ class TestManager:
             f"Currently the bottle cap has an accuracy of {total_accuracy / len(imgs)} "
             f"({total_accuracy}/{len(imgs)})"
         )
-
-        # Total DB: Almost 300
-        # My model
-        # 255 vector size
-        # Accuracy 100: 0.86
-        # Accuracy 50: 0.73
-        # Accuracy 25: 0.46
-        # Accuracy 10: 0.33
-
-        # Total DB: Almost 300
-        # My model
-        # 2048 vector size
-        # Accuracy 100: 0.66
-        # Accuracy 50: 0.4
-        # Accuracy 25: 0.4
-        # Accuracy 10: 0.13
-
-        # Total DB: Almost 300
-        # 2048 vector size
-        # Pretrained model
-        # Accuracy 100: 1
-        # Accuracy 50: 1
-        # Accuracy 25: 1
-        # Accuracy 10: 0.86
-
-        # Total DB: Almost 300
-        # 255 vector size
-        # Pretrained model
-        # Accuracy 100: 0.26
-        # Accuracy 50: 0.26
-        # Accuracy 25: 0.13
-        # Accuracy 10: 0
