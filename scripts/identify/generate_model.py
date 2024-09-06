@@ -146,6 +146,6 @@ def generate_model(pinecone_container: PineconeContainer) -> None:
 
 if __name__ == "__main__":
     pinecone_container = PineconeContainer()
-    pinecone_container.empty_index()
+    # pinecone_container.empty_index()
     # enerate_model(pinecone_container=pinecone_container)
     generate_vector_database(pinecone_container, get_model())

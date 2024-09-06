@@ -2,7 +2,7 @@ import os
 
 from pinecone import Pinecone
 
-TOP_K = 50
+TOP_K = 100
 
 
 class PineconeContainer:

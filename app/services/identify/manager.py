@@ -6,6 +6,7 @@ from numpy import ndarray
 
 from app.services.identify.pinecone_container import PineconeContainer
 from app.shared.utils import _apply_mask
+from scripts.identify.pretrained_model import get_pretrained_image_vector
 
 PROJECT_PATH = Path.cwd()
 
@@ -34,7 +35,7 @@ def identify_cap(
     return [cap.to_dict() for cap in result]
 
 
-def image_to_vector(img: ndarray, model) -> list:
+def image_to_vector(img: ndarray, model) -> list[float]:
     """Convert a imae into a vector.
 
     Args:
@@ -44,10 +45,7 @@ def image_to_vector(img: ndarray, model) -> list:
 
     Returns:
     -------
-    The vector
+    The list of floats, basically a vector
 
     """
-    resized_img = np.resize(img, (224, 224, 3))
-    preprocessed_img = preprocess_input(resized_img[np.newaxis, ...])
-    query_feature = model.predict(preprocessed_img)
-    return query_feature[0].tolist()
+    return get_pretrained_image_vector(img)
