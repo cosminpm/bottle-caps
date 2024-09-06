@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.services.detect.manager import detect_caps
+from app.services.identify.image_vectorizer import ImageVectorizer
 from app.services.identify.manager import identify_cap
 from app.services.identify.pinecone_container import PineconeContainer
 from app.shared.utils import img_to_numpy
@@ -14,6 +15,7 @@ from app.shared.utils import img_to_numpy
 load_dotenv()
 app = FastAPI()
 pinecone_container: PineconeContainer = PineconeContainer()
+image_vectorizer = ImageVectorizer()
 
 origins = [
     "*",
@@ -115,8 +117,7 @@ async def identify(file: UploadFile) -> list[dict]:
     """
     image = cv2.imdecode(np.frombuffer(await file.read(), np.uint8), cv2.IMREAD_COLOR)
     return identify_cap(
-        cap=np.array(image),
-        pinecone_con=pinecone_container,
+        cap=np.array(image), pinecone_con=pinecone_container, image_vectorizer=image_vectorizer
     )
 
 

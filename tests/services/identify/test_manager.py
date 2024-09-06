@@ -23,6 +23,7 @@ class TestManager:
         folder = "tests/services/identify/images"
         imgs: list[str] = os.listdir("tests/services/identify/images")
         total_accuracy = 0
+
         for img in imgs:
             img_path = Path(str(folder)) / img
             file: UploadFile = await upload_file(img_path)
