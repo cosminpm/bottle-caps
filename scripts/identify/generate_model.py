@@ -55,7 +55,7 @@ def create_model() -> Sequential:
 
     Returns
     -------
-        A Keras model to indentify bottle caps.
+        A Keras model to identify bottle caps.
 
     """
     img_size = 224
@@ -68,7 +68,8 @@ def create_model() -> Sequential:
     )
     model.add(base_model)
     model.add(Flatten())
-    model.add(Dense(256, activation="relu"))  # Add fully connected layers
+
+    model.add(Dense(2048, activation="relu"))
 
     model.compile("adam", loss=tf.losses.CategoricalCrossentropy(), metrics=["accuracy"])
     model.summary()
@@ -146,6 +147,6 @@ def generate_model(pinecone_container: PineconeContainer) -> None:
 
 if __name__ == "__main__":
     pinecone_container = PineconeContainer()
-    # pinecone_container.empty_index()
-    # enerate_model(pinecone_container=pinecone_container)
+    pinecone_container.empty_index()
+    # generate_model(pinecone_container=pinecone_container)
     generate_vector_database(pinecone_container, get_model())

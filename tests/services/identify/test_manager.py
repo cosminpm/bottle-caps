@@ -49,6 +49,14 @@ class TestManager:
         # Accuracy 10: 0.33
 
         # Total DB: Almost 300
+        # My model
+        # 2048 vector size
+        # Accuracy 100: 0.66
+        # Accuracy 50: 0.4
+        # Accuracy 25: 0.4
+        # Accuracy 10: 0.13
+
+        # Total DB: Almost 300
         # 2048 vector size
         # Pretrained model
         # Accuracy 100: 1
