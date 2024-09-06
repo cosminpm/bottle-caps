@@ -16,9 +16,7 @@ __pycache__/
 # Django stuff:
 *.log
 *.pot
-# Sphinx docum
-/database/*
-/training/*
+
 visual/result/*
 
 # links

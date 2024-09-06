@@ -27,18 +27,38 @@ def _resize_img_pix_with_name(cap_path, path_output, pix):
     )
 
 
-def _read_img_from_path_with_mask(img_path: str) -> np.ndarray:
-    image = cv2.imread(img_path)
-    return _apply_mask(image)
+def read_img_from_path_with_mask(img_path: str) -> np.ndarray:
+    """Transform a path image of a cap and apply a black mask to it.
+
+    Args:
+    ----
+        img_path (str): The path of the image.
+
+    Returns:
+    -------
+        The ndarray of the mask.
+
+    """
+    return apply_mask(cv2.imread(img_path))
 
 
-def _apply_mask(image: np.ndarray) -> np.ndarray:
+def apply_mask(image: np.ndarray) -> np.ndarray:
+    """Apply a mask of the ndarray cap, basically removing the background of the bottle-cap.
+
+    Args:
+    ----
+        image ( np.ndarray): The img that we are going to apply the mask.
+
+    Returns:
+    -------
+        The img with a mask
+
+    """
     height, width, _ = image.shape
-    size = min(width, height)  # Take the shortest size if the image is not square
+    size = min(width, height)
     center_x, center_y = width // 2, height // 2
     radius = size // 2
 
-    # Create a mask with a circular region of interest (ROI) in the center
     mask = np.zeros((height, width), dtype=np.uint8)
     cv2.circle(mask, (center_x, center_y), radius, (255), thickness=-1)
 
