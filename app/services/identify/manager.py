@@ -1,12 +1,10 @@
 from pathlib import Path
 
-import numpy as np
-from keras.src.applications.nasnet import preprocess_input
 from numpy import ndarray
 
 from app.services.identify.pinecone_container import PineconeContainer
-from app.shared.utils import _apply_mask
-from scripts.identify.pretrained_model import get_pretrained_image_vector
+from app.shared.utils import apply_mask
+from scripts.identify.pretrained_model import image_to_vector
 
 PROJECT_PATH = Path.cwd()
 
@@ -28,10 +26,7 @@ def identify_cap(
         The cap model with all the information.
 
     """
-    img = _apply_mask(cap)
+    img = apply_mask(cap)
     vector = image_to_vector(img=img)
     result = pinecone_con.query_database(vector=vector)
     return [cap.to_dict() for cap in result]
-
-
-get_pretrained_image_vector(img)

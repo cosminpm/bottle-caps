@@ -1,8 +1,7 @@
+import cv2
 import numpy as np
 import torch
-import torchvision.models as models
-import torchvision.transforms as transforms
-import cv2
+from torchvision import models, transforms
 
 
 def initialize_resources():
@@ -12,13 +11,15 @@ def initialize_resources():
     model.eval()
 
     global preprocess
-    preprocess = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
+    preprocess = transforms.Compose(
+        [
+            transforms.ToPILImage(),
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ]
+    )
 
 
 initialize_resources()

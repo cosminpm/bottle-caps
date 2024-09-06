@@ -1,5 +1,4 @@
 import cv2
-import keras
 import numpy as np
 import uvicorn
 from dotenv import load_dotenv
@@ -49,7 +48,6 @@ def post_detect_and_identify(file_contents: bytes) -> dict:
     caps_identified = [
         identify_cap(
             cap=np.array(cap[0]),
-            model=model,
             pinecone_con=pinecone_container,
         )
         for cap in cropped_images
