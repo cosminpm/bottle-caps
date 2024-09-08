@@ -1,6 +1,9 @@
+import os
+
 import cv2
 import numpy as np
-from numpy import uint16
+from loguru import logger
+from numpy import ndarray, uint16
 
 multiplier_left_max_radius = 0.8
 multiplier_right_max_radius = 1
@@ -31,12 +34,12 @@ def combine_overlapping_circles(circles: uint16) -> list[tuple[int, int, int]]:
     return combined_circles
 
 
-def hough_transform_circle(img: np.ndarray, max_radius: int) -> list[tuple[int, int, int]]:
+def hough_transform_circle(original_img: np.ndarray, max_radius: int) -> list[tuple[int, int, int]]:
     """Return the final circles after HTC transformation.
 
     Args:
     ----
-        img: The image where we are going to find the circles.
+        original_img: The image where we are going to find the circles.
         max_radius: The maximum radius of a bottlecap.
 
     Returns:
@@ -44,6 +47,7 @@ def hough_transform_circle(img: np.ndarray, max_radius: int) -> list[tuple[int, 
         A list with all the circles.
 
     """
+    img = original_img.copy()
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img = cv2.GaussianBlur(img, (5, 5), 0)
 
@@ -59,4 +63,21 @@ def hough_transform_circle(img: np.ndarray, max_radius: int) -> list[tuple[int, 
     )
     circles: uint16 = np.uint16(np.around(circles))
 
-    return combine_overlapping_circles(circles)
+    combined = combine_overlapping_circles(circles)
+    _draw_img(original_img, combined)
+    return combined
+
+
+def _draw_img(img: ndarray, circles, env_var_name: str = "SAVE_IMG"):
+    if os.getenv(env_var_name):
+        circles_img = img.copy()
+        circles = np.uint16(np.around(circles))
+        for i in circles:
+            # Draw the circle in the image
+            center = (i[0], i[1])  # Center coordinates
+            radius = i[2]  # Radius
+            cv2.circle(circles_img, center, radius, (0, 255, 0), 2)
+            cv2.circle(circles_img, center, 2, (0, 0, 255), 3)
+        output_path: str = "./animations/pp_4.png"
+        cv2.imwrite(output_path, circles_img)
+        logger.info(f"Array saved as image to {output_path}.")

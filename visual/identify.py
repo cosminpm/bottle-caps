@@ -64,7 +64,7 @@ async def create_composite(img_path: Path, result: list[tuple], output_path: Pat
 
 
 async def main():  # noqa: D103
-    img_path: Path = Path("tests") / "services" / "identify" / "images" / "1.jpg"
+    img_path: Path = Path("tests") / "services" / "identify" / "images" / "11.jpg"
     file: UploadFile = await upload_file(img_path)
     res = await identify(file)
 

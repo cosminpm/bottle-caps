@@ -50,7 +50,7 @@ def crop_image_into_rectangles(photo_image: ndarray, rectangles: list) -> list[t
     return cropped_images
 
 
-def get_rectangles(circles: list) -> list:
+def get_rectangles(circles: list) -> list[tuple]:
     """Transform the circles given into rectangles.
 
     Args:
@@ -72,7 +72,7 @@ def get_rectangles(circles: list) -> list:
     return rectangles
 
 
-@save_img(output_path="animations/pp_0.png")
+@save_img(output_path="./animations/pp_0.png")
 def preprocess_image_size(img: ndarray) -> ndarray:
     """Resize the image to a specific maximum.
 
@@ -96,7 +96,7 @@ def preprocess_image_size(img: ndarray) -> ndarray:
     return resized
 
 
-def detect_caps(img: ndarray) -> list:
+def detect_caps(img: ndarray) -> list[tuple]:
     """Detect the caps in the image.
 
     Args:
@@ -108,12 +108,11 @@ def detect_caps(img: ndarray) -> list:
         A list with the detected caps.
 
     """
-    img = preprocess_image_size(img)
-
-    avg_size = get_avg_size_all_blobs(img)
+    img: ndarray = preprocess_image_size(img)
+    avg_size: int = get_avg_size_all_blobs(img)
     cropped_images = []
-    if avg_size != 0:
-        circles = hough_transform_circle(img, avg_size)
-        rectangles = get_rectangles(circles)
-        cropped_images = crop_image_into_rectangles(img, rectangles)
+    if avg_size:
+        circles: list[tuple] = hough_transform_circle(img, avg_size)
+        rectangles: list[tuple] = get_rectangles(circles)
+        cropped_images: list[tuple] = crop_image_into_rectangles(img, rectangles)
     return cropped_images
