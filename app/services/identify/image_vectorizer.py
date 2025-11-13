@@ -40,7 +40,6 @@ class ImageVectorizer:
     async def image_to_vector(self, file: bytes) -> list:
         image = cv2.imdecode(np.frombuffer(file, np.uint8), cv2.IMREAD_COLOR)
         img = apply_mask(np.array(image))
-
         return self.numpy_to_vector(img=img)
 
     def numpy_to_vector(self, img: np.ndarray) -> list[float]:

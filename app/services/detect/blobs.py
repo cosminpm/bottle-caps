@@ -88,6 +88,10 @@ def get_avg_size_all_blobs(img: ndarray) -> int:
 
     detector = cv2.SimpleBlobDetector_create(params)
     keypoints = detector.detect(img)
+
+    if settings.save_image:
+        _save_img(img=img, keypoints=keypoints)
+
     keypoints = _remove_overlapping_blobs(keypoints=keypoints)
 
     if len(keypoints) == 0:

@@ -8,15 +8,18 @@ from loguru import logger
 from matplotlib import animation
 from PIL import Image, ImageDraw
 
-from app.main import detect
+from app.services.detect.router import detect
 from app.shared.utils import upload_file
+from visual.utils import fake_request
 
 load_dotenv()
 
 
+
+
 async def _detect_animation(file_path: Path, output_path: Path) -> None:
     uploaded = await upload_file(file_path)
-    rectangles: list[tuple] = await detect(uploaded)
+    rectangles: list[tuple] = await detect(uploaded, fake_request("/detect"))
 
     image = Image.open(file_path)
     image_np = np.array(image)
@@ -62,7 +65,7 @@ async def process_directory(directory: Path, output_directory: Path) -> None:
 
 
 if __name__ == "__main__":
-    input_directory = Path("tests/services/full/images/")
+    input_directory = Path("tests/services/detect/images/")
     output_directory = Path("visual/result")
     output_directory.mkdir(parents=True, exist_ok=True)
     asyncio.run(process_directory(input_directory, output_directory))

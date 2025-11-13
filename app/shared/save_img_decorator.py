@@ -1,3 +1,4 @@
+import os
 from functools import wraps
 
 import cv2
@@ -22,6 +23,8 @@ def save_img(output_path: str):
         @wraps(func)
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
             if settings.save_image:
                 if isinstance(result, np.ndarray):
                     cv2.imwrite(output_path, result)

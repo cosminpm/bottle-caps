@@ -4,6 +4,9 @@ import cv2
 import numpy as np
 from loguru import logger
 from numpy import ndarray, uint16
+from app.config import Settings
+
+settings = Settings()
 
 multiplier_left_max_radius = 0.8
 multiplier_right_max_radius = 1
@@ -63,19 +66,31 @@ def hough_transform_circle(original_img: np.ndarray, max_radius: int) -> list[tu
     )
     circles: uint16 = np.uint16(np.around(circles))
 
-    return combine_overlapping_circles(circles)
+    result = combine_overlapping_circles(circles)
 
+    if settings.save_image:
+        _draw_img(original_img, result)
 
-def _draw_img(img: ndarray, circles, env_var_name: str = "SAVE_IMG"):
-    if os.getenv(env_var_name):
-        circles_img = img.copy()
-        circles = np.uint16(np.around(circles))
-        for i in circles:
-            # Draw the circle in the image
-            center = (i[0], i[1])  # Center coordinates
-            radius = i[2]  # Radius
-            cv2.circle(circles_img, center, radius, (0, 255, 0), 2)
-            cv2.circle(circles_img, center, 2, (0, 0, 255), 3)
-        output_path: str = "./animations/pp_4.png"
-        cv2.imwrite(output_path, circles_img)
-        logger.info(f"Array saved as image to {output_path}.")
+    return result
+
+def _draw_img(img: np.ndarray, circles):
+    if circles is None or len(circles) == 0:
+        logger.warning("No circles detected, skipping drawing.")
+        return
+
+    circles_img = img.copy()
+
+    circles = np.uint16(np.around(circles))
+    if circles.ndim == 3:
+        circles = circles[0, :]
+
+    for (x, y, r) in circles:
+        center = (int(x), int(y))
+        radius = int(r)
+        cv2.circle(circles_img, center, radius, (0, 255, 0), 2)
+        cv2.circle(circles_img, center, 2, (0, 0, 255), 3)
+
+    output_path = "./animations/pp_4.png"
+    cv2.imwrite(output_path, circles_img)
+    logger.info(f"Array saved as image to {output_path}.")
+

@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 load_dotenv()
 
-LIMIT_PERIOD: str = "15/minute"
+LIMIT_PERIOD: str = "1000/minute"
 
 
 class Settings(BaseSettings):
